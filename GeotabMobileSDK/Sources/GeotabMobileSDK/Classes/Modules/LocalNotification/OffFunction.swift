@@ -1,0 +1,38 @@
+//
+//  RemoveActionListenerFunction.swift
+//  GeotabDriveSDK
+//
+//  Created by Yunfeng Liu on 2020-01-27.
+//
+
+class OffFunction: ModuleFunction {
+    private let module: LocalNotificationModule
+    init(module: LocalNotificationModule) {
+        self.module = module
+        super.init(module: module, name: "off")
+    }
+    
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+
+        guard let actionIdentifiers = argument as? [String] else {
+            return
+        }
+
+        if module.actionHandler == nil {
+            return
+        }
+
+        module.actionIdentifiers = actionIdentifiers
+    }
+    
+    override func scripts() -> String {
+        
+        let functionTemplate = try! Module.templateRepo.template(named: "ModuleFunction.Off.Script")
+        let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": module.name, "functionName": name]
+        
+        guard let functionScript = try? functionTemplate.render(scriptData) else {
+            return ""
+        }
+        return functionScript
+    }
+}

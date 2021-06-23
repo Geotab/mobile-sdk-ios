@@ -1,0 +1,10 @@
+/* 
+  Localizable.strings
+  Pods
+
+  Created by Anubhav Saini on 2020-12-03.
+  
+*/
+"No Network Connection" = "无网络连接";
+"Please try again to continue." = "请再试以继续操作。";
+"REFRESH"="刷新";
