@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  Pods
+
+  Created by Anubhav Saini on 2020-12-03.
+  
+*/
+"No Network Connection" = "No Network Connection";
+"Please try again to continue." = "Please try again to continue.";
+"REFRESH"="REFRESH";
+
