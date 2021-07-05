@@ -13,7 +13,7 @@
         }
         var api = window.webViewLayer.getApi(userNames[0]);
         var violations = await api.mobile.user.getViolations();
-        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: violations}, (error, res) => {});
+        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: JSON.stringify(violations)}, (error, res) => {});
     } catch(err) {
         window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, error: err.message}, (error, res) => {});
         throw err;

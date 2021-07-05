@@ -14,7 +14,6 @@ class UserModule: Module {
         self.webDriveDelegate = webDriveDelegate
         super.init(name: "user")
         functions.append(GetAllUsersFunction(module: self))
-        functions.append(GetUserFunction(module: self))
         functions.append(GetAvailabilityFunction(module: self))
         functions.append(GetViolationsFunction(module: self))
         functions.append(GetHosRuleSetFunction(module: self))

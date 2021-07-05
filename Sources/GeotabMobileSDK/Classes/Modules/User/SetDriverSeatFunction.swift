@@ -7,15 +7,10 @@
 
 import WebKit
 
-struct SetDriverSeatFunctionArgument: Codable {
-    let callerId: String
-    let error: String? // javascript given error, when js failed providing result, it provides error
-    let result: [User]?
-}
 
 class SetDriverSeatFunction: ModuleFunction {
     let module: UserModule
-    var callbacks: [String: CallbackWithType<User>] = [:]
+    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: UserModule) {
         self.module = module
         super.init(module: module, name: "setDriverSeat")
@@ -26,7 +21,7 @@ class SetDriverSeatFunction: ModuleFunction {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
-        guard let arg = try? JSONDecoder().decode(GetUserFunctionArgument.self, from: data) else {
+        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -40,7 +35,7 @@ class SetDriverSeatFunction: ModuleFunction {
             callbacks[arg.callerId] = nil
             return
         }
-        guard let user = arg.result?.first else {
+        guard let user = arg.result else {
             callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No user returned")))
             jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No user returned")))
             callbacks[arg.callerId] = nil
@@ -51,11 +46,11 @@ class SetDriverSeatFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(driver: User, _ callback: @escaping CallbackWithType<User>) {
+    func call(driverId: String, _ callback: @escaping (Result<String, Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.SetDriverSeatFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "driverId": driver.id])
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.SetDriverSeatFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "driverId": driverId])
         module.webDriveDelegate.evaluate(script: script) { result in
             switch result {
             case .success(_): return

@@ -24,6 +24,7 @@ class SamlLoginViewController: UIViewController {
     }()
     
     override func viewDidLoad() {
+        let device = DeviceModule.device
         let url = URL(string: samlLoginUrl)!
         webview.configuration.processPool = WKProcessPool()
         webview.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
@@ -31,8 +32,18 @@ class SamlLoginViewController: UIViewController {
         webview.configuration.allowsAirPlayForMediaPlayback = false
         webview.configuration.allowsPictureInPictureMediaPlayback = false
         webview.configuration.suppressesIncrementalRendering = false
+        
+        webview.configuration.applicationNameForUserAgent = "MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
+        
         webview.navigationDelegate = self
-        webview.load(URLRequest(url: url))
+        
+        webview.evaluateJavaScript("navigator.userAgent") { ua, err  in
+            let defaultUA = ua ?? ""
+            self.webview.customUserAgent = "\(defaultUA) MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
+            self.webview.load(URLRequest(url: url))
+        }
+        
+        
         
         navigationItem.title = url.host
         

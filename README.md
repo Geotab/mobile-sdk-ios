@@ -16,10 +16,6 @@ DriveViewController is the starting point of integrating Geotab Drive SDK. It's 
 
 ### How to start
 
-Geotab Drive SDK comes with an example app that you can jump on and start experimenting the SDK in seconds. This is under the `Example` folder. Open `GeotabDriveSDK.xcworkspace` to start the example project along with the SDK source code.
-
-If you want to start integrating with Geotab Drive SDK, it's also super easy. `DriveViewController` is all you need.
-
 #### Installation
 
 Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app
@@ -81,7 +77,7 @@ driveVC = DriveViewController(modules: [])
 
 ##### Login
 
-GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user's credential. See `LoginViewController.swift` for an example.
+GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user's credential. 
 
 Tell DriveViewController about the user credential as follows:
 

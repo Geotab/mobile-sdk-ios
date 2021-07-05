@@ -8,15 +8,10 @@
 import WebKit
 //import Mustache
 
-struct GetAllUsersFunctionArgument: Codable {
-    let callerId: String
-    let error: String? // javascript given error, when js failed providing result, it provides error
-    let result: [User]?
-}
 
 class GetAllUsersFunction: ModuleFunction {
     private let module: UserModule
-    var callbacks: [String: CallbackWithType<[User]>] = [:]
+    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: UserModule) {
         self.module = module
         super.init(module: module, name: "getAll")
@@ -27,7 +22,7 @@ class GetAllUsersFunction: ModuleFunction {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
-        guard let arg = try? JSONDecoder().decode(GetUserFunctionArgument.self, from: data) else {
+        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -41,7 +36,7 @@ class GetAllUsersFunction: ModuleFunction {
             callbacks[arg.callerId] = nil
             return
         }
-        guard let users: [User] = arg.result, users.count > 0 else {
+        guard let users = arg.result else {
             callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No users returned")))
             jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No users returned")))
             callbacks[arg.callerId] = nil
@@ -52,7 +47,7 @@ class GetAllUsersFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping CallbackWithType<[User]>) {
+    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         

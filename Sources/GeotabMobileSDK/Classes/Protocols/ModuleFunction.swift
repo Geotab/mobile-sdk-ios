@@ -5,7 +5,7 @@
 //  Created by Yunfeng Liu on 2019-10-28.
 //
 import Mustache
-
+import WebKit
 /**
  Module Function. This class is used for creating a Geotab Module function in the WKWebview/Javascript environment. Mostly intended for Drive and MyGeotab.
  */

@@ -7,15 +7,10 @@
 
 import WebKit
 
-struct DeviceFunctionArgument: Codable {
-    let callerId: String
-    let error: String? // javascript given error, when js failed providing result, it provides error
-    let result: GoDeviceState?
-}
 
 class DeviceFunction: ModuleFunction {
     private let module: StateModule
-    var callbacks: [String: CallbackWithType<GoDevice>] = [:]
+    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: StateModule) {
         self.module = module
         super.init(module: module, name: "device")
@@ -26,7 +21,7 @@ class DeviceFunction: ModuleFunction {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
-        guard let arg = try? JSONDecoder().decode(DeviceFunctionArgument.self, from: data) else {
+        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -40,18 +35,18 @@ class DeviceFunction: ModuleFunction {
             callbacks[arg.callerId] = nil
             return
         }
-        guard let state: GoDeviceState = arg.result else {
+        guard let state = arg.result else {
             callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DeviceState returned")))
             jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DeviceState returned")))
             callbacks[arg.callerId] = nil
             return
         }
-        callback(Result.success(state.device))
+        callback(Result.success(state))
         callbacks[arg.callerId] = nil
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping CallbackWithType<GoDevice>) {
+    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         

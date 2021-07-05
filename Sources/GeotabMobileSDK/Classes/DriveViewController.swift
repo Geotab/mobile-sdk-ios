@@ -323,24 +323,10 @@ extension DriveViewController {
      Get all driver users signed in.
      
      - Parameters:
-        - callback: Result is given in an array of type`User`
+        - callback: Result is given as a JSON string representing an array of Users
      */
-    public func getAllUsers(_ callback: @escaping (CallbackWithType<[User]>)) {
+    public func getAllUsers(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getAll") as? GetAllUsersFunction else {
-            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
-            return
-        }
-        fun.call(callback)
-    }
-    
-    /**
-     Get current user signed in.
-     
-     - Parameters:
-        - callback: Result is given in type`User`
-     */
-    public func getUser(_ callback: @escaping (CallbackWithType<User>)) {
-        guard let fun = findModuleFunction(module: "user", function: "get") as? GetUserFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
@@ -351,9 +337,9 @@ extension DriveViewController {
     Get the HOS Rule Set.
      
      - Parameters:
-        - callback: Result is given in type`HosRuleSet`
+        - callback: Result is given as a JSON string representing a HosRuleset
      */
-    public func getHosRuleSet(_ callback: @escaping (CallbackWithType<HosRuleSet>)) {
+    public func getHosRuleSet(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getHosRuleSet") as? GetHosRuleSetFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -365,9 +351,9 @@ extension DriveViewController {
     Get the User Availability.
      
      - Parameters:
-        - callback: Result is given in type`DutyStatusAvailability`
+        - callback: Result is given as a JSON string representing a DutyStatusAvailability
      */
-    public func getUserAvailability(_ callback: @escaping (CallbackWithType<DutyStatusAvailability>)) {
+    public func getUserAvailability(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getAvailability") as? GetAvailabilityFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -379,9 +365,9 @@ extension DriveViewController {
     Get the User Violations.
      
      - Parameters:
-        - callback: Result is given in type`DutyStatusViolation`
+        - callback: Result is given as a JSON string representing a DutyStatusViolation
      */
-    public func getUserViolations(_ callback: @escaping (CallbackWithType<[DutyStatusViolation]>)) {
+    public func getUserViolations(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getViolations") as? GetViolationsFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -393,73 +379,31 @@ extension DriveViewController {
     Set a driver in driver seat.
      
      - Parameters:
-        - driver: User. See `getAllUsers` and `getUser`.
-        - callback: Result is given in type`User`
+        - driverId: String
+        - callback: Result is given as a JSON string representing a User
      */
-    public func setDriverSeat(driver: User, _ callback: @escaping (CallbackWithType<User>)) {
+    public func setDriverSeat(driverId: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "setDriverSeat") as? SetDriverSeatFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
-        fun.call(driver: driver, callback)
+        fun.call(driverId: driverId, callback)
     }
     
     /**
     Get the `Go Device` of Drive's `state`.
      
      - Parameters:
-        - callback: Result is given in type`GoDevice`
+        - callback: Result is given as a JSON string representation of a GoDevice
      */
-    public func getStateDevice(_ callback: @escaping (CallbackWithType<GoDevice>)) {
+    public func getStateDevice(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "state", function: "device") as? DeviceFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
         fun.call(callback)
     }
-    
-    /**
-    Get the `Device Communicating` of Drive's `state`.
-     
-     - Parameters:
-        - callback: Result is given in type`Bool`
-     */
-    public func getStateDeviceCommunicating(_ callback: @escaping (CallbackWithType<Bool>)) {
-        guard let fun = findModuleFunction(module: "state", function: "deviceCommunicating") as? DeviceCommunicatingFunction else {
-            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
-            return
-        }
-        fun.call(callback)
-    }
-    
-    /**
-    Get the `Driving` status of Drive's `state`.
-     
-     - Parameters:
-        - callback: Result is given in type`Bool`
-     */
-    public func getStateDriving(_ callback: @escaping (CallbackWithType<Bool>)) {
-        guard let fun = findModuleFunction(module: "state", function: "driving") as? DrivingFunction else {
-            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
-            return
-        }
-        fun.call(callback)
-    }
-    
-    /**
-    Get the `GPS Connected` of Drive's `state`.
-     
-     - Parameters:
-        - callback: Result is given in type`Bool`
-     */
-    public func getStateGpsConnected(_ callback: @escaping (CallbackWithType<Bool>)) {
-        guard let fun = findModuleFunction(module: "state", function: "gpsConnected") as? GpsConnectedFunction else {
-            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
-            return
-        }
-        fun.call(callback)
-    }
-    
+
     /**
     Set a custom speech Engine to replace the default one comes with the SDK.
      

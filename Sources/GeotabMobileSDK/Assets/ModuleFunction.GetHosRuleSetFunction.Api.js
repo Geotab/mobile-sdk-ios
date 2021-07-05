@@ -13,7 +13,7 @@
         }
         var api = window.webViewLayer.getApi(userNames[0]);
         var hos = await api.mobile.user.getHosRuleSet();
-        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: hos}, (error, res) => {});
+        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: JSON.stringify(hos)}, (error, res) => {});
     } catch(err) {
         window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, error: err.message}, (error, res) => {});
         throw err;

@@ -11,8 +11,5 @@ class StateModule: Module {
         self.webDriveDelegate = webDriveDelegate
         super.init(name: "state")
         functions.append(DeviceFunction(module: self))
-        functions.append(DeviceCommunicatingFunction(module: self))
-        functions.append(DrivingFunction(module: self))
-        functions.append(GpsConnectedFunction(module: self))
     }
 }

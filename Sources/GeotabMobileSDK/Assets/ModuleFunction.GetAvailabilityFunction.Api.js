@@ -13,7 +13,7 @@
         }
         var api = window.webViewLayer.getApi(userNames[0]);
         var availability = await api.mobile.user.getAvailability();
-        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: availability}, (error, res) => {});
+        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: JSON.stringify(availability)}, (error, res) => {});
     } catch(err) {
         window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, error: err.message}, (error, res) => {});
         throw err;

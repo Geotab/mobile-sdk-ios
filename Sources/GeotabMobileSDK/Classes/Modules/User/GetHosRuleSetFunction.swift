@@ -8,15 +8,10 @@
 import WebKit
 //import Mustache
 
-struct GetHosRuleSetFunctionArgument: Codable {
-    let callerId: String
-    let error: String? // javascript given error, when js failed providing result, it provides error
-    let result: HosRuleSet?
-}
 
 class GetHosRuleSetFunction: ModuleFunction {
     private let module: UserModule
-    var callbacks: [String: CallbackWithType<HosRuleSet>] = [:]
+    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: UserModule) {
         self.module = module
         super.init(module: module, name: "getHosRuleSet")
@@ -27,7 +22,7 @@ class GetHosRuleSetFunction: ModuleFunction {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
-        guard let arg = try? JSONDecoder().decode(GetHosRuleSetFunctionArgument.self, from: data) else {
+        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -52,7 +47,7 @@ class GetHosRuleSetFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping (CallbackWithType<HosRuleSet>)) {
+    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
@@ -76,5 +71,4 @@ class GetHosRuleSetFunction: ModuleFunction {
             self.callbacks[callerId] = nil
         }
     }
-    
 }

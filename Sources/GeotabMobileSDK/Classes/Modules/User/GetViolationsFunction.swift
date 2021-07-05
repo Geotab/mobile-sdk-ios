@@ -8,16 +8,10 @@
 import WebKit
 //import Mustache
 
-struct GetViolationsFunctionArgument: Codable {
-    let callerId: String
-    let error: String? // javascript given error, when js failed providing result, it provides error
-    let result: [DutyStatusViolation]?
-}
-
 
 class GetViolationsFunction: ModuleFunction {
     private let module: UserModule
-    var callbacks: [String: CallbackWithType<[DutyStatusViolation]>] = [:]
+    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: UserModule) {
         self.module = module
         super.init(module: module, name: "getViolations")
@@ -27,7 +21,7 @@ class GetViolationsFunction: ModuleFunction {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
-        guard let arg = try? JSONDecoder().decode(GetViolationsFunctionArgument.self, from: data) else {
+        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -52,7 +46,7 @@ class GetViolationsFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping CallbackWithType<[DutyStatusViolation]>) {
+    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
