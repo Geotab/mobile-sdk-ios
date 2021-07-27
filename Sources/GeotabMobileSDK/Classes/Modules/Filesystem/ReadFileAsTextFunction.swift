@@ -1,9 +1,4 @@
-//
-//  ReadFileAsTextFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Satyaana Anton on 2020-07-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

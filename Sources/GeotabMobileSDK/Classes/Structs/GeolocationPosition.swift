@@ -1,9 +1,4 @@
-//
-//  GeolocationPosition.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-08-24.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 struct GeolocationPosition: Codable {
     let coords: GeolocationCoordinates

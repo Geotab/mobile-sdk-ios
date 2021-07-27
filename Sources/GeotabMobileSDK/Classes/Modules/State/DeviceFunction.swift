@@ -1,9 +1,4 @@
-//
-//  DeviceFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-01-07.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
 

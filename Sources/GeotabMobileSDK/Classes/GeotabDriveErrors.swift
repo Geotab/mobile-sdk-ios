@@ -1,9 +1,4 @@
-//
-//  GeotabDriveErrors.swift
-//  Drive
-//
-//  Created by Yunfeng Liu on 2019-11-01.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

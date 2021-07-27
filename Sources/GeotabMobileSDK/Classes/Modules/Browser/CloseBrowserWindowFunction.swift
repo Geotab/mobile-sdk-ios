@@ -1,9 +1,4 @@
-//
-//  CloseBrowserFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Anubhav Saini on 2020-10-16.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import SafariServices
 

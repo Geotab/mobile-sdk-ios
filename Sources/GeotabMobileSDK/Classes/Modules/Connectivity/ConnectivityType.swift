@@ -1,9 +1,4 @@
-//
-//  ConnectivityType.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-02-19.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 enum ConnectivityType: String {
     case UNKNOWN = "UNKNOWN"

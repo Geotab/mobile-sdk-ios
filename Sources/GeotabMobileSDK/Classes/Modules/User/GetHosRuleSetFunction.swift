@@ -1,13 +1,6 @@
-//
-//  GetHosRuleSetFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-17.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
-//import Mustache
-
 
 class GetHosRuleSetFunction: ModuleFunction {
     private let module: UserModule

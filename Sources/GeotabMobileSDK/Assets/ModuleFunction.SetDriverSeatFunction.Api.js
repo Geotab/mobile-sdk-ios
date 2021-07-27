@@ -1,9 +1,4 @@
-//
-//  ModuleFunction.GetViolationsFunction.js
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-01-29.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 (async function (callerId) {
     try {
@@ -17,7 +12,7 @@
         if (user[0].id !== "{{driverId}}") {
             throw new Error("Driver not set");
         }
-        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: user}, (error, res) => {});
+        window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, result: JSON.stringify(user)}, (error, res) => {});
     } catch(err) {
         window.geotabModules.{{moduleName}}.{{functionName}}({callerId: callerId, error: err.message}, (error, res) => {});
         throw err;

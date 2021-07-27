@@ -1,9 +1,4 @@
-
-//  DeleteFileFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Anubhav Saini on 2020-09-29.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

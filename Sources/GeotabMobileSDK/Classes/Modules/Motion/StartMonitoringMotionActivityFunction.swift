@@ -1,9 +1,4 @@
-//
-//  StartMonitoringMotionActivityFunction.swift
-//  GeotabMobileSDK
-//
-//  Created by Yunfeng Liu on 2021-01-28.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

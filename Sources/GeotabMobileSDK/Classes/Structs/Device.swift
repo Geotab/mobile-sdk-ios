@@ -1,9 +1,4 @@
-//
-//  Device.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2019-12-12.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 import UIKit

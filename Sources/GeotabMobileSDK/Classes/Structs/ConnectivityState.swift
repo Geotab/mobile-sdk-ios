@@ -1,9 +1,4 @@
-//
-//  ConnectivityState.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-02-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 struct ConnectivityState: Codable {
     let online: Bool

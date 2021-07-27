@@ -1,9 +1,5 @@
-//
-//  LocalizeXib.swift
-//  GeotabMobileSDK
-//
-//  Created by Anubhav Saini on 2020-12-03.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import UIKit
 
 protocol LocalizeXib {

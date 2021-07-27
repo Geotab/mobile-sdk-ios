@@ -1,9 +1,4 @@
-//
-//  StartIoxBleFunction.swift
-//  GeotabMobileSDK
-//
-//  Created by Yunfeng Liu on 2021-02-11.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

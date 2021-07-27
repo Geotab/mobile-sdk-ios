@@ -1,9 +1,5 @@
-//
-//  CaptureImageFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-04-07.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import UIKit
 
 struct CaptureImageFunctionArgument: Codable {

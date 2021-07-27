@@ -1,9 +1,4 @@
-//
-//  ScreenModule.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2019-12-03.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 class ScreenModule: Module {
     init() {

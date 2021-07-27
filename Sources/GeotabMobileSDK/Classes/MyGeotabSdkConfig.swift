@@ -1,9 +1,4 @@
-//
-//  MyGeotabSdkConfig.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-10-07.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 /**
  Configuration options for MyGeotabViewController

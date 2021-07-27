@@ -6,7 +6,7 @@ Yunfeng Liu, yunfengliu@geotab.com
 
 ## License
 
-GeotabDriveSDK is available under the [PLACE-HOLDER] license. See the LICENSE file for more info.
+GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.
 
 ## DriveViewController
 

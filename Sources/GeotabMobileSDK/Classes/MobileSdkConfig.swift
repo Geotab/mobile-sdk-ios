@@ -1,9 +1,4 @@
-//
-//  MobileSdkConfig.swift
-//  GeotabMobileSDK
-//
-//  Created by Yunfeng Liu on 2020-11-26.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 /// :nodoc:
 public class MobileSdkConfig {

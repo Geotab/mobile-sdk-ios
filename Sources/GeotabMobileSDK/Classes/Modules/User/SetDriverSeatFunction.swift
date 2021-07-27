@@ -1,12 +1,6 @@
-//
-//  SetDriverSeatFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2019-12-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
-
 
 class SetDriverSeatFunction: ModuleFunction {
     let module: UserModule

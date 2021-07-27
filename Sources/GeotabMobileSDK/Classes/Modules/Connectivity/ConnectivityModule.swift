@@ -1,9 +1,4 @@
-//
-//  ConnectivityModule.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-02-18.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import CoreTelephony
 import Reachability

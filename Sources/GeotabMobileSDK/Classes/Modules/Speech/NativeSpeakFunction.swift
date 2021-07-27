@@ -1,9 +1,5 @@
-//
-//  NativeSpeakFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2020-01-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 struct NativeSpeakArgument: Codable {

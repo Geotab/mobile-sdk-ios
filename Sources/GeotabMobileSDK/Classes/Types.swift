@@ -1,9 +1,4 @@
-//
-//  Types.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-03.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 public typealias DriverActionNecessaryCallbackType = (_ isDriverActionNecessary: Bool, _ driverActionType: String) -> Void
 

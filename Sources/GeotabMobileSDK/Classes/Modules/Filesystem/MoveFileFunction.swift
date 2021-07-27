@@ -1,9 +1,5 @@
-//
-//  MoveFileFunction.swift
-//  GeotabMobileSDK
-//
-//  Created by Chet Chhom on 2021-01-05.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 struct MoveFileArgument: Codable {

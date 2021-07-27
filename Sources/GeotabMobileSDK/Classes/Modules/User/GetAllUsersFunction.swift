@@ -1,13 +1,6 @@
-//
-//  GetAllUsersFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2019-12-18.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
-//import Mustache
-
 
 class GetAllUsersFunction: ModuleFunction {
     private let module: UserModule

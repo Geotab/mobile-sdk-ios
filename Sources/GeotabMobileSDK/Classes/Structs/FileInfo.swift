@@ -1,10 +1,4 @@
-//
-//  FileInfo.swift
-//  GeotabMobileSDK
-//
-//  Created by Anubhav Saini on 2020-12-10.
-//
-
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 struct FileInfo: Codable {
     let name: String

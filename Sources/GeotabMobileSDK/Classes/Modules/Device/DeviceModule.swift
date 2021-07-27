@@ -1,9 +1,4 @@
-//
-//  DeviceModule.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-12.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 
 class DeviceModule: Module {

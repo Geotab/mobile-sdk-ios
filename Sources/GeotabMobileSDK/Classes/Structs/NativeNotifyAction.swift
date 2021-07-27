@@ -1,9 +1,4 @@
-//
-//  NativeNotifyAction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-01-22.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 struct NativeNotifyAction: Codable {
     let id: String

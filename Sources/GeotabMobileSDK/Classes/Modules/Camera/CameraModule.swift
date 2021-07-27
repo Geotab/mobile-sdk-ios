@@ -1,9 +1,5 @@
-//
-//  CameraModule.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-04-01.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import UIKit
 
 class CameraModule: Module {

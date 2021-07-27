@@ -1,9 +1,4 @@
-//
-//  ListFileFunction.swift
-//  GeotabMobileSDK
-//
-//  Created by Anubhav Saini on 2020-12-09.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

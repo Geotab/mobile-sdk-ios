@@ -1,9 +1,5 @@
-//
-//  WriteFileAsTextFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-06-05.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 struct WriteFileAsTextArgument: Codable {

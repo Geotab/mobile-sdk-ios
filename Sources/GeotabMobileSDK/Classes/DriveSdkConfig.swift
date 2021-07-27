@@ -1,9 +1,4 @@
-//
-//  DriveSdkConfig.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-01-17.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 /**
  Configuration options for DriveViewController

@@ -1,9 +1,4 @@
-//
-//  Module.Scripts.js
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-01-29.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 
 window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function(params, callback) {

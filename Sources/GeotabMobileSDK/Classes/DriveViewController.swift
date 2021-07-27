@@ -1,9 +1,4 @@
-//
-//  DriveViewController.swift
-//  Drive
-//
-//  Created by Yunfeng Liu on 2019-10-28.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
 import SafariServices
@@ -79,14 +74,6 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         webviewConfig.processPool = WKProcessPool()
         
         webviewConfig.mediaTypesRequiringUserActionForPlayback = []
-
-        var data: Data!
-        if #available(iOS 12.2, *) {
-            data = Data(base64Encoded: "YWx3YXlzUnVuc0F0Rm9yZWdyb3VuZFByaW9yaXR5")
-        } else {
-            data = Data(base64Encoded: "X2Fsd2F5c1J1bnNBdEZvcmVncm91bmRQcmlvcml0eQ==")
-        }
-        webviewConfig.setValue(1, forKey: String(data: data, encoding: .utf8)!)
 
         webviewConfig.allowsInlineMediaPlayback = true
         webviewConfig.suppressesIncrementalRendering = false
@@ -538,36 +525,5 @@ extension DriveViewController {
             return
         }
         appModule.lastServerAddressUpdated = nil
-    }
-}
-
-extension DriveViewController {
-
-    public static func addAppDevice(token: String, _ complete: @escaping (Result<Void, Error>) -> Void) {
-        let url = URL(string: "https://us-central1-yunfeng-liu.cloudfunctions.net/addiOSAppDevice")!
-        var request =  URLRequest(url: url)
-        let data = AppDeviceAddReq(notificationToken: token, expireAfterDays: 14)
-        let encoder = JSONEncoder()
-        let jsonData = try? encoder.encode(data)
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
-        request.allHTTPHeaderFields = ["Content-Type": "application/json", "app-token": "123321"]
-        let session = URLSession.shared
-        session.dataTask(with: request) { (data, response, error) in
-            guard let res = response as? HTTPURLResponse else {
-                complete(Result.failure(GeotabDriveErrors.AddAppDeviceError(error: "Empty Response")))
-                return
-            }
-            guard data != nil else {
-                complete(Result.failure(GeotabDriveErrors.AddAppDeviceError(error: "Empty Response")))
-                return
-            }
-            
-            guard res.statusCode == 200 else {
-                complete(Result.failure(GeotabDriveErrors.AddAppDeviceError(error: "Error Response")))
-                return
-            }
-            complete(Result.success(()))
-        }.resume()
     }
 }

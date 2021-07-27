@@ -1,9 +1,4 @@
-//
-//  DriveApiFunctionArgument.swift
-//  
-//
-//  Created by Nathan Kuruvilla on 2021-06-25.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 

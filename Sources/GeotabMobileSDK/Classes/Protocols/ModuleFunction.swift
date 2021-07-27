@@ -1,9 +1,5 @@
-//
-//  ModuleFunction.swift
-//  Drive
-//
-//  Created by Yunfeng Liu on 2019-10-28.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Mustache
 import WebKit
 /**

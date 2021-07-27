@@ -1,9 +1,4 @@
-//
-//  GetAvailabilityFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-13.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
 

@@ -1,3 +1,5 @@
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 struct DeviceEvent: Codable {

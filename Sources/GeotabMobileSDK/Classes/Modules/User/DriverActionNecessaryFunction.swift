@@ -1,12 +1,6 @@
-//
-//  SessionExpiredFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-02-27.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
-//import Mustache
 
 struct DriverActionNecessaryArgument: Codable {
     let isDriverActionNecessary: Bool

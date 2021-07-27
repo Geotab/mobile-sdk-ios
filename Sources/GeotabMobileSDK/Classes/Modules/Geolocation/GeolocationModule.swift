@@ -1,9 +1,4 @@
-//
-//  GeolocationModule.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-08-10.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 import CoreLocation
@@ -18,7 +13,6 @@ class GeolocationModule: Module {
     let locationManager: CLLocationManager
     
     var lastLocationResult = GeolocationResult(position: nil, error: nil)
-    var isLocationServiceAuthorized = true // default to authorized
     var started = false
     
     
@@ -66,9 +60,13 @@ class GeolocationModule: Module {
         return scripts
     }
     
-    func requestAuthorization() {
+    func requestAuthorizationAlways() {
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.requestAlwaysAuthorization()
+    }
+    
+    func requestAuthorizationWhenInUse() {
+        locationManager.requestWhenInUseAuthorization()
     }
     
     func updateLastLocation(result: GeolocationResult) {
@@ -95,30 +93,81 @@ class GeolocationModule: Module {
             throw GeotabDriveErrors.GeolocationError(error: GeolocationModule.POSITION_UNAVAILABLE)
         }
         
+        if isDeniedOrRestricted() {
+            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
+            throw GeotabDriveErrors.GeolocationError(error: GeolocationModule.PERMISSION_DENIED)
+        }
+        
         // note: startService could be called by different times, if one of the calls requested high accuracy, set it.
+        var accuChanged = false
         if enableHighAccuracy {
+            accuChanged = locationManager.distanceFilter != 0.01 || locationManager.desiredAccuracy != kCLLocationAccuracyBest
             locationManager.distanceFilter = 0.01
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
         }
         
         
         guard !started else {
+            if isNotDetermined() {
+                requestAuthorizationWhenInUse()
+            } else if accuChanged && isAuthorizedAlways() {
+                locationManager.stopUpdatingLocation()
+                locationManager.startUpdatingLocation()
+            } else if isAuthorizedWhenInUse() {
+                requestAuthorizationAlways()
+                if accuChanged {
+                    locationManager.stopUpdatingLocation()
+                    locationManager.startUpdatingLocation()
+                }
+            }
             return
         }
         
-        // make sure everytime user calls startService, we send a request for authorization
-        requestAuthorization()
-        
-//        // note: we are assuming permission granted by default, user may get a denied result event in a later time or timeout if user ignores the authorization request.
-//        guard isLocationServiceAuthorized else {
-//            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
-//            throw GeotabDriveErrors.GeolocationError(error: GeolocationModule.PERMISSION_DENIED)
-//        }
-//
-//        locationManager.stopUpdatingLocation()
-//        locationManager.startUpdatingLocation()
-        
-        started = true
+        if isAuthorizedAlways() {
+            locationManager.stopUpdatingLocation()
+            locationManager.startUpdatingLocation()
+            started = true
+        } else if isAuthorizedWhenInUse() {
+            locationManager.stopUpdatingLocation()
+            locationManager.startUpdatingLocation()
+            started = true
+            requestAuthorizationAlways()
+        } else {
+            requestAuthorizationWhenInUse()
+            started = true
+        }
+    }
+    
+    func isNotDetermined() -> Bool {
+        if #available(iOS 14.0, *) {
+            return locationManager.authorizationStatus == .notDetermined;
+        } else {
+            return CLLocationManager.authorizationStatus() == .notDetermined;
+        }
+    }
+    
+    func isDeniedOrRestricted() -> Bool {
+        if #available(iOS 14.0, *) {
+            return locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted;
+        } else {
+            return CLLocationManager.authorizationStatus() == .denied || CLLocationManager.authorizationStatus() == .restricted;
+        }
+    }
+    
+    func isAuthorizedWhenInUse() -> Bool {
+        if #available(iOS 14.0, *) {
+            return locationManager.authorizationStatus == .authorizedWhenInUse;
+        } else {
+            return CLLocationManager.authorizationStatus() == .authorizedWhenInUse;
+        }
+    }
+    
+    func isAuthorizedAlways() -> Bool {
+        if #available(iOS 14.0, *) {
+            return locationManager.authorizationStatus == .authorizedAlways
+        } else {
+            return CLLocationManager.authorizationStatus() == .authorizedAlways
+        }
     }
     
     func stopService() {
@@ -141,12 +190,18 @@ class GeolocationModule: Module {
 
 extension GeolocationModule: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways || status == .authorizedWhenInUse {
-            isLocationServiceAuthorized = true
-            locationManager.stopUpdatingLocation()
-            locationManager.startUpdatingLocation()
+        if status == .authorizedAlways {
+            if started {
+                locationManager.stopUpdatingLocation()
+                locationManager.startUpdatingLocation()
+            }
+        } else if status == .authorizedWhenInUse {
+            if started {
+                requestAuthorizationAlways()
+                locationManager.stopUpdatingLocation()
+                locationManager.startUpdatingLocation()
+            }
         } else if status == .denied {
-            isLocationServiceAuthorized = false
             updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
         }
     }

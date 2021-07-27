@@ -1,9 +1,4 @@
-//
-//  SpeechEngine.swift
-//  GeotabDriveSDK
-//
-//  Created by Chet Chhom on 2020-01-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 public protocol SpeechEngine {
     func speak(text: String, rate: Float, language: String)

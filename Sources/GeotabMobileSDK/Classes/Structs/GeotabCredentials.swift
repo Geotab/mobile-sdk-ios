@@ -1,9 +1,4 @@
-//
-//  GeotabCredentials.swift
-//  GeotabDriveSDK
-//
-//  Created by Anubhav Saini on 2020-02-03.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 /**
  Geotab User Session Data.

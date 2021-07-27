@@ -1,9 +1,4 @@
-//
-//  RequestLocationAuthorizationFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-08-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 
@@ -15,7 +10,12 @@ class RequestLocationAuthorizationFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        module.requestAuthorization()
+        
+        if module.isNotDetermined() {
+            module.requestAuthorizationWhenInUse()
+        } else if module.isAuthorizedWhenInUse() {
+            module.requestAuthorizationAlways()
+        }
         jsCallback(Result.success("undefined"))
     }
 }

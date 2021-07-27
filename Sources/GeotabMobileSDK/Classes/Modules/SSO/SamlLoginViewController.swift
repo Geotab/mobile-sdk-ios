@@ -1,9 +1,4 @@
-//
-//  File.swift
-//  
-//
-//  Created by Yunfeng Liu on 2021-06-07.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import Foundation
 import WebKit

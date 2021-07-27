@@ -1,9 +1,4 @@
-//
-//  ModuleFunction.WriteFileAsBinary.Script.js
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-06-17.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function(params, callback) {
     if (params.data instanceof ArrayBuffer !== true) {

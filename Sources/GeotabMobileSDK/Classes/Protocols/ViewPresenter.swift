@@ -1,9 +1,5 @@
-//
-//  ViewPresenter.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-04-08.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import UIKit
 
 protocol ViewPresenter {

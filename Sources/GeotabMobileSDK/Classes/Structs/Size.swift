@@ -1,9 +1,4 @@
-//
-//  Size.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-07-16.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 struct Size: Codable {
     let width: Int

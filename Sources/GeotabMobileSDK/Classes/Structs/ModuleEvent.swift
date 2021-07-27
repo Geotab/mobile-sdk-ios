@@ -1,9 +1,4 @@
-//
-//  ModuleEvent.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-11-20.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 /// :nodoc:
 struct ModuleEvent {

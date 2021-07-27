@@ -1,9 +1,5 @@
-//
-//  ReadFileAsBinary.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-06-25.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 // ReadFileAsBinary

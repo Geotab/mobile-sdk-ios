@@ -1,13 +1,6 @@
-//
-//  GetViolationsFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-19.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import WebKit
-//import Mustache
-
 
 class GetViolationsFunction: ModuleFunction {
     private let module: UserModule

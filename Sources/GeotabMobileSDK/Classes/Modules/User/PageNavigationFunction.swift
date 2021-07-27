@@ -1,9 +1,5 @@
-//
-//  PageNavigationFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2020-03-30.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import Foundation
 
 class PageNavigationFunction: ModuleFunction {

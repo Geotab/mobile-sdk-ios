@@ -1,9 +1,5 @@
-//
-//  KeepAwakeFunction.swift
-//  GeotabDriveSDK
-//
-//  Created by Yunfeng Liu on 2019-12-11.
-//
+// Copyright © 2021 Geotab Inc. All rights reserved.
+
 import UIKit
 
 class KeepAwakeFunction: ModuleFunction {
