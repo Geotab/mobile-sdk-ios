@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a title="  Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="index.html"> Docs</a> (78% documented)</p>
+        <p class="header-right">
+          <form role="search" action="search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="index.html"> Reference</a>
+        <img id="carat" src="img/carat.png" />
+          Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Classes/DriveSdkConfig.html">DriveSdkConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/DriveViewController.html">DriveViewController</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/Module.html">Module</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/ModuleFunction.html">ModuleFunction</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MyGeotabSdkConfig.html">MyGeotabSdkConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MyGeotabViewController.html">MyGeotabViewController</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Protocols/SpeechEngine.html">SpeechEngine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Structs/CredentialResult.html">CredentialResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/GeotabCredentials.html">GeotabCredentials</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Typealiases.html#/s:15GeotabMobileSDK33DriverActionNecessaryCallbackTypea">DriverActionNecessaryCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Typealiases.html#/s:15GeotabMobileSDK36LastServerAddressUpdatedCallbackTypea">LastServerAddressUpdatedCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Typealiases.html#/s:15GeotabMobileSDK25LoginRequiredCallbackTypea">LoginRequiredCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Typealiases.html#/s:15GeotabMobileSDK26PageNavigationCallbackTypea">PageNavigationCallbackType</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            
+            <h1 id='getting-started' class='heading'>Getting started</h1>
+<h2 id='author' class='heading'>Author</h2>
+
+<p>Yunfeng Liu, <a href="mailto:yunfengliu@geotab.com">yunfengliu@geotab.com</a></p>
+<h2 id='license' class='heading'>License</h2>
+
+<p>GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.</p>
+<h2 id='driveviewcontroller' class='heading'>DriveViewController</h2>
+<h3 id='what-is-driveviewcontroller' class='heading'>What is DriveViewController</h3>
+
+<p>DriveViewController is the starting point of integrating Geotab Drive SDK. It&rsquo;s the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app&rsquo;s data.</p>
+<h3 id='how-to-start' class='heading'>How to start</h3>
+<h4 id='installation' class='heading'>Installation</h4>
+
+<p>Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: <a href="https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app">https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app</a></p>
+
+<p><strong>Add Background mode capabilities</strong></p>
+
+<p>In your app&rsquo;s &ldquo;Signing and Capabilities&rdquo; section, add &ldquo;Background mode&rdquo; section and check the &ldquo;Audio, Airplay and Picture in Picture&rdquo; and &ldquo;Location updates&rdquo; options. </p>
+
+<p><strong>Info.plist</strong></p>
+
+<p>The following keys must be added to your app&rsquo;s Info.plist:</p>
+
+<ul>
+<li>&ldquo;Privacy - Location Always Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Location Always and When In Use Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Location When In Use Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Camera Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Photo Library Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Face ID Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Bluetooth Always Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Motion Usage Description&rdquo;</li>
+</ul>
+<h4 id='initialization' class='heading'>Initialization</h4>
+
+<p>Inside your <code>main</code> controller, define a property that holds the instance of DriveViewController</p>
+<pre class="highlight swift"><code><span class="kd">private</span> <span class="k">var</span> <span class="nv">driveVC</span><span class="p">:</span> <span class="kt">DriveViewController</span><span class="o">!</span>
+</code></pre>
+
+<p>If your drivers should login from a specific Geotab server, then you should set the serverAddress first:</p>
+<pre class="highlight swift"><code><span class="kt">DriveSdkConfig</span><span class="o">.</span><span class="n">serverAddress</span> <span class="o">=</span> <span class="s">"&lt;server-name&gt;.geotab.com"</span>
+</code></pre>
+
+<p>Note: Do not prefix with &ldquo;https://&rdquo;. SDK prefixes &ldquo;https://&rdquo; by default.</p>
+
+<p>You should also set up a listener for <code>LastServerAddress</code> update:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="n">setLastServerAddressUpdatedCallback</span> <span class="p">{</span> <span class="n">server</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="nv">store</span> <span class="o">=</span> <span class="kt">UserDefaults</span><span class="o">.</span><span class="n">standard</span>
+    <span class="n">store</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="kt">MainViewController</span><span class="o">.</span><span class="kt">GEOTAB_DRIVE_LAST_SERVER_KEY</span><span class="p">)</span>
+    <span class="kt">DriveSdkConfig</span><span class="o">.</span><span class="n">serverAddress</span> <span class="o">=</span> <span class="n">server</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>Whenever <code>LastServerAddress</code> is changed. it should be saved in persistent storage. At the next launch of your app, you should read the value from your persistent storage and set it to <code><a href="Classes/DriveSdkConfig.html#/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ">DriveSdkConfig.serverAddress</a></code> before executing any Drive SDK APIs.</p>
+
+<p>Initialize the instance during <code>viewDidLoad()</code> of your <code>main</code> controller</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="p">[])</span>
+</code></pre>
+<h5 id='login' class='heading'>Login</h5>
+
+<p>GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user&rsquo;s credential. </p>
+
+<p>Tell DriveViewController about the user credential as follows:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="nf">setSession</span><span class="p">(</span><span class="nv">credentialResult</span><span class="p">:</span> <span class="kt">CredentialResult</span><span class="p">,</span> <span class="nv">isCoDriver</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">set</span> <span class="n">to</span> <span class="kc">true</span> <span class="k">if</span> <span class="n">it</span><span class="err">'</span><span class="n">s</span> <span class="n">a</span> <span class="n">co</span><span class="o">-</span><span class="n">driver</span> <span class="n">login</span><span class="o">&gt;</span><span class="p">)</span>
+</code></pre>
+
+<p>where credentials is a type of: </p>
+<pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">GeotabCredentials</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+
+    <span class="k">var</span> <span class="nv">userName</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">database</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">sessionID</span><span class="p">:</span> <span class="kt">String</span>
+
+    <span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">userName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">database</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">sessionID</span><span class="p">:</span> <span class="kt">String</span><span class="p">){</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">userName</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">sessionID</span> <span class="o">=</span> <span class="n">sessionID</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>See <code>GeotabCredentials.swift</code>.</p>
+<h5 id='present-the-driveviewcontroller' class='heading'>Present the DriveViewController</h5>
+
+<p>Once user credentials are given, present the driveVC to user. DriveViewController will automatically validate the session and continue through the normal Drive workflow.</p>
+<pre class="highlight swift"><code><span class="k">self</span><span class="o">.</span><span class="nf">present</span><span class="p">(</span><span class="n">driveVC</span><span class="p">,</span> <span class="nv">animated</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span>
+</code></pre>
+<h5 id='session-expire-invalid-no-session-and-co-driver-login' class='heading'>Session expire/Invalid/No-session and co-driver Login</h5>
+
+<p>To get notified when a user session is expired. Set a listener callback as follows:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="n">setLoginRequiredCallback</span> <span class="p">{</span> <span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">errorMessage</span><span class="p">)</span> <span class="k">in</span>
+    <span class="o">...</span> <span class="o">...</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>Set a callback to listen for session changes. That includes: no session, invalid session, session expired, co-driver login is requested.</p>
+
+<p>There are three defined values and variance of different error messages that could be passed in the callback.</p>
+
+<ul>
+<li>&ldquo;&rdquo;, empty string, indicates no login required or login is successful, or the login is in progress. At this state, implementor should presents the DriveViewControlleFragment.</li>
+<li>&ldquo;LoginRequired&rdquo;: indicates the login UI is going to show a login form(No valid user is available or the current activeSession is expired/invalid). At this stateimplementor presents its own login screen.</li>
+<li>&ldquo;AddCoDriver&rdquo;: indicates that a co-driver login is requested. At this state, implementor presents its own co-driver login screen.</li>
+<li>Any error message, any other error messages. At this state, implementor presents its own login screen.</li>
+</ul>
+
+<p>After receiving such session expired callback call. Integrator usually dismisses the presented <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> and present user with its Login screen.</p>
+<h4 id='other-important-callbacks' class='heading'>Other important callbacks</h4>
+
+<p>There are couple of other callbacks you that can be useful for managing and watching DriveViewController.</p>
+
+<ul>
+<li><p><code>DriveViewController::setDriverActionNecessaryCallback</code>: driverActionNecessary is a list of events that occur in our app where the application owner needs to bring the Drive app activity UI to the foreground. Example: &ldquo;Your vehicle has been selected by another driver. You now need to select a vehicle&rdquo;.</p></li>
+<li><p><code>DriveViewController::setPageNavigationCallback</code>: pageNavigation event indicates any navigation changes by the driver in Geotab Drive.</p></li>
+<li><p><code>DriveViewController::setLastServerAddressUpdatedCallback</code>: Drive tells the integrator which server address is used after a user successful login. This server address must be used for future logins of other users of the same company. Integrators can save the received <code>server</code> address to a persistant storage and when the app restarts next time, update the <code><a href="Classes/DriveSdkConfig.html#/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ">DriveSdkConfig.serverAddress</a></code> with the saved one. This will let SDK know which Geotab server to use.</p></li>
+</ul>
+<h4 id='overwrite-default-background-color-font-color-and-icon' class='heading'>Overwrite Default Background color, font color and icon</h4>
+
+<p>To override default background color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenBckColor&rdquo; of type String and add a hex value for the color
+To override default font color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenFontColor&rdquo; of type String and add a hex value for the color
+To override default font color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenIcon&rdquo; of type String and add the name of the image. The image must also be added to the project.</p>
+<h2 id='drive-apis' class='heading'>Drive APIs</h2>
+
+<p>All drive APIs are accessible directly under an instance of <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> or <code>MyGeotabbViewController</code>. See more details in the API document.</p>
+
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2021-08-25)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>DriveViewController Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/DriveViewController" class="dashAnchor"></a>
+    <a title="DriveViewController Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html"> Docs</a> (78% documented)</p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html"> Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        DriveViewController Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/DriveSdkConfig.html">DriveSdkConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DriveViewController.html">DriveViewController</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Module.html">Module</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ModuleFunction.html">ModuleFunction</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MyGeotabSdkConfig.html">MyGeotabSdkConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MyGeotabViewController.html">MyGeotabViewController</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/SpeechEngine.html">SpeechEngine</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/CredentialResult.html">CredentialResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/GeotabCredentials.html">GeotabCredentials</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:15GeotabMobileSDK33DriverActionNecessaryCallbackTypea">DriverActionNecessaryCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:15GeotabMobileSDK36LastServerAddressUpdatedCallbackTypea">LastServerAddressUpdatedCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:15GeotabMobileSDK25LoginRequiredCallbackTypea">LoginRequiredCallbackType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:15GeotabMobileSDK26PageNavigationCallbackTypea">PageNavigationCallbackType</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>DriveViewController</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">DriveViewController</span> <span class="p">:</span> <span class="kt">UIViewController</span><span class="p">,</span> <span class="kt">WKScriptMessageHandler</span><span class="p">,</span> <span class="kt">ViewPresenter</span></code></pre>
+
+                </div>
+              </div>
+            <p>Drive&rsquo;s View Controller and API interface. Everthing you need to launch a Drive. Only one instance should be created.</p>
+
+<ul>
+<li>Extends: WebDriveDelegate. Provides modules functions to push &lsquo;window&rsquo; CustomEvent to the Web Drive.</li>
+</ul>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC10isChargingSbvp"></a>
+                    <a name="//apple_ref/swift/Property/isCharging" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC10isChargingSbvp">isCharging</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates whether phone is in charging state.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isCharging</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC16webAppLoadFailedyycSgvp"></a>
+                    <a name="//apple_ref/swift/Property/webAppLoadFailed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC16webAppLoadFailedyycSgvp">webAppLoadFailed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A callback listener when Drive failed to load from the server in case of network issue.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">webAppLoadFailed</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC7modulesACShyAA6ModuleCG_tcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(modules:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC7modulesACShyAA6ModuleCG_tcfc">init(modules:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initializer</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt"><a href="../Classes/Module.html">Module</a></span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>modules</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>User implemented thirdparty modules</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC11cancelLoginyyF"></a>
+                    <a name="//apple_ref/swift/Method/cancelLogin()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC11cancelLoginyyF">cancelLogin()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Cancelling a login request. When user clicked Add CoDriver in Drive, but decided not to proceed and want to cancel that request, this function must be called. What this function do is to navigate the Drive to the previously non-login page. If the login request is main driver login, calling this function will result dismissing the DriveViewController.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">cancelLogin</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC11getAllUsersyyys6ResultOySSs5Error_pGcF"></a>
+                    <a name="//apple_ref/swift/Method/getAllUsers(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC11getAllUsersyyys6ResultOySSs5Error_pGcF">getAllUsers(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get all driver users signed in.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getAllUsers</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representing an array of Users</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC13getHosRuleSetyyys6ResultOySSs5Error_pGcF"></a>
+                    <a name="//apple_ref/swift/Method/getHosRuleSet(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC13getHosRuleSetyyys6ResultOySSs5Error_pGcF">getHosRuleSet(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the HOS Rule Set.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getHosRuleSet</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representing a HosRuleset</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC19getUserAvailabilityyyys6ResultOySSs5Error_pGcF"></a>
+                    <a name="//apple_ref/swift/Method/getUserAvailability(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC19getUserAvailabilityyyys6ResultOySSs5Error_pGcF">getUserAvailability(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the User Availability.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getUserAvailability</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representing a DutyStatusAvailability</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC17getUserViolationsyyys6ResultOySSs5Error_pGcF"></a>
+                    <a name="//apple_ref/swift/Method/getUserViolations(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC17getUserViolationsyyys6ResultOySSs5Error_pGcF">getUserViolations(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the User Violations.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getUserViolations</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representing a DutyStatusViolation</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC13setDriverSeat8driverId_ySS_ys6ResultOySSs5Error_pGctF"></a>
+                    <a name="//apple_ref/swift/Method/setDriverSeat(driverId:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC13setDriverSeat8driverId_ySS_ys6ResultOySSs5Error_pGctF">setDriverSeat(driverId:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set a driver in driver seat.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setDriverSeat</span><span class="p">(</span><span class="nv">driverId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>driverId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>String</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representing a User</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC14getStateDeviceyyys6ResultOySSs5Error_pGcF"></a>
+                    <a name="//apple_ref/swift/Method/getStateDevice(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC14getStateDeviceyyys6ResultOySSs5Error_pGcF">getStateDevice(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the <code>Go Device</code> of Drive&rsquo;s <code>state</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getStateDevice</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Result is given as a JSON string representation of a GoDevice</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC15setSpeechEngine06speechI0yAA0hI0_p_tF"></a>
+                    <a name="//apple_ref/swift/Method/setSpeechEngine(speechEngine:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC15setSpeechEngine06speechI0yAA0hI0_p_tF">setSpeechEngine(speechEngine:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set a custom speech Engine to replace the default one comes with the SDK.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setSpeechEngine</span><span class="p">(</span><span class="nv">speechEngine</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SpeechEngine.html">SpeechEngine</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>speechEngine</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Protocols/SpeechEngine.html">SpeechEngine</a></code></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC10setSession16credentialResult10isCoDriveryAA010CredentialJ0V_SbtF"></a>
+                    <a name="//apple_ref/swift/Method/setSession(credentialResult:isCoDriver:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC10setSession16credentialResult10isCoDriveryAA010CredentialJ0V_SbtF">setSession(credentialResult:<wbr>isCoDriver:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set a new Geotab session for driver or co-driver. Setting a new session means adding a new driver to Drive. In case the given session is invalid, <code>Login Required</code> event will be triggered. See <code>setLoginRequiredCallback</code> for more detail.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setSession</span><span class="p">(</span><span class="nv">credentialResult</span><span class="p">:</span> <span class="kt"><a href="../Structs/CredentialResult.html">CredentialResult</a></span><span class="p">,</span> <span class="nv">isCoDriver</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>credentialResult</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Structs/CredentialResult.html">CredentialResult</a></code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>isCoDriver</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Bool. Indicate if its&rsquo; for a co-driver login.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC16setCustomURLPath4pathySS_tF"></a>
+                    <a name="//apple_ref/swift/Method/setCustomURLPath(path:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC16setCustomURLPath4pathySS_tF">setCustomURLPath(path:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set navigation path. &ldquo;path&rdquo; will be concatenated as follows: &ldquo;https://<my.geotab.com>/drive/default.html?#${path}&rdquo;.
+Once set, DriveViewController will navigate to the given UI path.</p>
+
+<p>This function can be used to implement iOS custom URL. For example by accepting &ldquo;myscheme://dvir/main&rdquo; as a launch URL, An app could navgate the app the requested path &ldquo;dvir/main&rdquo; on launch.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setCustomURLPath</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>path</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Drive&rsquo;s UI path to navigate to.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC32setDriverActionNecessaryCallbackyyySb_SStcF"></a>
+                    <a name="//apple_ref/swift/Method/setDriverActionNecessaryCallback(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC32setDriverActionNecessaryCallbackyyySb_SStcF">setDriverActionNecessaryCallback(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set <code>DriverActionNecessary</code> callback to listen for such event sent from Web Drive.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setDriverActionNecessaryCallback</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Typealiases.html#/s:15GeotabMobileSDK33DriverActionNecessaryCallbackTypea">DriverActionNecessaryCallbackType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Typealiases.html#/s:15GeotabMobileSDK33DriverActionNecessaryCallbackTypea">DriverActionNecessaryCallbackType</a></code></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC34clearDriverActionNecessaryCallbackyyF"></a>
+                    <a name="//apple_ref/swift/Method/clearDriverActionNecessaryCallback()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC34clearDriverActionNecessaryCallbackyyF">clearDriverActionNecessaryCallback()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clear <code>DriverActionNecessary</code> callback listener.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearDriverActionNecessaryCallback</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC25setPageNavigationCallbackyyySScF"></a>
+                    <a name="//apple_ref/swift/Method/setPageNavigationCallback(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC25setPageNavigationCallbackyyySScF">setPageNavigationCallback(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set <code>PageNavigation</code> callback listener.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setPageNavigationCallback</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Typealiases.html#/s:15GeotabMobileSDK26PageNavigationCallbackTypea">PageNavigationCallbackType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Typealiases.html#/s:15GeotabMobileSDK26PageNavigationCallbackTypea">PageNavigationCallbackType</a></code></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC27clearPageNavigationCallbackyyF"></a>
+                    <a name="//apple_ref/swift/Method/clearPageNavigationCallback()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC27clearPageNavigationCallbackyyF">clearPageNavigationCallback()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clear <code>PageNavigation</code> callback listener.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearPageNavigationCallback</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC24setLoginRequiredCallbackyyySS_SSSgtcF"></a>
+                    <a name="//apple_ref/swift/Method/setLoginRequiredCallback(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC24setLoginRequiredCallbackyyySS_SSSgtcF">setLoginRequiredCallback(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set a callback to listen for session changes. That includes: no session, invalid session, session expired, co-driver login is requested.</p>
+
+<p>There are three defined values and variance of different error messages that could be passed in the callback.</p>
+
+<ul>
+<li>&ldquo;&rdquo;, empty string, indicates no login required or login is successful, or the login is in progress. At this state, implementor should presents the DriveViewController/Fragment.</li>
+<li>&ldquo;LoginRequired&rdquo;: indicates the login UI is going to show a login form(No valid user is available or the current activeSession is expired/invalid). At this state, implementor presents its own login screen.</li>
+<li>&ldquo;AddCoDriver&rdquo;: indicates that a co-driver login is requested. At this state, implementor presents its own co-driver login screen.</li>
+<li>Any error message, any other error messages. At this state, implementor presents its own login screen.</li>
+</ul>
+
+<p>After receiving such session expired callback call. Integrator usually dismisses the presented <code>DriveViewController</code> and present user with its Login screen.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setLoginRequiredCallback</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Typealiases.html#/s:15GeotabMobileSDK25LoginRequiredCallbackTypea">LoginRequiredCallbackType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Typealiases.html#/s:15GeotabMobileSDK25LoginRequiredCallbackTypea">LoginRequiredCallbackType</a></code>
+
+<ul>
+<li>status: <code>&quot;&quot;</code> <code>&quot;LoginRequired&quot;</code>, <code>&quot;AddCoDriver&quot;</code>.</li>
+<li>errorMessage: Error happened during login process and error info is given in <code>errorMessage</code>.</li>
+</ul></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC26clearLoginRequiredCallbackyyF"></a>
+                    <a name="//apple_ref/swift/Method/clearLoginRequiredCallback()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC26clearLoginRequiredCallbackyyF">clearLoginRequiredCallback()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clear <code>LoginRequired</code> callback listener.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearLoginRequiredCallback</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC35setLastServerAddressUpdatedCallbackyyySScF"></a>
+                    <a name="//apple_ref/swift/Method/setLastServerAddressUpdatedCallback(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC35setLastServerAddressUpdatedCallbackyyySScF">setLastServerAddressUpdatedCallback(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set <code>LastServerAddressUpdated</code> callback listener. Such event is sent by Drive to notify impelementor that a designated &ldquo;server address&rdquo; should be used for future launches. Implementor should save the new server address in persistent storage. In the future launches, app should set the DriveSdkConfig.serverAddress with the stored new address before creating an instance of DriveViewController. Note such address is not the same as the counterparty one in MyGeotabViewController.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setLastServerAddressUpdatedCallback</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Typealiases.html#/s:15GeotabMobileSDK36LastServerAddressUpdatedCallbackTypea">LastServerAddressUpdatedCallbackType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p><code><a href="../Typealiases.html#/s:15GeotabMobileSDK36LastServerAddressUpdatedCallbackTypea">LastServerAddressUpdatedCallbackType</a></code></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK19DriveViewControllerC37clearLastServerAddressUpdatedCallbackyyF"></a>
+                    <a name="//apple_ref/swift/Method/clearLastServerAddressUpdatedCallback()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK19DriveViewControllerC37clearLastServerAddressUpdatedCallbackyyF">clearLastServerAddressUpdatedCallback()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clear <code>LastServerAddressUpdated</code> callback listener.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearLastServerAddressUpdatedCallback</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2021 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2021-08-25)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>
