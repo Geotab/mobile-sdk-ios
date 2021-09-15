@@ -146,6 +146,8 @@ There are couple of other callbacks you that can be useful for managing and watc
 
 - `DriveViewController::setLastServerAddressUpdatedCallback`: Drive tells the integrator which server address is used after a user successful login. This server address must be used for future logins of other users of the same company. Integrators can save the received `server` address to a persistant storage and when the app restarts next time, update the `DriveSdkConfig.serverAddress` with the saved one. This will let SDK know which Geotab server to use.
 
+See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html).
+
 
 #### Overwrite Default Background color, font color and icon
 
@@ -156,4 +158,4 @@ To override default font color in the network error page, create a property in I
 
 ## Drive APIs
 
-All drive APIs are accessible directly under an instance of `DriveViewController` or `MyGeotabbViewController`. See more details in the API document.
+All drive APIs are accessible directly under an instance of `DriveViewController` or `MyGeotabbViewController`. See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/).
