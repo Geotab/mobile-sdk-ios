@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 import UIKit
 
@@ -47,7 +46,7 @@ class CaptureImageFunction: ModuleFunction {
                 switch result {
                 case .success(let img):
                     guard let image = img, let png = image.pngData() else {
-                        jsCallback(Result.success("null"))
+                        jsCallback(Result.failure(GeotabDriveErrors.CaptureImageError(error: "Camera Cancelled")))
                         return
                     }
 

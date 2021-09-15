@@ -1,4 +1,4 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
 
 import Foundation
 import UIKit
@@ -47,7 +47,7 @@ class PickImageFunction: ModuleFunction {
                 switch result {
                 case .success(let img):
                     guard let image = img, let png = image.pngData() else {
-                        jsCallback(Result.success("null"))
+                        jsCallback(Result.failure(GeotabDriveErrors.CaptureImageError(error: "Pick Image Cancelled")))
                         return
                     }
                     do {

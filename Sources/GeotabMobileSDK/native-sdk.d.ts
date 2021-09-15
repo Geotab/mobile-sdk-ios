@@ -193,8 +193,8 @@ declare namespace geotabModules {
          * Invoke the text to speech to speak the `text` at the given `rate` and `language`
          * @param argument:
          *  text: The text to be spoken
-         *  rate: 0.1-10; `1` is normal speed.
-         *  lang: Specifies the BCP-47 language tag that represents the voice.
+         *  rate: 0.1-10; `1` is normal speed. Default value is 1.0
+         *  lang: Specifies the BCP-47 language tag that represents the voice. Default value is "en-US"
          * @param callback:
          *  callback will be called with `err` if the argument format is incorrect. Otherwise, err is null and result is undefined.
          */

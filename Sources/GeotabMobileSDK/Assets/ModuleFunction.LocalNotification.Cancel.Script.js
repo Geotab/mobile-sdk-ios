@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (id, callback) {
     
@@ -6,9 +5,13 @@ window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (id, callbac
     
     var nativeCallback = "{{callbackPrefix}}" + Math.random().toString(36).substring(2);
     
-    window.{{geotabNativeCallbacks}}[nativeCallback] = function (error, notification) {
+    window.{{geotabNativeCallbacks}}[nativeCallback] = async function (error, notification) {
         if (error != null) {
-            callback(error, undefined);
+            try {
+                await callback(error, undefined);
+            } catch (err) {
+                console.log(">>>>> User provided callback throws uncaught exception: ", err.message);
+            }
             return;
         }
         const actions = notification.actions;
@@ -17,7 +20,11 @@ window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (id, callbac
                 mod.{{off}}(action.id, (err, result) => {});
             });
         }
-        callback(error, notification);
+        try {
+            await callback(error, notification);
+        } catch (err) {
+            console.log(">>>>> User provided callback throws uncaught exception: ", err.message);
+        }
         delete window.{{geotabNativeCallbacks}}[nativeCallback];
     };
     

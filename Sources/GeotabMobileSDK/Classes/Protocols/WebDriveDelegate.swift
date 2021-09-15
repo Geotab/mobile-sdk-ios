@@ -1,9 +1,11 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
+
+import WebKit
 
 /**
  Interface for evaluating javascript script and pushing CustomEvent to WKWebview.
  */
-protocol WebDriveDelegate {
+internal protocol WebDriveDelegate {
     /**
      Evaluate a javascript code.
      
@@ -16,4 +18,6 @@ protocol WebDriveDelegate {
      Push a HTML5 `CustomEvent` to WKWebview.
      */
     func push(moduleEvent: ModuleEvent)
+    
+    var webView: WKWebView { get }
 }

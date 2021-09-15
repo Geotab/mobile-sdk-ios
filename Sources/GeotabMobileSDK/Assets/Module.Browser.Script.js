@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 window.open = function(url, target, options) {
     if (url == null) throw new Error("URL is required");

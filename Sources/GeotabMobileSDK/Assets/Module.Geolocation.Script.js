@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 (function () {
     var mod = window.geotabModules.geolocation;
@@ -17,7 +16,7 @@
         if (typeof success != "function") {
             throw new Error("First argument must be a function");
         }
-        mod.___startLocationService(options, function (err) {
+        mod.___startLocationService(options, async function (err) {
             var errorFunc = function () { };
 
             if (typeof error == "function") {
@@ -25,11 +24,23 @@
             }
             if (err != null) {
                 if (err.message && err.message.includes("PERMISSION_DENIED")) {
-                    errorFunc(new __GeolocationPositionError(1, err.message));
+                    try {
+                        await errorFunc(new __GeolocationPositionError(1, err.message));
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 } else if (err.message && err.message.includes("POSITION_UNAVAILABLE")) {
-                    errorFunc(new __GeolocationPositionError(2, err.message));
+                    try {
+                        await errorFunc(new __GeolocationPositionError(2, err.message));
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 } else {
-                    errorFunc(err);
+                    try {
+                        await errorFunc(err);
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 }
                 return;
             }
@@ -39,7 +50,7 @@
                 options: options
             };
             if (options != null && options.timeout != null && options.timeout > 0) {
-                req.timerId = setTimeout(function () {
+                req.timerId = setTimeout(async function () {
                     clearTimeout(req.timerId);
                     req.timerId = undefined;
                     var idx = mod.positionGetters.findIndex(itm => itm === req);
@@ -47,7 +58,11 @@
                     mod.positionGetters.splice(idx, 1);
                     mod.___stopLocationServiceIfNeeded();
                     if (typeof error == "function") {
-                        error(new __GeolocationPositionError(3, "TIMEOUT"));
+                        try {
+                            await error(new __GeolocationPositionError(3, "TIMEOUT"));
+                        } catch(err) {
+                            console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                        }
                     }
                 }, options.timeout);
             }
@@ -68,18 +83,22 @@
             options: options,
             lastCode: null,
         };
-        req.timeoutFun = function () {
+        req.timeoutFun = async function () {
             req.timerId = setTimeout(req.timeoutFun, options.timeout);
             if (typeof error == "function" && req.lastCode != 3) {
                 req.lastCode = 3;
-                error(new __GeolocationPositionError(3, "TIMEOUT"));
+                try {
+                    await error(new __GeolocationPositionError(3, "TIMEOUT"));
+                } catch(err) {
+                    console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                }
             }
         }
         if (options != null && options.timeout != null && options.timeout > 0) {
             req.timerId = setTimeout(req.timeoutFun, options.timeout);
         }
         mod.positionWatchers[id] = req;
-        mod.___startLocationService(options, function (err) {
+        mod.___startLocationService(options, async function (err) {
             var errorFunc = function () { };
 
             if (typeof error == "function") {
@@ -88,17 +107,29 @@
             if (err != null) {
                 if (err.message && err.message.includes("PERMISSION_DENIED")) {
                     if (req.lastCode != 1) {
-                        errorFunc(new __GeolocationPositionError(1, err.message));
+                        try {
+                            await errorFunc(new __GeolocationPositionError(1, err.message));
+                        } catch(err) {
+                            console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                        }
                     }
                     req.lastCode = 1;
                 } else if (err.message && err.message.includes("POSITION_UNAVAILABLE")) {
                     if (req.lastCode != 2) {
-                        errorFunc(new __GeolocationPositionError(2, err.message));
+                        try {
+                            await errorFunc(new __GeolocationPositionError(2, err.message));
+                        } catch(err) {
+                            console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                        }
                     }
                     req.lastCode = 2;
                 } else {
                     if (req.lastCode != -1) {
-                        errorFunc(err);
+                        try {
+                            await errorFunc(err);
+                        } catch(err) {
+                            console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                        }
                     }
                     req.lastCode = -1;
                 }
@@ -134,7 +165,7 @@
     navigator.geolocation.clearWatch = mod.clearWatch;
 
 
-    mod.___emitResultErrorForGetters = function (error) {
+    mod.___emitResultErrorForGetters = async function (error) {
         while (mod.positionGetters.length > 0) {
             var g = mod.positionGetters.splice(0, 1)[0];
             mod.___stopLocationServiceIfNeeded();
@@ -147,18 +178,34 @@
                 errorFunc = g.error;
             }
             if (error && error.includes("PERMISSION_DENIED")) {
-                errorFunc(new __GeolocationPositionError(1, error));
+                try {
+                    await errorFunc(new __GeolocationPositionError(1, error));
+                } catch(err) {
+                    console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                }
             } else if (error && error.includes("POSITION_UNAVAILABLE")) {
-                errorFunc(new __GeolocationPositionError(2, error));
+                try {
+                    await errorFunc(new __GeolocationPositionError(2, error));
+                } catch(err) {
+                    console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                }
             } else if (error && error.includes("TIMEOUT")) {
-                errorFunc(new __GeolocationPositionError(3, error));
+                try {
+                    await errorFunc(new __GeolocationPositionError(3, error));
+                } catch(err) {
+                    console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                }
             } else {
-                errorFunc(error);
+                try {
+                    await errorFunc(error);
+                } catch(err) {
+                    console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                }
             }
         }
     };
 
-    mod.___emitResultErrorForWatchers = function (error) {
+    mod.___emitResultErrorForWatchers = async function (error) {
         var ids = Object.keys(mod.positionWatchers);
         for (var id of ids) {
             var req = mod.positionWatchers[id];
@@ -173,29 +220,45 @@
             }
             if (error && error.includes("PERMISSION_DENIED")) {
                 if (req.lastCode != 1) {
-                    errorFunc(new __GeolocationPositionError(1, error));
+                    try {
+                        await errorFunc(new __GeolocationPositionError(1, error));
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 }
                 req.lastCode = 1;
             } else if (error && error.includes("POSITION_UNAVAILABLE")) {
                 if (req.lastCode != 2) {
-                    errorFunc(new __GeolocationPositionError(2, error));
+                    try {
+                        await errorFunc(new __GeolocationPositionError(2, error));
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 }
                 req.lastCode = 2;
             } else if (error && error.includes("TIMEOUT")) {
                 if (req.lastCode != 3) {
-                    errorFunc(new __GeolocationPositionError(3, error));
+                    try {
+                        await errorFunc(new __GeolocationPositionError(3, error));
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 }
                 req.lastCode = 3;
             } else {
                 if (req.lastCode != -1) {
-                    errorFunc(error);
+                    try {
+                        await errorFunc(error);
+                    } catch(err) {
+                        console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+                    }
                 }
                 req.lastCode = -1;
             }
         }
     };
 
-    mod.___emitResultPositionForGetters = function (position) {
+    mod.___emitResultPositionForGetters = async function (position) {
         while (mod.positionGetters.length > 0) {
             var g = (mod.positionGetters.splice(0, 1))[0];
             mod.___stopLocationServiceIfNeeded();
@@ -203,11 +266,15 @@
                 clearTimeout(g.timerId);
                 g.timerId = undefined;
             }
-            g.success(position);
+            try {
+                await g.success(position);
+            } catch(err) {
+                console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+            }
         }
     };
 
-    mod.___emitResultPositionForWatchers = function (position) {
+    mod.___emitResultPositionForWatchers = async function (position) {
         var ids = Object.keys(mod.positionWatchers);
         for (var id of ids) {
             var req = mod.positionWatchers[id];
@@ -216,7 +283,11 @@
                 clearTimeout(req.timerId);
                 req.timerId = setTimeout(req.timeoutFun, req.options.timeout);
             }
-            req.success(position);
+            try {
+                await req.success(position);
+            } catch(err) {
+                console.log(">>>>> User provided function throws uncaught exception: ", err.message)
+            }
             req.lastCode = null;
         }
     };

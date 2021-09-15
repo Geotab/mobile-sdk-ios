@@ -1,9 +1,10 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
 
 import WebKit
 
 class GetViolationsFunction: ModuleFunction {
     private let module: UserModule
+    var userName = ""
     var callbacks: [String: (Result<String, Error>) -> Void] = [:]
     init(module: UserModule) {
         self.module = module
@@ -43,7 +44,7 @@ class GetViolationsFunction: ModuleFunction {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetViolationsFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId])
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetViolationsFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
         module.webDriveDelegate.evaluate(script: script) { result in
             switch result {
             case .success(_): return

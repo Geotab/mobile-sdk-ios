@@ -1,4 +1,4 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
 
 import WebKit
 import SafariServices
@@ -14,6 +14,8 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
     private var completedViewDidLoaded = false
     
     private var loginCredentials: CredentialResult?
+    
+    private var customUrl: URL?
     
     /**
      Indicates whether phone is in charging state.
@@ -70,7 +72,7 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
     */
     public var webAppLoadFailed: (() -> Void)?
     
-    private lazy var webView: WKWebView = {
+    internal lazy var webView: WKWebView = {
         webviewConfig.processPool = WKProcessPool()
         
         webviewConfig.mediaTypesRequiringUserActionForPlayback = []
@@ -78,7 +80,6 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         webviewConfig.allowsInlineMediaPlayback = true
         webviewConfig.suppressesIncrementalRendering = false
         webviewConfig.allowsAirPlayForMediaPlayback = true
-
         webviewConfig.userContentController = self.contentController
         let script = WKUserScript(source: self.moduleScripts, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         self.contentController.addUserScript(script)
@@ -153,6 +154,10 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
             url = URL(string: urlString)!
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
+        
+        } else if let url = customUrl {
+            webView.load(URLRequest(url: url))
+            customUrl = nil
         } else {
             url = URL(string: "https://\(DriveSdkConfig.serverAddress)/drive/default.html")!
             webViewNavigationFailedView.reloadURL = url
@@ -195,13 +200,27 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
             case .success(let result):
                 DispatchQueue.main.async {
                     self.webView.evaluateJavaScript("""
-                        \(callback)(null, \(result));
+                        try {
+                            var t = \(callback)(null, \(result));
+                            if (t instanceof Promise) {
+                                t.catch(err => { console.log(">>>>> Unexpected exception: ", err); });
+                            }
+                        } catch(err) {
+                            console.log(">>>>> Unexpected exception: ", err);
+                        }
                     """)
                 }
             case .failure(let error):
                 DispatchQueue.main.async {
                     self.webView.evaluateJavaScript("""
-                        \(callback)(new Error("\(error.localizedDescription)"));
+                        try {
+                            var t = \(callback)(new Error("\(error.localizedDescription)"));
+                            if (t instanceof Promise) {
+                                t.catch(err => { console.log(">>>>> Unexpected exception: ", err); });
+                            }
+                        } catch(err) {
+                            console.log(">>>>> Unexpected exception: ", err);
+                        }
                     """)
                 }
             }
@@ -271,29 +290,16 @@ extension DriveViewController: WKNavigationDelegate {
 
 extension DriveViewController: WebDriveDelegate {
 
-    /**
-     Push a `window` `CustomEvent` to Web Drive.
-     
-     - Parameters:
-        - ModuleEvent: Mimic of HTML5 `CustomEvent. `params` corresponds to JSON stringified javascript object having the optional fied 'details'.
-            ` https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
-     
-     ### Example
-     ```swift
-     driveVC.push(moduleEvent: ModuleEvent(event: "testEvent", params: "{detail: 321}"))
-     ```
-     */
-    func push(moduleEvent: ModuleEvent) {
+    /// :nodoc:
+    internal func push(moduleEvent: ModuleEvent) {
         let script = """
             window.dispatchEvent(new CustomEvent("\(moduleEvent.event)", \(moduleEvent.params)));
         """
         self.webView.evaluateJavaScript(script)
     }
     
-    /**
-     Evaluate a custom javascript code in Web Drive.
-     */
-    func evaluate(script: String, completed: @escaping (Result<Any?, Error>) -> Void) {
+    /// :nodoc:
+    internal func evaluate(script: String, completed: @escaping (Result<Any?, Error>) -> Void) {
         self.webView.evaluateJavaScript(script) { result, error in
             if error != nil {
                 completed(Result.failure(error!))
@@ -302,7 +308,6 @@ extension DriveViewController: WebDriveDelegate {
             }
         }
     }
-    
 }
 
 extension DriveViewController {
@@ -326,11 +331,12 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a HosRuleset
      */
-    public func getHosRuleSet(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getHosRuleSet(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getHosRuleSet") as? GetHosRuleSetFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
+        fun.userName = userName
         fun.call(callback)
     }
     
@@ -340,11 +346,12 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a DutyStatusAvailability
      */
-    public func getUserAvailability(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getUserAvailability(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getAvailability") as? GetAvailabilityFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
+        fun.userName = userName
         fun.call(callback)
     }
     
@@ -354,11 +361,12 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a DutyStatusViolation
      */
-    public func getUserViolations(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getUserViolations(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
         guard let fun = findModuleFunction(module: "user", function: "getViolations") as? GetViolationsFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
         }
+        fun.userName = userName
         fun.call(callback)
     }
     
@@ -421,6 +429,28 @@ extension DriveViewController {
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url:url))
         }
+    }
+    
+    /**
+     Set navigation path. "path" will be concatenated as follows: "https://<my.geotab.com>/drive/default.html?#${path}".
+     Once set, DriveViewController will navigate to the given UI path.
+      
+      This function can be used to implement iOS custom URL. For example by accepting "myscheme://dvir/main" as a launch URL, An app could navgate the app the requested path "dvir/main" on launch.
+     
+     - Parameters:
+        - path: Drive's UI path to navigate to.
+     */
+    public func setCustomURLPath(path: String){
+        
+        let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
+        if let url = URL(string: urlString) {
+            customUrl = url
+            if completedViewDidLoaded {
+                webView.load(URLRequest(url: customUrl!))
+                customUrl = nil
+            }
+        }
+        
     }
     
     /**

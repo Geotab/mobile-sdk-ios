@@ -1,4 +1,4 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
 
 import WebKit
 import SafariServices
@@ -53,8 +53,8 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
      A callback listener when Drive failed to load from the server in case of network issue.
     */
     public var webAppLoadFailed: (() -> Void)?
-    
-    private lazy var webView: WKWebView = {
+
+    internal lazy var webView: WKWebView = {
         webviewConfig.processPool = WKProcessPool()
         
         webviewConfig.mediaTypesRequiringUserActionForPlayback = []
@@ -86,7 +86,8 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
     private lazy var modulesInternal: Set<Module> = [
         AppModule(webDriveDelegate: self),
         BrowserModule(viewPresenter: self),
-        DeviceModule(webDriveDelegate: self)
+        DeviceModule(webDriveDelegate: self),
+        PrintModule(webDriveDelegate: self, viewPresenter: self)
     ]
     
     /**
@@ -154,13 +155,27 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
             case .success(let result):
                 DispatchQueue.main.async {
                     self.webView.evaluateJavaScript("""
-                        \(callback)(null, \(result));
+                        try {
+                            var t = \(callback)(null, \(result));
+                            if (t instanceof Promise) {
+                                t.catch(err => { console.log(">>>>> Unexpected exception: ", err); });
+                            }
+                        } catch(err) {
+                            console.log(">>>>> Unexpected exception: ", err);
+                        }
                     """)
                 }
             case .failure(let error):
                 DispatchQueue.main.async {
                     self.webView.evaluateJavaScript("""
-                        \(callback)(new Error("\(error.localizedDescription)"));
+                        try {
+                            var t = \(callback)(new Error("\(error.localizedDescription)"));
+                            if (t instanceof Promise) {
+                                t.catch(err => { console.log(">>>>> Unexpected exception: ", err); });
+                            }
+                        } catch(err) {
+                            console.log(">>>>> Unexpected exception: ", err);
+                        }
                     """)
                 }
             }
@@ -190,6 +205,9 @@ extension MyGeotabViewController: ModuleContainerDelegate {
 extension MyGeotabViewController: WKNavigationDelegate {
     /// :nodoc:
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        if let err = error as? NSError, err.code == NSURLErrorCancelled {
+            return
+        }
         webViewNavigationFailedView.isHidden = false
         webAppLoadFailed?()
     }
@@ -215,29 +233,16 @@ extension MyGeotabViewController: WKUIDelegate {
 
 extension MyGeotabViewController: WebDriveDelegate {
 
-    /**
-     Push a `window` `CustomEvent` to Web Drive.
-     
-     - Parameters:
-        - ModuleEvent: Mimic of HTML5 `CustomEvent. `params` corresponds to JSON stringified javascript object having the optional fied 'details'.
-            ` https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
-     
-     ### Example
-     ```swift
-     driveVC.push(moduleEvent: ModuleEvent(event: "testEvent", params: "{detail: 321}"))
-     ```
-     */
-    func push(moduleEvent: ModuleEvent) {
+    /// :nodoc:
+    internal func push(moduleEvent: ModuleEvent) {
         let script = """
             window.dispatchEvent(new CustomEvent("\(moduleEvent.event)", \(moduleEvent.params)));
         """
         self.webView.evaluateJavaScript(script)
     }
     
-    /**
-     Evaluate a custom javascript code in Web Drive.
-     */
-    func evaluate(script: String, completed: @escaping (Result<Any?, Error>) -> Void) {
+    /// :nodoc:
+    internal func evaluate(script: String, completed: @escaping (Result<Any?, Error>) -> Void) {
         self.webView.evaluateJavaScript(script) { result, error in
             if error != nil {
                 completed(Result.failure(error!))
@@ -246,7 +251,6 @@ extension MyGeotabViewController: WebDriveDelegate {
             }
         }
     }
-    
 }
 
 extension MyGeotabViewController {

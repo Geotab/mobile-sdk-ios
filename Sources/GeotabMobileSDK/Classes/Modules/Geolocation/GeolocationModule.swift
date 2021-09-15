@@ -1,4 +1,4 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
+
 
 import Foundation
 import CoreLocation

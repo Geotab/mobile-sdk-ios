@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (eventName, callback) {
     if (typeof eventName != "string" || eventName == "") {
@@ -21,8 +20,8 @@ window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (eventName, 
             if (mod.onListeners[eventName] == null && mod.onListeners[eventName].length == 0) {
                 return;
             }
-            mod.onListeners[eventName].forEach((cb) => {
-                try { cb(response.notification, response.event); } catch (err) { }
+            mod.onListeners[eventName].forEach(async (cb) => {
+                try { await cb(response.notification, response.event); } catch (err) { }
             });
         };
     }

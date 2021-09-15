@@ -1,10 +1,3 @@
-/* 
-  Localizable.strings
-  Pods
-
-  Created by Anubhav Saini on 2020-12-03.
-  
-*/
 "No Network Connection" = "Keine Netzwerkverbindung";
 "Please try again to continue." = "Versuchen Sie es erneut, um fortzufahren.";
 "REFRESH"="AKTUALISIEREN";

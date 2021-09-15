@@ -1,4 +1,3 @@
-// Copyright © 2021 Geotab Inc. All rights reserved.
 
 window.{{geotabModules}}.{{moduleName}}.{{functionName}} = function (eventName, callback) {
     if (typeof eventName != "string" || eventName == "") {
