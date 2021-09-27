@@ -1,18 +1,8 @@
-# Getting started
+# Mobile SDK iOS
 
-## License
+## How to start 
 
-GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.
-
-## DriveViewController
-
-### What is DriveViewController
-
-DriveViewController is the starting point of integrating Geotab Drive SDK. It's the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app's data.
-
-### How to start
-
-#### Installation
+### Installation
 
 Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app
 
@@ -36,7 +26,11 @@ The following keys must be added to your app's Info.plist:
 - "Privacy - Bluetooth Always Usage Description"
 - "Privacy - Motion Usage Description"
 
-#### Initialization
+### What is DriveViewController
+
+DriveViewController is the starting point of integrating Geotab Drive SDK. It's the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app's data.
+
+### Initialization
 
 Inside your `main` controller, define a property that holds the instance of DriveViewController
 
@@ -71,7 +65,7 @@ Initialize the instance during `viewDidLoad()` of your `main` controller
 driveVC = DriveViewController(modules: [])
 ```
 
-##### Login
+### Login
 
 GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user's credential. 
 
@@ -102,7 +96,7 @@ See `GeotabCredentials.swift`.
 
 
 
-##### Present the DriveViewController
+### Present the DriveViewController
 
 Once user credentials are given, present the driveVC to user. DriveViewController will automatically validate the session and continue through the normal Drive workflow.
 
@@ -110,7 +104,7 @@ Once user credentials are given, present the driveVC to user. DriveViewControlle
 self.present(driveVC, animated: true)
 ```
 
-##### Session expire/Invalid/No-session and co-driver Login
+### Session expire/Invalid/No-session and co-driver Login
 
 To get notified when a user session is expired. Set a listener callback as follows:
 
@@ -136,7 +130,7 @@ There are three defined values and variance of different error messages that cou
 
 After receiving such session expired callback call. Integrator usually dismisses the presented `DriveViewController` and present user with its Login screen.
 
-#### Other important callbacks
+### Other important callbacks
 
 There are couple of other callbacks you that can be useful for managing and watching DriveViewController.
 
@@ -149,7 +143,7 @@ There are couple of other callbacks you that can be useful for managing and watc
 See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html).
 
 
-#### Overwrite Default Background color, font color and icon
+### Overwrite Default Background color, font color and icon
 
 To override default background color in the network error page, create a property in Info.plist with the name "NetworkErrorScreenBckColor" of type String and add a hex value for the color
 To override default font color in the network error page, create a property in Info.plist with the name "NetworkErrorScreenFontColor" of type String and add a hex value for the color
@@ -159,3 +153,7 @@ To override default font color in the network error page, create a property in I
 ## Drive APIs
 
 All drive APIs are accessible directly under an instance of `DriveViewController` or `MyGeotabbViewController`. See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/).
+
+## License
+
+GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.
