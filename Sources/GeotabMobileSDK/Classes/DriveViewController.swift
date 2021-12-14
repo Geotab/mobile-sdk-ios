@@ -11,7 +11,7 @@ import Mustache
  */
 open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPresenter {
         
-    private var completedViewDidLoaded = false
+    private var completedViewDidLoad = false
     
     private var loginCredentials: CredentialResult?
     
@@ -146,25 +146,21 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-        var url: URL
         view.addSubview(webViewNavigationFailedView)
         
         if let credentialResult = loginCredentials {
             let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#ui/login,(server:'\(credentialResult.path)',credentials:(database:'\(credentialResult.credentials.database)',sessionId:'\(credentialResult.credentials.sessionId)',userName:'\(credentialResult.credentials.userName)'))"
-            url = URL(string: urlString)!
+            let url = URL(string: urlString)!
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
-        
         } else if let url = customUrl {
             webView.load(URLRequest(url: url))
             customUrl = nil
-        } else {
-            url = URL(string: "https://\(DriveSdkConfig.serverAddress)/drive/default.html")!
+        } else if let url = URL(string: "https://\(DriveSdkConfig.serverAddress)/drive/default.html") {
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
-            
         }
-        completedViewDidLoaded = true
+        completedViewDidLoad = true
     }
     
     /// :nodoc:
@@ -425,7 +421,7 @@ extension DriveViewController {
         if isCoDriver {
             urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#ui/login,(addCoDriver:!t,server:'\(credentialResult.path)',credentials:(database:'\(credentialResult.credentials.database)',sessionId:'\(credentialResult.credentials.sessionId)',userName:'\(credentialResult.credentials.userName)'))"
         }
-        if completedViewDidLoaded, let url = URL(string: urlString) {
+        if completedViewDidLoad, let url = URL(string: urlString) {
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url:url))
         }
@@ -441,16 +437,14 @@ extension DriveViewController {
         - path: Drive's UI path to navigate to.
      */
     public func setCustomURLPath(path: String){
-        
         let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
         if let url = URL(string: urlString) {
             customUrl = url
-            if completedViewDidLoaded {
+            if completedViewDidLoad {
                 webView.load(URLRequest(url: customUrl!))
                 customUrl = nil
             }
         }
-        
     }
     
     /**

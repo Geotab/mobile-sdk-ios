@@ -11,6 +11,10 @@ import Mustache
  */
 public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, ViewPresenter {
     
+    private var completedViewDidLoad = false
+    
+    private var customUrl: URL?
+    
     private lazy var contentController: WKUserContentController = {
         let controller = WKUserContentController()
         return controller
@@ -117,9 +121,15 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
         webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         self.view.addSubview(webViewNavigationFailedView)
-        let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/")!
-        webViewNavigationFailedView.reloadURL = url
-        webView.load(URLRequest(url: url))
+        
+        if let url = customUrl {
+            webView.load(URLRequest(url: url))
+            customUrl = nil
+        } else if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
+            webViewNavigationFailedView.reloadURL = url
+            webView.load(URLRequest(url: url))
+        }
+        completedViewDidLoad = true
     }
     
     /// :nodoc:
@@ -254,6 +264,26 @@ extension MyGeotabViewController: WebDriveDelegate {
 }
 
 extension MyGeotabViewController {
+    /**
+     Set navigation path. "path" will be concatenated as follows: "https://<my.geotab.com>#${path}".
+     Once set, MyGeotabViewController will navigate to the given UI path.
+      
+      This function can be used to implement iOS custom URL. For example by accepting "myscheme://dvir/main" as a launch URL, An app could navgate the app the requested path "dvir/main" on launch.
+     
+     - Parameters:
+        - path: Drive's UI path to navigate to.
+     */
+    public func setCustomURLPath(path: String){
+        let urlString = "https://\(MyGeotabSdkConfig.serverAddress)#\(path)"
+        if let url = URL(string: urlString) {
+            customUrl = url
+            if completedViewDidLoad {
+                webView.load(URLRequest(url: customUrl!))
+                customUrl = nil
+            }
+        }
+    }
+    
     /**
     Set `LastServerAddressUpdated` callback listener. Such event is sent by MyGeotab to notify impelementor that a designated "server address" should be used for future launches. Implementor should save the new server address in persistent storage. In the future launches, app should set the MyGeotabSdkConfig.serverAddress with the stored new address before creating an instance of MyGeotabViewController. Note such address is not the same as the counterparty one in DriveViewController.
      

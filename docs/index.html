@@ -99,16 +99,10 @@
         <section>
           <section class="section">
             
-            <h1 id='getting-started' class='heading'>Getting started</h1>
-<h2 id='license' class='heading'>License</h2>
-
-<p>GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.</p>
-<h2 id='driveviewcontroller' class='heading'>DriveViewController</h2>
-<h3 id='what-is-driveviewcontroller' class='heading'>What is DriveViewController</h3>
-
-<p>DriveViewController is the starting point of integrating Geotab Drive SDK. It&rsquo;s the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app&rsquo;s data.</p>
-<h3 id='how-to-start' class='heading'>How to start</h3>
-<h4 id='installation' class='heading'>Installation</h4>
+            <p><a href="https://github.com/Geotab/mobile-sdk-ios/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Geotab/mobile-sdk-ios" alt="GitHub license"></a> <a href="https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html"><img src="https://img.shields.io/badge/docs-passing-brightgreen" alt="GitHub docs"></a> <a href="https://swift.org/"><img src="https://img.shields.io/badge/swift-4%20%7C%204.2%20%7C%205-brightgreen" alt="GitHub swift"></a> <a href="https://github.com/Geotab/mobile-sdk-ios/tags"><img src="https://img.shields.io/github/v/tag/Geotab/mobile-sdk-ios?label=release" alt="GitHub tag (latest by date)"></a></p>
+<h1 id='mobile-sdk-ios' class='heading'>Mobile SDK iOS</h1>
+<h2 id='how-to-start' class='heading'>How to start</h2>
+<h3 id='installation' class='heading'>Installation</h3>
 
 <p>Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: <a href="https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app">https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app</a></p>
 
@@ -130,7 +124,10 @@
 <li>&ldquo;Privacy - Bluetooth Always Usage Description&rdquo;</li>
 <li>&ldquo;Privacy - Motion Usage Description&rdquo;</li>
 </ul>
-<h4 id='initialization' class='heading'>Initialization</h4>
+<h3 id='what-is-driveviewcontroller' class='heading'>What is DriveViewController</h3>
+
+<p>DriveViewController is the starting point of integrating Geotab Drive SDK. It&rsquo;s the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app&rsquo;s data.</p>
+<h3 id='initialization' class='heading'>Initialization</h3>
 
 <p>Inside your <code>main</code> controller, define a property that holds the instance of DriveViewController</p>
 <pre class="highlight swift"><code><span class="kd">private</span> <span class="k">var</span> <span class="nv">driveVC</span><span class="p">:</span> <span class="kt">DriveViewController</span><span class="o">!</span>
@@ -155,7 +152,7 @@
 <p>Initialize the instance during <code>viewDidLoad()</code> of your <code>main</code> controller</p>
 <pre class="highlight swift"><code><span class="n">driveVC</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="p">[])</span>
 </code></pre>
-<h5 id='login' class='heading'>Login</h5>
+<h3 id='login' class='heading'>Login</h3>
 
 <p>GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user&rsquo;s credential. </p>
 
@@ -179,12 +176,12 @@
 </code></pre>
 
 <p>See <code>GeotabCredentials.swift</code>.</p>
-<h5 id='present-the-driveviewcontroller' class='heading'>Present the DriveViewController</h5>
+<h3 id='present-the-driveviewcontroller' class='heading'>Present the DriveViewController</h3>
 
 <p>Once user credentials are given, present the driveVC to user. DriveViewController will automatically validate the session and continue through the normal Drive workflow.</p>
 <pre class="highlight swift"><code><span class="k">self</span><span class="o">.</span><span class="nf">present</span><span class="p">(</span><span class="n">driveVC</span><span class="p">,</span> <span class="nv">animated</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span>
 </code></pre>
-<h5 id='session-expire-invalid-no-session-and-co-driver-login' class='heading'>Session expire/Invalid/No-session and co-driver Login</h5>
+<h3 id='session-expire-invalid-no-session-and-co-driver-login' class='heading'>Session expire/Invalid/No-session and co-driver Login</h3>
 
 <p>To get notified when a user session is expired. Set a listener callback as follows:</p>
 <pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="n">setLoginRequiredCallback</span> <span class="p">{</span> <span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">errorMessage</span><span class="p">)</span> <span class="k">in</span>
@@ -204,7 +201,7 @@
 </ul>
 
 <p>After receiving such session expired callback call. Integrator usually dismisses the presented <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> and present user with its Login screen.</p>
-<h4 id='other-important-callbacks' class='heading'>Other important callbacks</h4>
+<h3 id='other-important-callbacks' class='heading'>Other important callbacks</h3>
 
 <p>There are couple of other callbacks you that can be useful for managing and watching DriveViewController.</p>
 
@@ -213,19 +210,24 @@
 <li><p><code>DriveViewController::setPageNavigationCallback</code>: pageNavigation event indicates any navigation changes by the driver in Geotab Drive.</p></li>
 <li><p><code>DriveViewController::setLastServerAddressUpdatedCallback</code>: Drive tells the integrator which server address is used after a user successful login. This server address must be used for future logins of other users of the same company. Integrators can save the received <code>server</code> address to a persistant storage and when the app restarts next time, update the <code><a href="Classes/DriveSdkConfig.html#/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ">DriveSdkConfig.serverAddress</a></code> with the saved one. This will let SDK know which Geotab server to use.</p></li>
 </ul>
-<h4 id='overwrite-default-background-color-font-color-and-icon' class='heading'>Overwrite Default Background color, font color and icon</h4>
+
+<p>See more details in the <a href="https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html">API document</a>.</p>
+<h3 id='overwrite-default-background-color-font-color-and-icon' class='heading'>Overwrite Default Background color, font color and icon</h3>
 
 <p>To override default background color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenBckColor&rdquo; of type String and add a hex value for the color
 To override default font color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenFontColor&rdquo; of type String and add a hex value for the color
 To override default font color in the network error page, create a property in Info.plist with the name &ldquo;NetworkErrorScreenIcon&rdquo; of type String and add the name of the image. The image must also be added to the project.</p>
 <h2 id='drive-apis' class='heading'>Drive APIs</h2>
 
-<p>All drive APIs are accessible directly under an instance of <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> or <code>MyGeotabbViewController</code>. See more details in the API document.</p>
+<p>All drive APIs are accessible directly under an instance of <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> or <code>MyGeotabbViewController</code>. See more details in the <a href="https://geotab.github.io/mobile-sdk-ios/">API document</a>.</p>
+<h2 id='license' class='heading'>License</h2>
+
+<p>GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.</p>
 
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2021 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2021-09-15)</p>
+          <p>&copy; 2021 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2021-12-09)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
