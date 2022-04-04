@@ -15,6 +15,7 @@ class DeviceEventTransformer {
             throw GeotabDriveErrors.IoxEventParsingError(error: "Error parsing DeviceEvent")
         }
         let timestamp = (byteArray[0...3].reversed().reduce(0) { $0 << 8 + UInt64($1) } + jan1st2002Timestamp) * milliseconds
+        let dateTime = String(timestamp)
         
         let latitude = Float(byteArray[4...7].reversed().reduce(0) { $0 << 8 + Int32($1) }) / locationPrecision
 
@@ -34,14 +35,16 @@ class DeviceEventTransformer {
 
         let tripDuration = byteArray[28...31].reversed().reduce(0) { $0 << 8 + UInt64($1) } * milliseconds
 
-        let vehicleId = "\(byteArray[32...35].reversed().reduce(0) { $0 << 8 + UInt64($1) })"
+        let vehicleIdInt = byteArray[32...35].reversed().reduce(0) { $0 << 8 + UInt64($1) }
+        let vehicleId = String(vehicleIdInt)
 
-        let driverId = "\(byteArray[36...39].reversed().reduce(0) { $0 << 8 + UInt64($1) })"
+        let driverIdInt = byteArray[36...39].reversed().reduce(0) { $0 << 8 + UInt64($1) }
+        let driverId = String(driverIdInt)
 
         let rawData = byteArray
 
         return DeviceEvent(
-            timestamp: timestamp,
+            dateTime: dateTime,
             latitude: latitude,
             longitude: longitude,
             roadSpeed: roadSpeed,

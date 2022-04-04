@@ -294,7 +294,7 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
                 
                 do {
                     let message = try GoDeviceDataMessage(bytes: self.partialGoData.data)
-                    let event = try self.transformer.transform(byteArray: message.data)
+                    let event = try self.transformer.transform(byteArray: Data(message.payload))
                     let deviceJson = String(data: try JSONEncoder().encode(event), encoding: .utf8)!
                     self.executer.run {
                         self.webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.godevicedata", params: "{ detail: \(deviceJson) }"))

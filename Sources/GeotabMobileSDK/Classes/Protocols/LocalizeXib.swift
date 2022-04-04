@@ -23,6 +23,9 @@ func languageBundle() -> Bundle? {
             return bundle
         }
     }
+    if let defaultPath = Bundle.module.path(forResource: "en", ofType: "lproj"), let defaultBundle = Bundle(path: defaultPath) {
+            return defaultBundle
+    }
     return nil
 }
 

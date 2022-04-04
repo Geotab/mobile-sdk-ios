@@ -91,7 +91,8 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
         AppModule(webDriveDelegate: self),
         BrowserModule(viewPresenter: self),
         DeviceModule(webDriveDelegate: self),
-        PrintModule(webDriveDelegate: self, viewPresenter: self)
+        PrintModule(webDriveDelegate: self, viewPresenter: self),
+        SsoModule(viewPresenter: self)
     ]
     
     /**

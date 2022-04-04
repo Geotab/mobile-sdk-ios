@@ -3,7 +3,7 @@
 import Foundation
 
 struct DeviceEvent: Codable {
-    let timestamp: UInt64
+    let dateTime: String
     let latitude: Float
     let longitude: Float
     let roadSpeed: Float
