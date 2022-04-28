@@ -1,5 +1,3 @@
-
-
 struct NativeNotifyAction: Codable {
     let id: String
     let title: String

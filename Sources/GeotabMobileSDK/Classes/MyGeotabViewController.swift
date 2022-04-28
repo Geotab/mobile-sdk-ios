@@ -1,5 +1,3 @@
-
-
 import WebKit
 import SafariServices
 import Mustache
@@ -10,10 +8,6 @@ import Mustache
  - Extends: WebDriveDelegate. Provides modules functions to push 'window' CustomEvent to the Web Drive.
  */
 public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, ViewPresenter {
-    
-    private var completedViewDidLoad = false
-    
-    private var customUrl: URL?
     
     private lazy var contentController: WKUserContentController = {
         let controller = WKUserContentController()
@@ -123,14 +117,10 @@ public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, V
         webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         self.view.addSubview(webViewNavigationFailedView)
         
-        if let url = customUrl {
-            webView.load(URLRequest(url: url))
-            customUrl = nil
-        } else if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
+        if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
         }
-        completedViewDidLoad = true
     }
     
     /// :nodoc:
@@ -216,7 +206,7 @@ extension MyGeotabViewController: ModuleContainerDelegate {
 extension MyGeotabViewController: WKNavigationDelegate {
     /// :nodoc:
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        if let err = error as? NSError, err.code == NSURLErrorCancelled {
+        if (error as NSError).code == NSURLErrorCancelled {
             return
         }
         webViewNavigationFailedView.isHidden = false
@@ -235,7 +225,7 @@ extension MyGeotabViewController: WKUIDelegate {
     public func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         if navigationAction.targetFrame == nil {
             if let url = navigationAction.request.url {
-                UIApplication.shared.openURL(url)
+                UIApplication.shared.open(url)
             }
         }
         return nil
@@ -243,13 +233,43 @@ extension MyGeotabViewController: WKUIDelegate {
 }
 
 extension MyGeotabViewController: WebDriveDelegate {
+    
+    enum PushErrors: Error {
+        case InvalidJSON
+        case InvalidModuleEvent
+    }
 
     /// :nodoc:
-    internal func push(moduleEvent: ModuleEvent) {
+    public func push(moduleEvent: ModuleEvent, completed: @escaping (Result<Any?, Error>) -> Void) {
+        
+        if moduleEvent.event.contains("\"") ||  moduleEvent.event.contains("\'") {
+            completed(Result.failure(PushErrors.InvalidModuleEvent))
+            return
+        }
+        
+        let jsonString = moduleEvent.params
+        let jsonData = jsonString.data(using: String.Encoding.utf8)!
+        
+        do {
+            _ =  try JSONSerialization.jsonObject(with: jsonData)
+        } catch {
+            completed(Result.failure(PushErrors.InvalidJSON))
+            return
+        }
+        
         let script = """
             window.dispatchEvent(new CustomEvent("\(moduleEvent.event)", \(moduleEvent.params)));
         """
-        self.webView.evaluateJavaScript(script)
+        
+        DispatchQueue.main.async {
+            self.webView.evaluateJavaScript(script) { result, error in
+                if error != nil {
+                    completed(Result.failure(error!))
+                } else {
+                    completed(Result.success(result))
+                }
+            }
+        }
     }
     
     /// :nodoc:
@@ -263,50 +283,3 @@ extension MyGeotabViewController: WebDriveDelegate {
         }
     }
 }
-
-extension MyGeotabViewController {
-    /**
-     Set navigation path. "path" will be concatenated as follows: "https://<my.geotab.com>#${path}".
-     Once set, MyGeotabViewController will navigate to the given UI path.
-      
-      This function can be used to implement iOS custom URL. For example by accepting "myscheme://dvir/main" as a launch URL, An app could navgate the app the requested path "dvir/main" on launch.
-     
-     - Parameters:
-        - path: Drive's UI path to navigate to.
-     */
-    public func setCustomURLPath(path: String){
-        let urlString = "https://\(MyGeotabSdkConfig.serverAddress)#\(path)"
-        if let url = URL(string: urlString) {
-            customUrl = url
-            if completedViewDidLoad {
-                webView.load(URLRequest(url: customUrl!))
-                customUrl = nil
-            }
-        }
-    }
-    
-    /**
-    Set `LastServerAddressUpdated` callback listener. Such event is sent by MyGeotab to notify impelementor that a designated "server address" should be used for future launches. Implementor should save the new server address in persistent storage. In the future launches, app should set the MyGeotabSdkConfig.serverAddress with the stored new address before creating an instance of MyGeotabViewController. Note such address is not the same as the counterparty one in DriveViewController.
-     
-     - Parameters:
-        - callback: `LastServerAddressUpdatedCallbackType`
-     */
-    public func setLastServerAddressUpdatedCallback(_ callback: @escaping LastServerAddressUpdatedCallbackType) {
-        guard let appModule = findModule(module: "app") as? AppModule else {
-            return
-        }
-        appModule.lastServerAddressUpdated = callback
-    }
-    
-    /**
-    Clear `LastServerAddressUpdated` callback listener.
-     */
-    public func clearLastServerAddressUpdatedCallback() {
-        guard let appModule = findModule(module: "app") as? AppModule else {
-            return
-        }
-        appModule.lastServerAddressUpdated = nil
-    }
-}
-
-

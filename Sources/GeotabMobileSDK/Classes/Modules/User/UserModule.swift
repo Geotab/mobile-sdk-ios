@@ -1,5 +1,3 @@
-
-
 class UserModule: Module {
     let webDriveDelegate: WebDriveDelegate
     var driverActionNecessaryCallback: DriverActionNecessaryCallbackType?

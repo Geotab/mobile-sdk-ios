@@ -1,5 +1,3 @@
-
-
 import Foundation
 import UIKit
 
@@ -43,7 +41,7 @@ class PickImageFunction: ModuleFunction {
                 throw GeotabDriveErrors.FileException(error: "File already exist \(path)")
             }
             let request = ImageFileControllerRequest(viewPresenter: module.viewPresenter, sourceType: .photoLibrary, resizeTo: resizeTo) { request, result in
-                self.requests.removeAll{ $0 == request}
+                self.requests.removeAll { $0 == request}
                 switch result {
                 case .success(let img):
                     guard let image = img, let png = image.pngData() else {

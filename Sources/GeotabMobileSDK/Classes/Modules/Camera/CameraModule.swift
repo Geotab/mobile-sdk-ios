@@ -1,4 +1,3 @@
-
 import UIKit
 
 class CameraModule: Module {
@@ -12,4 +11,3 @@ class CameraModule: Module {
         functions.append(CaptureImageFunction(module: self, moduleContainer: moduleContainer))
     }
 }
-

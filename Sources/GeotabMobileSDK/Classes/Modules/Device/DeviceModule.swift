@@ -1,6 +1,3 @@
-
-
-
 class DeviceModule: Module {
     static let device = Device()
     let webDriveDelegate: WebDriveDelegate
@@ -32,10 +29,10 @@ class DeviceModule: Module {
 
         window.device = window.\(Module.geotabModules).\(name);
         """
-        return scripts;
+        return scripts
     }
     
     func geotabDriveReady() {
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "sdkready", params: "undefined"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "sdkready", params: "undefined")) { _ in }
     }
 }

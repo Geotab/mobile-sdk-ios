@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 struct WriteFileAsTextArgument: Codable {
@@ -45,8 +43,6 @@ class WriteFileAsTextFunction: ModuleFunction {
                 return
             }
             
-            
         }
     }
 }
-

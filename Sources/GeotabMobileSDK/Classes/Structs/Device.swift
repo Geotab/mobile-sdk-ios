@@ -1,5 +1,3 @@
-
-
 import Foundation
 import UIKit
 
@@ -23,7 +21,7 @@ class Device {
         self.sdkVersion = DriveSdkConfig.sdkVersion
         self.model = UIDevice.current.modelName
         var uuid = UserDefaults.standard.string(forKey: "uuid")
-        if (uuid == nil) {
+        if uuid == nil {
             uuid = UUID().uuidString
             UserDefaults.standard.set(uuid, forKey: "uuid")
         }

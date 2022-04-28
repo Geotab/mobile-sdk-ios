@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 class PageNavigationFunction: ModuleFunction {
@@ -20,4 +18,3 @@ class PageNavigationFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
 }
-

@@ -1,5 +1,3 @@
-
-
 /**
  Geotab User Session Data.
  */
@@ -18,7 +16,7 @@ public struct GeotabCredentials: Codable {
      */
     public let sessionId: String
     
-    public init(userName: String, database: String, sessionId: String){
+    public init(userName: String, database: String, sessionId: String) {
         self.userName = userName
         self.database = database
         self.sessionId = sessionId

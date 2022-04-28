@@ -1,8 +1,6 @@
-
 import Foundation
 import UIKit
 import AVFoundation
-
 
 class AppModule: Module {
     let webDriveDelegate: WebDriveDelegate
@@ -31,7 +29,7 @@ class AppModule: Module {
     init(webDriveDelegate: WebDriveDelegate) {
         self.webDriveDelegate = webDriveDelegate
         super.init(name: "app")
-        NotificationCenter.default.addObserver(self,selector: #selector(self.applicationFinishedLaunching), name: UIApplication.didFinishLaunchingNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.applicationFinishedLaunching), name: UIApplication.didFinishLaunchingNotification, object: nil)
         functions.append(UpdateLastServerFunction(module: self))
     }
     
@@ -46,9 +44,9 @@ class AppModule: Module {
         try session.setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.mixWithOthers)  // AVAudioSessionCategoryPlayback
         try session.setActive(true)
         
-        NotificationCenter.default.addObserver(self,selector: #selector(self.backgroundModeChanged), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self,selector: #selector(self.backgroundModeChanged), name: UIApplication.willEnterForegroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self,selector: #selector(self.audioSessionInterrupt), name: AVAudioSession.interruptionNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.backgroundModeChanged), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.backgroundModeChanged), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.audioSessionInterrupt), name: AVAudioSession.interruptionNotification, object: nil)
         
     }
     
@@ -118,7 +116,7 @@ class AppModule: Module {
         keepAlive = "{}"
         script += "window.\(Module.geotabModules).\(name).keepAlive = \(keepAlive);"
         webDriveDelegate.evaluate(script: script) { _ in }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background", params: "{ detail: \(background) }"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background", params: "{ \"detail\": \(background) }")) { _ in }
     }
     func fireBackgroundFailureEvent(error: String) {
         let background = UIApplication.shared.applicationState == .active ? false : true
@@ -126,7 +124,7 @@ class AppModule: Module {
         keepAlive = "{ error: \"\(error)\" }"
         script += "window.\(Module.geotabModules).\(name).keepAlive = \(keepAlive);"
         webDriveDelegate.evaluate(script: script) { _ in }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background.keepalive", params: "{ detail: { error: \"\(error)\" } }"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background.keepalive", params: "{ \"detail\": { error: \"\(error)\" } }")) { _ in }
     }
     
 }

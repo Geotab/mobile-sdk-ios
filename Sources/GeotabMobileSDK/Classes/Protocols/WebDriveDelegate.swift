@@ -1,11 +1,9 @@
-
-
 import WebKit
 
 /**
  Interface for evaluating javascript script and pushing CustomEvent to WKWebview.
  */
-internal protocol WebDriveDelegate {
+internal protocol WebDriveDelegate: AnyObject {
     /**
      Evaluate a javascript code.
      
@@ -17,7 +15,7 @@ internal protocol WebDriveDelegate {
     /**
      Push a HTML5 `CustomEvent` to WKWebview.
      */
-    func push(moduleEvent: ModuleEvent)
+    func push(moduleEvent: ModuleEvent, completed: @escaping (Result<Any?, Error>) -> Void)
     
     var webView: WKWebView { get }
 }

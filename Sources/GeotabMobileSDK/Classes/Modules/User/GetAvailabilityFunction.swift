@@ -1,7 +1,4 @@
-
-
 import WebKit
-
 
 class GetAvailabilityFunction: ModuleFunction {
     private let module: UserModule
@@ -50,8 +47,8 @@ class GetAvailabilityFunction: ModuleFunction {
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetAvailabilityFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
         module.webDriveDelegate.evaluate(script: script) { result in
             switch result {
-            case .success(_): return
-            case .failure(_):
+            case .success: return
+            case .failure:
                 if self.callbacks[callerId] == nil {
                     return
                 }

@@ -1,5 +1,3 @@
-
-
 class GetFileInfoFunction: ModuleFunction {
     private let module: FileSystemModule
     init(module: FileSystemModule) {
@@ -7,7 +5,7 @@ class GetFileInfoFunction: ModuleFunction {
         super.init(module: module, name: "getFileInfo")
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        module.queue.async{
+        module.queue.async {
             
             guard let filePath = argument as? String else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))

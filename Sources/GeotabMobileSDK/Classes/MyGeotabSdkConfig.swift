@@ -1,5 +1,3 @@
-
-
 /**
  Configuration options for MyGeotabViewController
  */

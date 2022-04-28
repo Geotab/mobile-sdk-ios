@@ -1,103 +1,159 @@
 {
   "warnings": [
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/SSO/SamlLoginViewController.swift",
-      "line": 98,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/DriveViewController.swift",
+      "line": 292,
+      "symbol": "DriveViewController.webView(_:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/DriveViewController.swift",
+      "line": 309,
+      "symbol": "DriveViewController.webView(_:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/DriveViewController.swift",
+      "line": 630,
+      "symbol": "DriveViewController.setIOXDeviceEventCallback(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/Appearance/AppearanceModule.swift",
+      "line": 65,
+      "symbol": "DriveViewController.traitCollectionDidChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/SSO/SamlLoginViewController.swift",
+      "line": 93,
       "symbol": "SamlLoginViewController.webView(_:decidePolicyFor:decisionHandler:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/Speech/SpeechEngine.swift",
-      "line": 3,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/Speech/SpeechEngine.swift",
+      "line": 1,
       "symbol": "SpeechEngine",
       "symbol_kind": "source.lang.swift.decl.protocol",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/Speech/SpeechEngine.swift",
-      "line": 4,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Modules/Speech/SpeechEngine.swift",
+      "line": 2,
       "symbol": "SpeechEngine.speak(text:rate:language:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/Module.swift",
-      "line": 56,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/Module.swift",
+      "line": 54,
       "symbol": "Module.==(_:_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.static",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/ModuleFunction.swift",
-      "line": 10,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/ModuleFunction.swift",
+      "line": 8,
       "symbol": "ModuleFunction.name",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/ModuleFunction.swift",
-      "line": 36,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Protocols/ModuleFunction.swift",
+      "line": 34,
       "symbol": "ModuleFunction.handleJavascriptCall(argument:jsCallback:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
-      "line": 4,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
+      "line": 1,
       "symbol": "CredentialResult",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
-      "line": 5,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
+      "line": 2,
       "symbol": "CredentialResult.credentials",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
-      "line": 6,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/Credential.swift",
+      "line": 3,
       "symbol": "CredentialResult.path",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/GeotabCredentials.swift",
-      "line": 21,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/GeotabCredentials.swift",
+      "line": 19,
       "symbol": "GeotabCredentials.init(userName:database:sessionId:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
-      "line": 3,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/IOXDeviceEvent.swift",
+      "line": 8,
+      "symbol": "EventType",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/IOXDeviceEvent.swift",
+      "line": 9,
+      "symbol": "EventType.ble",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Structs/IOXDeviceEvent.swift",
+      "line": 12,
+      "symbol": "IOXDeviceEvent",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
+      "line": 1,
       "symbol": "DriverActionNecessaryCallbackType",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
-      "line": 5,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
+      "line": 3,
       "symbol": "PageNavigationCallbackType",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
-      "line": 7,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
+      "line": 5,
       "symbol": "LoginRequiredCallbackType",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/cchhom/Code/sdk/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
-      "line": 9,
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
+      "line": 7,
       "symbol": "LastServerAddressUpdatedCallbackType",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/joshuaknauer/Projects/drive-sdk-ios/GeotabMobileSDK/Sources/GeotabMobileSDK/Classes/Types.swift",
+      "line": 9,
+      "symbol": "IOXDeviceEventCallbackType",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     }
   ],
-  "source_directory": "/Users/cchhom/Code/sdk/drive-sdk-ios"
+  "source_directory": "/Users/joshuaknauer/Projects/drive-sdk-ios"
 }

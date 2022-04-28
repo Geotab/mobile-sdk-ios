@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 struct StartLocationServiceArgument: Codable {
@@ -15,7 +13,7 @@ class StartLocationServiceFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         var enableHA = false
-        if argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!)  {
+        if argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!) {
             guard let argument = try? JSONDecoder().decode(StartLocationServiceArgument.self, from: argData) else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
                 return

@@ -1,5 +1,3 @@
-
-
 class StateModule: Module {
     let webDriveDelegate: WebDriveDelegate
     init(webDriveDelegate: WebDriveDelegate) {

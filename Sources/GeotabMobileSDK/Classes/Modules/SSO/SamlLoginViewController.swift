@@ -1,5 +1,3 @@
-
-
 import Foundation
 import WebKit
 
@@ -7,9 +5,9 @@ class SamlLoginViewController: UIViewController {
     
     private var swipeDownDismissal = true
     
-    var onDimissal: ((Result<String, Error>) -> Void)? = nil
+    var onDimissal: ((Result<String, Error>) -> Void)?
     var samlLoginUrl: String!
-    var jsCallback: ((Result<String, Error>) -> Void)? = nil
+    var jsCallback: ((Result<String, Error>) -> Void)?
 
     @IBOutlet var webview: WKWebView!
     
@@ -32,13 +30,11 @@ class SamlLoginViewController: UIViewController {
         
         webview.navigationDelegate = self
         
-        webview.evaluateJavaScript("navigator.userAgent") { ua, err  in
+        webview.evaluateJavaScript("navigator.userAgent") { ua, _  in
             let defaultUA = ua ?? ""
             self.webview.customUserAgent = "\(defaultUA) MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
             self.webview.load(URLRequest(url: url))
         }
-        
-        
         
         navigationItem.title = url.host
         
@@ -93,7 +89,6 @@ class SamlLoginViewController: UIViewController {
     
 }
 
-
 extension SamlLoginViewController: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard navigationAction.request.url?.absoluteString.lowercased().hasPrefix("http") == true else {
@@ -129,7 +124,7 @@ extension SamlLoginViewController: WKNavigationDelegate {
                     }
                     return
                 }
-                do{
+                do {
                     let array = [s]
                     let json: Data = try JSONSerialization.data(withJSONObject: array, options: [])
                     var data: String = String(data: json, encoding: .utf8)!
@@ -137,8 +132,7 @@ extension SamlLoginViewController: WKNavigationDelegate {
                     DispatchQueue.main.async {
                         self.dismissWith(result: data)
                     }
-                }
-                catch{
+                } catch {
                     DispatchQueue.main.async {
                         self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Failed parsing session"))
                     }

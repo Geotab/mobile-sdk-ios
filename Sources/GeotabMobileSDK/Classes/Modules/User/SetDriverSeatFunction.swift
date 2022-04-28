@@ -1,5 +1,3 @@
-
-
 import WebKit
 
 class SetDriverSeatFunction: ModuleFunction {
@@ -47,8 +45,8 @@ class SetDriverSeatFunction: ModuleFunction {
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.SetDriverSeatFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "driverId": driverId])
         module.webDriveDelegate.evaluate(script: script) { result in
             switch result {
-            case .success(_): return
-            case .failure(_):
+            case .success: return
+            case .failure:
                 if self.callbacks[callerId] == nil {
                     return
                 }

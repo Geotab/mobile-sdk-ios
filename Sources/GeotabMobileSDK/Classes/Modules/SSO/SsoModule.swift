@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 class SsoModule: Module {
@@ -12,4 +10,3 @@ class SsoModule: Module {
         functions.append(SamlLoginFunction(module: self, name: "samlLogin"))
     }
 }
-

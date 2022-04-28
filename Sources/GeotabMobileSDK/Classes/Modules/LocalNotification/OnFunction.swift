@@ -1,5 +1,3 @@
-
-
 class OnFunction: ModuleFunction {
     private let module: LocalNotificationModule
     init(module: LocalNotificationModule) {

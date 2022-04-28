@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 class DeviceEventTransformer {
@@ -11,7 +9,7 @@ class DeviceEventTransformer {
     let engineHoursPrecision: Float = 10
 
     func transform(byteArray: Data) throws -> DeviceEvent {
-        if (byteArray.count < 40) {
+        if byteArray.count < 40 {
             throw GeotabDriveErrors.IoxEventParsingError(error: "Error parsing DeviceEvent")
         }
         let timestamp = (byteArray[0...3].reversed().reduce(0) { $0 << 8 + UInt64($1) } + jan1st2002Timestamp) * milliseconds
@@ -63,42 +61,42 @@ class DeviceEventTransformer {
     private func statusFlags(_ byte: UInt8) -> String {
         var statusFlags = ""
 
-        if (byte & 0b00000001 != 0x00) {
+        if byte & 0b00000001 != 0x00 {
             statusFlags += "GPS Latched"
         } else {
             statusFlags += "GPS Latched"
         }
         statusFlags += " | "
         
-        if (byte & 0b00000010 != 0x00) {
+        if byte & 0b00000010 != 0x00 {
             statusFlags += "IGN on"
         } else {
             statusFlags += "IGN off"
         }
         statusFlags += " | "
         
-        if (byte & 0b00000100 != 0x00) {
+        if byte & 0b00000100 != 0x00 {
             statusFlags += "Engine Data"
         } else {
             statusFlags += "No Engine Data"
         }
         statusFlags += " | "
         
-        if (byte & 0b00001000 != 0x00) {
+        if byte & 0b00001000 != 0x00 {
             statusFlags += "Date/Time Valid"
         } else {
             statusFlags += "Date/Time Invalid"
         }
         statusFlags += " | "
         
-        if (byte & 0b00010000 != 0x00) {
+        if byte & 0b00010000 != 0x00 {
             statusFlags += "Speed From Engine"
         } else {
             statusFlags += "Speed From GPS"
         }
         statusFlags += " | "
         
-        if (byte & 0b00100000 != 0x00) {
+        if byte & 0b00100000 != 0x00 {
             statusFlags += "Distance From Engine"
         } else {
             statusFlags += "Distance From GPS"

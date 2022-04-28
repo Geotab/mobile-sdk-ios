@@ -1,16 +1,12 @@
-
-
 import Foundation
 
-
-class DeleteFileFunction: ModuleFunction{
+class DeleteFileFunction: ModuleFunction {
     
     private let module: FileSystemModule
     init(module: FileSystemModule) {
         self.module = module
         super.init(module: module, name: "deleteFile")
     }
-    
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         module.queue.async {

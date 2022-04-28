@@ -1,4 +1,3 @@
-
 import SafariServices
 
 class CloseBrowserWindowFunction: ModuleFunction {
@@ -10,11 +9,11 @@ class CloseBrowserWindowFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        DispatchQueue.main.async{
+        DispatchQueue.main.async {
             
-            if(self.module.inAppBrowserVC != nil){
+            if self.module.inAppBrowserVC != nil {
 
-                if(self.module.inAppBrowserVC!.isBeingDismissed){
+                if self.module.inAppBrowserVC!.isBeingDismissed {
                     self.module.inAppBrowserVC = nil
                     jsCallback(Result.success("undefined"))
                     return

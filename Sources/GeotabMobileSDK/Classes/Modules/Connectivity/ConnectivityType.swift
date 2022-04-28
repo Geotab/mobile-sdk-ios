@@ -1,4 +1,4 @@
-
+// swiftlint:disable redundant_string_enum_value
 enum ConnectivityType: String {
     case UNKNOWN = "UNKNOWN"
     case NONE = "NONE"
@@ -10,4 +10,3 @@ enum ConnectivityType: String {
     case CELL_5G = "CELL_5G"
     case CELL = "CELL"
 }
-

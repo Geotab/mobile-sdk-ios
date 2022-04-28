@@ -1,4 +1,3 @@
-
 import SafariServices
 
 private enum HtmlTarget: String {
@@ -24,7 +23,7 @@ class OpenBrowserWindowFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        DispatchQueue.main.async{
+        DispatchQueue.main.async {
             
             guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!) else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
@@ -47,7 +46,7 @@ class OpenBrowserWindowFunction: ModuleFunction {
             case .blank, .system, .none:
                 UIApplication.shared.open(url)
             case .parent, .top, .`self`, .iab:
-                if(self.module.inAppBrowserVC != nil){
+                if self.module.inAppBrowserVC != nil {
                     self.module.inAppBrowserVC?.dismiss(animated: true)
                     self.module.inAppBrowserVC = nil
                 }

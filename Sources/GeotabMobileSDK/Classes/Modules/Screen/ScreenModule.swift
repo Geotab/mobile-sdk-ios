@@ -1,5 +1,3 @@
-
-
 class ScreenModule: Module {
     init() {
         super.init(name: "screen")

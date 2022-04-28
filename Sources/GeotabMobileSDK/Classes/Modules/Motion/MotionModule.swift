@@ -1,5 +1,3 @@
-
-
 import Foundation
 import CoreMotion
 
@@ -38,7 +36,7 @@ class MotionModule: Module {
             return
         }
         let now = Date()
-        mam.queryActivityStarting(from: now, to: now, to: .main) { activities, error in
+        mam.queryActivityStarting(from: now, to: now, to: .main) { _, error in
             if let code = error?._code {
                 switch code {
                 case Int(CMErrorMotionActivityNotAuthorized.rawValue):
@@ -70,7 +68,7 @@ class MotionModule: Module {
     }
     
     // return type by priority by speed
-    func determineActivityType(_ activity: CMMotionActivity?) -> MotionActivityType{
+    func determineActivityType(_ activity: CMMotionActivity?) -> MotionActivityType {
         guard let activity = activity else {
             return .Unknown
         }
@@ -97,6 +95,6 @@ class MotionModule: Module {
             return
         }
         lastReported = type.rawValue
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "geotab.motion", params: "{ detail: \(type.rawValue) }"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "geotab.motion", params: "{ \"detail\": \(type.rawValue) }")) { _ in } 
     }
 }

@@ -1,5 +1,3 @@
-
-
 import UIKit
 import UserNotifications
 
@@ -10,7 +8,6 @@ class LocalNotificationModule: Module {
     // remember what the client is listening for
     var actionIdentifiers: [String] = []
     var actionHandler: ((Result<String, Error>) -> Void)?
-
     
     init() {
         super.init(name: "localNotification")
@@ -33,12 +30,11 @@ extension LocalNotificationModule: UNUserNotificationCenterDelegate {
         // default actionIdentifier: com.apple.UNNotificationDefaultActionIdentifier
         fireActionEventHandler(center, actionIdentifier: response.actionIdentifier, notification: response.notification, completionHandler: completionHandler)
     }
-    
 
     func fireActionEventHandler(_ center: UNUserNotificationCenter, actionIdentifier: String, notification: UNNotification, completionHandler: @escaping () -> Void) {
         
         let convertedActionIdentifier = actionIdentifier == LocalNotificationModule.DEFAULT_OPEN_ACTION_IDENTIFIER ? "click" : actionIdentifier
-        guard let _ = actionIdentifiers.firstIndex(of: convertedActionIdentifier) else {
+        guard actionIdentifiers.firstIndex(of: convertedActionIdentifier) != nil else {
             completionHandler()
             return
         }

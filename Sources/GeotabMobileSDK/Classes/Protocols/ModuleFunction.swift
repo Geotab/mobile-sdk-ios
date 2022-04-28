@@ -1,5 +1,3 @@
-
-
 import Mustache
 import WebKit
 /**
@@ -33,9 +31,8 @@ open class ModuleFunction {
         }
         return functionScript
     }
-    open func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) -> Void {
+    open func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         fatalError("Must Override")
     }
     
 }
-

@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 struct MoveFileArgument: Codable {
@@ -8,7 +6,7 @@ struct MoveFileArgument: Codable {
     let overwrite: Bool?
 }
 
-class MoveFileFunction: ModuleFunction{
+class MoveFileFunction: ModuleFunction {
     
     private let module: FileSystemModule
     init(module: FileSystemModule) {

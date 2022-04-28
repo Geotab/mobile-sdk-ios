@@ -19,7 +19,6 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(name: "Mustache", url: "https://github.com/groue/GRMustache.swift.git", from: "4.0.1"),
-        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.15.0"),
         .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift.git", from: "5.1.0"),
     ],
     targets: [
@@ -27,14 +26,14 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "GeotabMobileSDK",
-            dependencies: ["Mustache", "Reachability", "SwiftProtobuf"],
+            dependencies: ["Mustache", "Reachability"],
             exclude: [
-                "Protos/GoDeviceData.proto",
                 "native-sdk.d.ts"],
             resources: [
                 .process("Assets")]),
         .testTarget(
             name: "GeotabMobileSDKTests",
-            dependencies: ["GeotabMobileSDK"]),
+            dependencies: ["GeotabMobileSDK"],
+            exclude: ["Info.plist", "rulesets.json"]),
     ]
 )

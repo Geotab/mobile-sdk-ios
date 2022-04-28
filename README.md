@@ -8,6 +8,7 @@
 
 Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app
 
+Using the Mobile SDK with SwiftUI is not recommended. 
 
 
 **Add Background mode capabilities**

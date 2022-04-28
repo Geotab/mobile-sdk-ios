@@ -1,5 +1,3 @@
-
-
 /**
  Interface for searching module and module functions.
  */

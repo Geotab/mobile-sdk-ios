@@ -1,5 +1,3 @@
-
-
 import Foundation
 import CoreBluetooth
 
@@ -14,6 +12,7 @@ class IoxBleModule: Module {
     private var isConnected = false
     private var startListener: ((Result<String, Error>) -> Void)?
     private var partialGoData: PartialGoData = PartialGoData()
+    var ioxDeviceEventCallback: IOXDeviceEventCallbackType?
     
     private lazy var peripheralManager: CBPeripheralManager = CBPeripheralManager(delegate: self, queue: .main)
     private var central: CBCentral?
@@ -24,7 +23,6 @@ class IoxBleModule: Module {
     private lazy var notifyChar = CBMutableCharacteristic(type: notifyCharId, properties: [.notify, .read], value: nil, permissions: [.readable, .writeable])
     private lazy var writeChar = CBMutableCharacteristic(type: writeCharId, properties: [.writeWithoutResponse], value: nil, permissions: [.writeable])
     private lazy var descriptor = CBMutableDescriptor(type: CBUUID(string: "2902"), value: nil)
-    
     
     convenience init(webDriveDelegate: WebDriveDelegate) {
         self.init(webDriveDelegate: webDriveDelegate, executer: MainExecuter(), queue: OperationQueue())
@@ -182,7 +180,7 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
         var expectedLength: Int = -1
         
         func isFull() -> Bool {
-            if (data.count > expectedLength) {
+            if data.count > expectedLength {
                 data = []
                 expectedLength = -1
             }
@@ -196,14 +194,16 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
             break
         case .unsupported:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.error", params: "{ detail: new Error('BLE is unsupported') }"))
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is unsupported') }")) { _ in }
+                ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE is unsupported")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE is unsupported")))
             stop()
         case .unauthorized:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.error", params: "{ detail: new Error('BLE is unauthorized') }"))
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is unauthorized') }")) { _ in }
             }
+            ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE usage is unauthorized")))
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE usage is unauthorized")))
             stop()
         case .resetting:
@@ -212,13 +212,15 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
             startServiceIfNotYet()
         case .poweredOff:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.error", params: "{ detail: new Error('BLE is power off state') }"))
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is power off state') }")) { _ in }
+                ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE is in Power off state")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE is in Power off state")))
             stop()
         @unknown default:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.error", params: "{ detail: new Error('Unknown error') }"))
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('Unknown error') }")) { _ in }
+                ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "Unknown error")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "Unknown error")))
             stop()
@@ -256,6 +258,7 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
+        isConnected = false // setting isConnected off will start handshake sync messages again after a new subscription
         self.central = nil
     }
     
@@ -297,11 +300,14 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
                     let event = try self.transformer.transform(byteArray: Data(message.payload))
                     let deviceJson = String(data: try JSONEncoder().encode(event), encoding: .utf8)!
                     self.executer.run {
-                        self.webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.godevicedata", params: "{ detail: \(deviceJson) }"))
+                        self.webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.godevicedata", params: "{ \"detail\": \(deviceJson) }")) { _ in }
+                        let ioxBLEDeviceEvent = IOXDeviceEvent(type: 0, deviceEvent: event)
+                        self.ioxDeviceEventCallback?(.success(ioxBLEDeviceEvent))
                     }
-                } catch (let error) {
+                } catch {
                     self.executer.run {
-                        self.webDriveDelegate.push(moduleEvent:  ModuleEvent(event: "ioxble.error", params: "{ detail: \"\(error.localizedDescription)\" }"))
+                        self.webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": \"\(error.localizedDescription)\" }")) { _ in }
+                        self.ioxDeviceEventCallback?(.failure(error))
                     }
                 }
             }

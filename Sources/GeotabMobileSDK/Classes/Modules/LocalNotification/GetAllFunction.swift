@@ -1,5 +1,3 @@
-
-
 import UIKit
 
 class GetAllFunction: ModuleFunction {
@@ -23,15 +21,10 @@ class GetAllFunction: ModuleFunction {
     func getAll(_ result: @escaping ([NativeNotify]) -> Void) {
         let center = UNUserNotificationCenter.current()
         var notifications: [NativeNotify] = []
-        center.getDeliveredNotifications{ nts in
-            notifications += nts.map({ nt -> NativeNotify? in
-                self.transformToNativeNotify(content: nt.request.content)
-            }).filter { $0 != nil } as! [NativeNotify]
-            
+        center.getDeliveredNotifications { nts in
+            notifications += nts.compactMap { self.transformToNativeNotify(content: $0.request.content) }
             center.getPendingNotificationRequests { reqs in
-                notifications += reqs.map({ req -> NativeNotify? in
-                    self.transformToNativeNotify(content: req.content)
-                }).filter { $0 != nil } as! [NativeNotify]
+                notifications += reqs.compactMap { self.transformToNativeNotify(content: $0.content) }
                 result(notifications)
             }
         }

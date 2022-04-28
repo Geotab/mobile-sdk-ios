@@ -1,5 +1,3 @@
-
-
 import WebKit
 
 struct DriverActionNecessaryArgument: Codable {

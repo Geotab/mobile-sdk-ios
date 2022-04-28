@@ -1,4 +1,3 @@
-
 import SafariServices
 
 class BrowserModule: Module {
@@ -21,5 +20,3 @@ class BrowserModule: Module {
         return scripts
     }
 }
-
-

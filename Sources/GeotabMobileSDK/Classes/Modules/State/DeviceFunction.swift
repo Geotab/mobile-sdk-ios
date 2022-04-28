@@ -1,7 +1,4 @@
-
-
 import WebKit
-
 
 class DeviceFunction: ModuleFunction {
     private let module: StateModule
@@ -48,8 +45,8 @@ class DeviceFunction: ModuleFunction {
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.DeviceState.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId])
         module.webDriveDelegate.evaluate(script: script) { result in
             switch result {
-            case .success(_): return
-            case .failure(_):
+            case .success: return
+            case .failure:
                 if self.callbacks[callerId] == nil {
                     return
                 }

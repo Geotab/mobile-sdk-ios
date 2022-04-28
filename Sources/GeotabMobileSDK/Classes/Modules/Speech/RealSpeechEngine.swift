@@ -1,5 +1,3 @@
-
-
 import AVFoundation
 
 class RealSpeechEngine: SpeechEngine {

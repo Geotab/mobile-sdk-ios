@@ -1,5 +1,3 @@
-
-
 import UIKit
 import WebKit
 
@@ -13,7 +11,7 @@ class WebViewNavigationFailedView: UIView {
     @IBOutlet weak var tryAgainLabel: UILabel!
     @IBOutlet weak var noNetworkLabel: UILabel!
     
-    func configureXib(){
+    func configureXib() {
         
         let buttonEdgeInset: CGFloat = 10
         self.refreshButton.contentEdgeInsets = UIEdgeInsets(top: buttonEdgeInset, left: buttonEdgeInset, bottom: buttonEdgeInset, right: buttonEdgeInset)
@@ -23,22 +21,22 @@ class WebViewNavigationFailedView: UIView {
         
         do {
             let data = try Data(contentsOf: url)
-            let plist = try PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String:Any]
+            let plist = try PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil) as? [String: Any]
                         
             if let imageName = plist?["NetworkErrorScreenIcon"] as? String {
-                if let image = UIImage(named: imageName, in: Bundle.main, compatibleWith: nil){
+                if let image = UIImage(named: imageName, in: Bundle.main, compatibleWith: nil) {
                     self.imageLogo.image = image
                 }
             }
             if let fontColor =  plist?["NetworkErrorScreenFontColor"] as? String {
-                if let validFontColor = UIColor(hexColor: fontColor){
+                if let validFontColor = UIColor(hexColor: fontColor) {
                     noNetworkLabel.textColor = validFontColor
                     tryAgainLabel.textColor = validFontColor
                     self.refreshButton.setTitleColor(validFontColor, for: .normal)
                 }
             }
             if let bckColor =  plist?["NetworkErrorScreenBckColor"] as? String {
-                if let validBckColor = UIColor(hexColor: bckColor){
+                if let validBckColor = UIColor(hexColor: bckColor) {
                     self.backgroundColor = validBckColor
                     self.refreshButton.backgroundColor = validBckColor
                 }
@@ -52,7 +50,7 @@ class WebViewNavigationFailedView: UIView {
     
     @IBAction func onRefresh(_ sender: Any) {
         
-        if webView?.url != nil{
+        if webView?.url != nil {
             webView?.reload()
             self.isHidden = true
         } else if let url = reloadURL {

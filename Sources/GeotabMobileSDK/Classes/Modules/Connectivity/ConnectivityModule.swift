@@ -1,4 +1,3 @@
-
 import CoreTelephony
 import Reachability
 
@@ -12,7 +11,7 @@ class ConnectivityModule: Module {
         functions.append(StartFunction(module: self))
         functions.append(StopFunction(module: self))
         
-        reachability?.whenReachable = { reachability in
+        reachability?.whenReachable = { _ in
             self.updateState(online: true)
             self.signalConnectivityEvent(online: true)
         }
@@ -26,7 +25,7 @@ class ConnectivityModule: Module {
         guard let json = stateJson(online: online) else {
             return
         }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "connectivity", params: "{ detail: \(json) }"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "connectivity", params: "{ \"detail\": \(json) }")) { _ in }
     }
     
     func stateJson(online: Bool) -> String? {

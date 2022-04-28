@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 class ListFunction: ModuleFunction {
@@ -12,7 +10,7 @@ class ListFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        module.queue.async{
+        module.queue.async {
             
             guard let filePath = argument as? String else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))

@@ -1,5 +1,3 @@
-
-
 /**
  Configuration options for DriveViewController
  */
@@ -11,4 +9,3 @@ public class DriveSdkConfig: MobileSdkConfig {
      */
     public static var serverAddress: String = "my.geotab.com"
 }
-

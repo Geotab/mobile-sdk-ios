@@ -1,5 +1,3 @@
-
-
 import Foundation
 import UIKit
 
@@ -63,12 +61,9 @@ class ScheduleFunction: ModuleFunction {
             content.userInfo = ["nativeNotify": try! JSONEncoder().encode(notification)]
             content.badge = 0
             
-            
             let request = UNNotificationRequest(identifier: String(notification.id), content: content, trigger: nil)
 
-            UNUserNotificationCenter.current().add(request) {
-                error in
-                
+            UNUserNotificationCenter.current().add(request) { error in
                 if error != nil {
                     jsCallback(false)
                 } else {

@@ -1,8 +1,5 @@
-
-
 import Foundation
 import CoreLocation
-
 
 class GeolocationModule: Module {
     
@@ -15,12 +12,10 @@ class GeolocationModule: Module {
     var lastLocationResult = GeolocationResult(position: nil, error: nil)
     var started = false
     
-    
     private var requestedHighAccuracy = false
     
     private let defaultDistanceFilter: CLLocationDistance
     private let defaultAccuracy: CLLocationAccuracy
-    
     
     init(webDriveDelegate: WebDriveDelegate) {
         self.webDriveDelegate = webDriveDelegate
@@ -38,7 +33,6 @@ class GeolocationModule: Module {
     var isLocationServicesEnabled: Bool {
         return CLLocationManager.locationServicesEnabled()
     }
-    
     
     override func scripts() -> String {
         var scripts = super.scripts()
@@ -82,7 +76,7 @@ class GeolocationModule: Module {
         
         let script = "window.\(Module.geotabModules).\(name).result = \(json);"
         webDriveDelegate.evaluate(script: script) { _ in }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ detail: \(json) }"))
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
     }
     
     func startService(enableHighAccuracy: Bool) throws {
@@ -105,7 +99,6 @@ class GeolocationModule: Module {
             locationManager.distanceFilter = 0.01
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
         }
-        
         
         guard !started else {
             if isNotDetermined() {
@@ -140,25 +133,25 @@ class GeolocationModule: Module {
     
     func isNotDetermined() -> Bool {
         if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .notDetermined;
+            return locationManager.authorizationStatus == .notDetermined
         } else {
-            return CLLocationManager.authorizationStatus() == .notDetermined;
+            return CLLocationManager.authorizationStatus() == .notDetermined
         }
     }
     
     func isDeniedOrRestricted() -> Bool {
         if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted;
+            return locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted
         } else {
-            return CLLocationManager.authorizationStatus() == .denied || CLLocationManager.authorizationStatus() == .restricted;
+            return CLLocationManager.authorizationStatus() == .denied || CLLocationManager.authorizationStatus() == .restricted
         }
     }
     
     func isAuthorizedWhenInUse() -> Bool {
         if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .authorizedWhenInUse;
+            return locationManager.authorizationStatus == .authorizedWhenInUse
         } else {
-            return CLLocationManager.authorizationStatus() == .authorizedWhenInUse;
+            return CLLocationManager.authorizationStatus() == .authorizedWhenInUse
         }
     }
     
@@ -184,7 +177,6 @@ class GeolocationModule: Module {
         // make sure to stop when DriveViewController is destroyed.
         stopService()
     }
-    
     
 }
 

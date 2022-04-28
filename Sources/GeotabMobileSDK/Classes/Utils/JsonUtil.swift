@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 func toJson<T: Encodable>(_ val: T) -> String? {

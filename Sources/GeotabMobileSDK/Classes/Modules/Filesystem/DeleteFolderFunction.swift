@@ -1,13 +1,10 @@
-
-
-class DeleteFolderFunction: ModuleFunction{
+class DeleteFolderFunction: ModuleFunction {
     
     private let module: FileSystemModule
     init(module: FileSystemModule) {
         self.module = module
         super.init(module: module, name: "deleteFolder")
     }
-    
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         module.queue.async {
@@ -35,4 +32,3 @@ class DeleteFolderFunction: ModuleFunction{
     }
     
 }
-

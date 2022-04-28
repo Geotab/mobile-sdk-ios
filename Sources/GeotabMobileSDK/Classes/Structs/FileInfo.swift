@@ -1,5 +1,3 @@
-
-
 struct FileInfo: Codable {
     let name: String
     let size: UInt32?

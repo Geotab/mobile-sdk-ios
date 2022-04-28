@@ -1,5 +1,3 @@
-
-
 import Foundation
 
 func fileExist(fsPrefix: String, drvfsDir: URL, path: String) throws -> Bool {
@@ -44,7 +42,6 @@ func writeFile(fsPrefix: String, drvfsDir: URL, path: String, data: Data, offset
             throw GeotabDriveErrors.FileException(error: "Failed creating directory \(relativeFolderPath)")
         }
     }
-    
     
     let url = URL(fileURLWithPath: String(relativeFilePath), relativeTo: drvfsDir)
     
@@ -107,7 +104,7 @@ func readFile(fsPrefix: String, drvfsDir: URL, path: String, offset: UInt64, siz
     return data
 }
 
-func readFileAsText(fsPrefix: String, drvfsDir: URL, path: String) throws -> String{
+func readFileAsText(fsPrefix: String, drvfsDir: URL, path: String) throws -> String {
     guard path.hasPrefix(FileSystemModule.fsPrefix) && !path.hasSuffix("/") else {
         throw GeotabDriveErrors.FileException(error: "Invalid file path \(path)")
     }
@@ -128,18 +125,17 @@ func readFileAsText(fsPrefix: String, drvfsDir: URL, path: String) throws -> Str
     let content = try String(contentsOfFile: url.path, encoding: .utf8)
     let array = [content]
     
-    do{
+    do {
         let json: Data = try JSONSerialization.data(withJSONObject: array, options: [])
         var data: String = String(data: json, encoding: .utf8)!
         data = String(data.dropFirst().dropLast())
         return data
-    }
-    catch{
+    } catch {
         throw GeotabDriveErrors.FileException(error: "Failed JSON to string conversion")
     }
 }
 
-func deleteFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> Void{
+func deleteFile(fsPrefix: String, drvfsDir: URL, path: String) throws {
     
     var resultStorage: ObjCBool = false
     
@@ -161,14 +157,13 @@ func deleteFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> Void{
     
     let isDir = resultStorage.boolValue
     
-    if(isDir){
+    if isDir {
         throw GeotabDriveErrors.FileException(error: "Given path is a directory")
     }
     
     do {
         try fm.removeItem(at: url)
-    }
-    catch{
+    } catch {
         throw GeotabDriveErrors.FileException(error: "Failed deleting file")
     }
 
@@ -184,7 +179,6 @@ func getFileInfo(fsPrefix: String, drvfsDir: URL, path: String) throws -> FileIn
     }
     
     let relativeFolderPath = path[ path.index(path.startIndex, offsetBy: FileSystemModule.fsPrefix.count)..<path.endIndex].trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-    
     
     let fm = FileManager.default
     let url = URL(fileURLWithPath: String(relativeFolderPath), relativeTo: drvfsDir)
@@ -206,7 +200,6 @@ func getFileInfo(fsPrefix: String, drvfsDir: URL, path: String) throws -> FileIn
           let size = attr[FileAttributeKey.size] as? UInt32 else {
         throw GeotabDriveErrors.FileException(error: "Unable to get file attributes: \(path)")
     }
-
     
     return FileInfo(name: fileName, size: resultStorage.boolValue ? nil:size, isDir: resultStorage.boolValue, modifiedDate: dateFormatter.string(from: modifiedDate))
 
@@ -244,7 +237,6 @@ func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo
     if !fm.fileExists(atPath: url.path, isDirectory: &resultStorage) || !resultStorage.boolValue {
             throw GeotabDriveErrors.FileException(error: "Invalid directory path \(path)")
     }
-
     
     do {
         let items = try fm.contentsOfDirectory(atPath: url.path)
@@ -271,7 +263,7 @@ func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo
     return result
 }
 
-func deleteFolder(fsPrefix: String, drvfsDir: URL, path: String) throws -> Void{
+func deleteFolder(fsPrefix: String, drvfsDir: URL, path: String) throws {
     
     var resultStorage: ObjCBool = false
     
@@ -297,7 +289,7 @@ func deleteFolder(fsPrefix: String, drvfsDir: URL, path: String) throws -> Void{
     
     let isDir = resultStorage.boolValue
     
-    if(!isDir){
+    if !isDir {
         throw GeotabDriveErrors.FileException(error: "Given path is not a folder: \(path)")
     }
     
@@ -316,13 +308,12 @@ func deleteFolder(fsPrefix: String, drvfsDir: URL, path: String) throws -> Void{
     
     do {
         try fm.removeItem(at: url)
-    }
-    catch{
+    } catch {
         throw GeotabDriveErrors.FileException(error: "Failed deleting folder: \(path)")
     }
 }
 
-func moveFile(fsPrefix: String, drvfsDir: URL, srcPath: String, dstPath: String, overwrite: Bool = false) throws -> Void {
+func moveFile(fsPrefix: String, drvfsDir: URL, srcPath: String, dstPath: String, overwrite: Bool = false) throws {
     var resultStorage: ObjCBool = false
     
     guard srcPath.hasPrefix(FileSystemModule.fsPrefix) && !srcPath.hasSuffix("/") else {
@@ -358,7 +349,7 @@ func moveFile(fsPrefix: String, drvfsDir: URL, srcPath: String, dstPath: String,
     
     let isDir = resultStorage.boolValue
     
-    if(isDir){
+    if isDir {
         throw GeotabDriveErrors.FileException(error: "Given path is a directory")
     }
     
@@ -376,16 +367,13 @@ func moveFile(fsPrefix: String, drvfsDir: URL, srcPath: String, dstPath: String,
         }
     }
     
-    
     do {
-        if (overwrite) {
+        if overwrite {
             try fm.replaceItem(at: destUrl, withItemAt: srcUrl, backupItemName: nil, resultingItemURL: nil)
         } else {
             try fm.moveItem(at: srcUrl, to: destUrl)
         }
-    }
-    catch {
+    } catch {
         throw GeotabDriveErrors.FileException(error: "Failed moving file")
     }
 }
-

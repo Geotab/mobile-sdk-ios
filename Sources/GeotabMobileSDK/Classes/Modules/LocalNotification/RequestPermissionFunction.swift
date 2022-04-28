@@ -1,5 +1,3 @@
-
-
 import UIKit
 
 class RequestPermissionFunction: ModuleFunction {
@@ -10,8 +8,7 @@ class RequestPermissionFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
-            granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             
             if granted != true {
                 jsCallback(Result.success("false"))

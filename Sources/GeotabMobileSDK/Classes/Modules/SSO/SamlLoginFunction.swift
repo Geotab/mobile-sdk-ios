@@ -1,7 +1,4 @@
-
-
 import UIKit
-
 
 struct SamlLoginFunctionArgument: Codable {
     let samlLoginUrl: String
@@ -21,16 +18,16 @@ class SamlLoginFunction: ModuleFunction {
             return
         }
         while samlLoginQueue.count > 1 {
-            let vc = samlLoginQueue.removeFirst();
+            let vc = samlLoginQueue.removeFirst()
             vc.jsCallback?(Result.failure(GeotabDriveErrors.SamlLoginError(error: "Terminated 1")))
         }
-        let vc = samlLoginQueue.removeFirst();
+        let vc = samlLoginQueue.removeFirst()
         presentSamlLoginViewController(vc)
     }
     
     func cancelAllSamlLogin() {
         while samlLoginQueue.count > 0 {
-            let vc = samlLoginQueue.removeFirst();
+            let vc = samlLoginQueue.removeFirst()
             vc.jsCallback?(Result.failure(GeotabDriveErrors.SamlLoginError(error: "Terminated 2")))
         }
     }
@@ -58,7 +55,7 @@ class SamlLoginFunction: ModuleFunction {
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        DispatchQueue.main.async{
+        DispatchQueue.main.async {
             
             guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!) else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
@@ -78,15 +75,15 @@ class SamlLoginFunction: ModuleFunction {
                 self.addToSamlLoginQueue(samlLoginUrl: arg.samlLoginUrl, jsCallback: jsCallback)
                 if let nc = self.module.viewPresenter.presentedViewController as? SamlLoginNavigationController, let vc = nc.topViewController as? SamlLoginViewController {
                     guard presentedViewController.isBeingPresented == false &&
-                        presentedViewController.isBeingDismissed == false else{
+                        presentedViewController.isBeingDismissed == false else {
                         return
                     }
                     vc.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Terminated 4"))
                 } else {
                     guard presentedViewController.isBeingPresented == false &&
-                            presentedViewController.isBeingDismissed == false else{
+                            presentedViewController.isBeingDismissed == false else {
                         if self.isMeDismissingAnonymousVC == false {
-                            self.cancelAllSamlLogin();
+                            self.cancelAllSamlLogin()
                         }
                         return
                     }
@@ -111,7 +108,6 @@ class SamlLoginFunction: ModuleFunction {
         }
     }
 }
-
 
 class SamlLoginNavigationController: UINavigationController {
     

@@ -1,4 +1,3 @@
-
 class StartFunction: ModuleFunction {
     private let module: ConnectivityModule
     

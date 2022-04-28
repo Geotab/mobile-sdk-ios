@@ -12,7 +12,6 @@ class PrintFunction: ModuleFunction {
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
         controller.printFormatter = module.webDriveDelegate.webView.viewPrintFormatter()
-
         
         if let presentedViewController = module.viewPresenter.presentedViewController {
             guard presentedViewController.isBeingPresented == false && presentedViewController.isBeingDismissed == false else {
@@ -22,14 +21,14 @@ class PrintFunction: ModuleFunction {
             }
 
           presentedViewController.dismiss(animated: true, completion: {
-            self.controller.present(animated: true, completionHandler: { (printController, completed, error) in
+            self.controller.present(animated: true, completionHandler: { _, _, _ in
                 
                 jsCallback(Result.success("undefined"))
             })
           })
 
         } else {
-            controller.present(animated: true, completionHandler: { (printController, completed, error) in
+            controller.present(animated: true, completionHandler: { _, _, _ in
                 
                 jsCallback(Result.success("undefined"))
             })

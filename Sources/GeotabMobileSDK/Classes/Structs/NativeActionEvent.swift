@@ -1,5 +1,3 @@
-
-
 struct NativeActionEvent: Codable {
     let event: String
     let foreground: Bool

@@ -1,5 +1,3 @@
-
-
 import UIKit
 
 protocol LocalizeXib {
@@ -7,7 +5,7 @@ protocol LocalizeXib {
 }
 
 func languageBundle() -> Bundle? {
-    var lang = NSLocale.preferredLanguages.first ?? "en";
+    var lang = NSLocale.preferredLanguages.first ?? "en"
     if let path = Bundle.module.path(forResource: lang, ofType: "lproj"), let bundle = Bundle(path: path) {
         return bundle
     }
@@ -15,16 +13,16 @@ func languageBundle() -> Bundle? {
     if let lan = locale.languageCode {
         lang = lan
         if let script = locale.scriptCode {
-            if let path = Bundle.module.path(forResource:  "\(lang)-\(script)", ofType: "lproj"), let bundle = Bundle(path: path) {
+            if let path = Bundle.module.path(forResource: "\(lang)-\(script)", ofType: "lproj"), let bundle = Bundle(path: path) {
                 return bundle
             }
         }
-        if let path = Bundle.module.path(forResource:  lang, ofType: "lproj"), let bundle = Bundle(path: path) {
+        if let path = Bundle.module.path(forResource: lang, ofType: "lproj"), let bundle = Bundle(path: path) {
             return bundle
         }
     }
     if let defaultPath = Bundle.module.path(forResource: "en", ofType: "lproj"), let defaultBundle = Bundle(path: defaultPath) {
-            return defaultBundle
+        return defaultBundle
     }
     return nil
 }

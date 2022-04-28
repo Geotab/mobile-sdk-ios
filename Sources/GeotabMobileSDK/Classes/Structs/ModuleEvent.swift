@@ -1,7 +1,5 @@
-
-
 /// :nodoc:
-struct ModuleEvent {
+public struct ModuleEvent {
     /**
      event name
      */
@@ -12,9 +10,8 @@ struct ModuleEvent {
      - "detail", optional and defaulting to null, of type any, that is an event-dependent value associated with the event.
      */
     let params: String
-    init(event: String, params: String) {
+    public init(event: String, params: String) {
         self.event = event
         self.params = params
     }
 }
-

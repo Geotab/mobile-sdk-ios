@@ -1,5 +1,3 @@
-
-
 import Foundation
 import UIKit
 
@@ -29,7 +27,7 @@ class ImageFileControllerRequest: NSObject, UINavigationControllerDelegate, UIIm
         viewPresenter.present(imagePicker, animated: true, completion: nil)
     }
     
-    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true)
         guard let image = info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.editedImage.rawValue)] as? UIImage else {
             completed(self, Result.failure(GeotabDriveErrors.CaptureImageError(error: "No image data")))

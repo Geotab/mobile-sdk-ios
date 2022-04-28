@@ -1,4 +1,3 @@
-
 import Foundation
 
 class UpdateLastServerFunction: ModuleFunction {
@@ -8,7 +7,6 @@ class UpdateLastServerFunction: ModuleFunction {
         self.module = module
         super.init(module: module, name: "updateLastServer")
     }
-    
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
             

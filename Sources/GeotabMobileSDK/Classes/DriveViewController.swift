@@ -1,5 +1,3 @@
-
-
 import WebKit
 import SafariServices
 import Mustache
@@ -21,12 +19,10 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
      Indicates whether phone is in charging state.
      */
     public var isCharging: Bool {
-        get {
-            guard let batteryModule = findModule(module: "battery") as? BatteryModule else {
-                return false
-            }
-            return batteryModule.isCharging
+        guard let batteryModule = findModule(module: "battery") as? BatteryModule else {
+            return false
         }
+        return batteryModule.isCharging
     }
     
     private lazy var contentController: WKUserContentController = {
@@ -35,7 +31,7 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
     }()
     
     private lazy var languageBundle: Bundle? = {
-            GeotabMobileSDK.languageBundle()
+        GeotabMobileSDK.languageBundle()
     }()
     
     private lazy var moduleScripts: String = {
@@ -123,7 +119,8 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         GeolocationModule(webDriveDelegate: self),
         MotionModule(webDriveDelegate: self),
         IoxBleModule(webDriveDelegate: self),
-        SsoModule(viewPresenter: self)
+        SsoModule(viewPresenter: self),
+        AppearanceModule(webDriveDelegate: self, appearanceSource: self)
     ]
     /**
      Initializer
@@ -275,7 +272,8 @@ extension DriveViewController: WKNavigationDelegate {
     
     /// :nodoc:
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        if let err = error as? NSError, err.code == NSURLErrorCancelled {
+        
+        if (error as NSError).code == NSURLErrorCancelled {
             return
         }
         webViewNavigationFailedView.isHidden = false
@@ -332,15 +330,44 @@ extension DriveViewController: WKUIDelegate {
     
 }
 
-
 extension DriveViewController: WebDriveDelegate {
+    
+    enum PushErrors: Error {
+        case InvalidJSON
+        case InvalidModuleEvent
+    }
 
     /// :nodoc:
-    internal func push(moduleEvent: ModuleEvent) {
+    internal func push(moduleEvent: ModuleEvent, completed: @escaping (Result<Any?, Error>) -> Void) {
+        
+        if moduleEvent.event.contains("\"") ||  moduleEvent.event.contains("\'") {
+            completed(Result.failure(PushErrors.InvalidModuleEvent))
+            return
+        }
+        
+        let jsonString = moduleEvent.params
+        let jsonData = jsonString.data(using: String.Encoding.utf8)!
+        
+        do {
+            _ =  try JSONSerialization.jsonObject(with: jsonData)
+        } catch {
+            completed(Result.failure(PushErrors.InvalidJSON))
+            return
+        }
+        
         let script = """
             window.dispatchEvent(new CustomEvent("\(moduleEvent.event)", \(moduleEvent.params)));
         """
-        self.webView.evaluateJavaScript(script)
+        
+        DispatchQueue.main.async {
+            self.webView.evaluateJavaScript(script) { result, error in
+                if error != nil {
+                    completed(Result.failure(error!))
+                } else {
+                    completed(Result.success(result))
+                }
+            }
+        }
     }
     
     /// :nodoc:
@@ -464,7 +491,7 @@ extension DriveViewController {
         - credentialResult: `CredentialResult`.
         - isCoDriver: Bool. Indicate if its' for a co-driver login.
      */
-    public func setSession(credentialResult: CredentialResult, isCoDriver: Bool = false){
+    public func setSession(credentialResult: CredentialResult, isCoDriver: Bool = false) {
         self.loginCredentials = credentialResult
         var urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#ui/login,(server:'\(credentialResult.path)',credentials:(database:'\(credentialResult.credentials.database)',sessionId:'\(credentialResult.credentials.sessionId)',userName:'\(credentialResult.credentials.userName)'))"
         if isCoDriver {
@@ -472,7 +499,7 @@ extension DriveViewController {
         }
         if completedViewDidLoad, let url = URL(string: urlString) {
             webViewNavigationFailedView.reloadURL = url
-            webView.load(URLRequest(url:url))
+            webView.load(URLRequest(url: url))
         }
     }
     
@@ -485,7 +512,7 @@ extension DriveViewController {
      - Parameters:
         - path: Drive's UI path to navigate to.
      */
-    public func setCustomURLPath(path: String){
+    public func setCustomURLPath(path: String) {
         let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
         if let url = URL(string: urlString) {
             customUrl = url
@@ -598,5 +625,12 @@ extension DriveViewController {
             return
         }
         appModule.lastServerAddressUpdated = nil
+    }
+    
+    public func setIOXDeviceEventCallback(_ callback: @escaping IOXDeviceEventCallbackType) {
+        guard let ioxBleModule = findModule(module: "ioxble") as? IoxBleModule else {
+            return
+        }
+        ioxBleModule.ioxDeviceEventCallback = callback
     }
 }
