@@ -48,7 +48,7 @@ class BatteryModule: Module {
 
     @objc private func batteryStatusDidChange(notification: NSNotification) {
         updateState()
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "batterystatus", params: "{ \"detail\": { isPlugged: \(isCharging), level: \(batteryLevel) } }")) { _ in }
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "batterystatus", params: "{ \"detail\": { \"isPlugged\": \(isCharging), \"level\": \(batteryLevel) } }")) { _ in }
     }
 }
 

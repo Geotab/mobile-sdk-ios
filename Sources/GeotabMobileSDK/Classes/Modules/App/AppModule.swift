@@ -124,7 +124,7 @@ class AppModule: Module {
         keepAlive = "{ error: \"\(error)\" }"
         script += "window.\(Module.geotabModules).\(name).keepAlive = \(keepAlive);"
         webDriveDelegate.evaluate(script: script) { _ in }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background.keepalive", params: "{ \"detail\": { error: \"\(error)\" } }")) { _ in }
+        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.background.keepalive", params: "{ \"detail\": { \"error\": \"\(error)\" } }")) { _ in }
     }
     
 }

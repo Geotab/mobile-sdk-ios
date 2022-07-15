@@ -194,14 +194,14 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
             break
         case .unsupported:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is unsupported') }")) { _ in }
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": \"BLE is unsupported\" }")) { _ in }
                 ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE is unsupported")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE is unsupported")))
             stop()
         case .unauthorized:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is unauthorized') }")) { _ in }
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": \"BLE is unauthorized\" }")) { _ in }
             }
             ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE usage is unauthorized")))
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE usage is unauthorized")))
@@ -212,14 +212,14 @@ extension IoxBleModule: CBPeripheralManagerDelegate {
             startServiceIfNotYet()
         case .poweredOff:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('BLE is power off state') }")) { _ in }
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": \"BLE is power off state\" }")) { _ in }
                 ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "BLE is in Power off state")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "BLE is in Power off state")))
             stop()
         @unknown default:
             if isStarted && startListener == nil {
-                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": new Error('Unknown error') }")) { _ in }
+                webDriveDelegate.push(moduleEvent: ModuleEvent(event: "ioxble.error", params: "{ \"detail\": \"Unknown error\" }")) { _ in }
                 ioxDeviceEventCallback?(.failure(GeotabDriveErrors.IoxBleError(error: "Unknown error")))
             }
             callStartListener(result: Result.failure(GeotabDriveErrors.IoxBleError(error: "Unknown error")))

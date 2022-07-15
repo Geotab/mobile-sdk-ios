@@ -7,13 +7,17 @@ class DeviceEventTransformer {
     let rpmPrecision: Float = 4
     let odometerPrecision: Float = 10
     let engineHoursPrecision: Float = 10
+    let dateFormatter = DateFormatter()
 
     func transform(byteArray: Data) throws -> DeviceEvent {
         if byteArray.count < 40 {
             throw GeotabDriveErrors.IoxEventParsingError(error: "Error parsing DeviceEvent")
         }
-        let timestamp = (byteArray[0...3].reversed().reduce(0) { $0 << 8 + UInt64($1) } + jan1st2002Timestamp) * milliseconds
-        let dateTime = String(timestamp)
+        let timestamp = TimeInterval(byteArray[0...3].reversed().reduce(0) { $0 << 8 + UInt64($1) } + jan1st2002Timestamp)
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        let dateTime = dateFormatter.string(from: Date(timeIntervalSince1970: timestamp))
         
         let latitude = Float(byteArray[4...7].reversed().reduce(0) { $0 << 8 + Int32($1) }) / locationPrecision
 

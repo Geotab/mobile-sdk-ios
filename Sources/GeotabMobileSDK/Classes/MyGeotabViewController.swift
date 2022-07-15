@@ -9,6 +9,10 @@ import Mustache
  */
 public class MyGeotabViewController: UIViewController, WKScriptMessageHandler, ViewPresenter {
     
+    private lazy var languageBundle: Bundle? = {
+        GeotabMobileSDK.languageBundle()
+    }()
+    
     private lazy var contentController: WKUserContentController = {
         let controller = WKUserContentController()
         return controller
@@ -282,4 +286,48 @@ extension MyGeotabViewController: WebDriveDelegate {
             }
         }
     }
+}
+
+// Implementation of window.alert() and window.confirm()
+extension MyGeotabViewController {
+
+    public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        
+        guard let bundle = languageBundle else {
+            completionHandler()
+            return
+        }
+        
+        let closeText = NSLocalizedString("Close", tableName: "Localizable", bundle: bundle, comment: "nil")
+        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: closeText, style: .default, handler: { _ in
+            completionHandler()
+        }))
+
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        
+        guard let bundle = languageBundle else {
+            completionHandler(false)
+            return
+        }
+        
+        let okText = NSLocalizedString("OK", tableName: "Localizable", bundle: bundle, comment: "nil")
+        let cancelText = NSLocalizedString("Cancel", tableName: "Localizable", bundle: bundle, comment: "nil")
+        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: okText, style: .default, handler: { _ in
+            completionHandler(true)
+        }))
+        
+        alertController.addAction(UIAlertAction(title: cancelText, style: .cancel, handler: { _ in
+            completionHandler(false)
+        }))
+
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
 }
