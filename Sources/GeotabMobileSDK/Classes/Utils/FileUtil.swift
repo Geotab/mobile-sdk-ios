@@ -241,20 +241,16 @@ func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo
     do {
         let items = try fm.contentsOfDirectory(atPath: url.path)
         
-        for item in items {
-            
-            if fm.fileExists(atPath: "\(url.path)/\(item)", isDirectory: &resultStorage) {
-                let attr = try fm.attributesOfItem(atPath: "\(url.path)/\(item)")
-                guard let modifiedDate = attr[FileAttributeKey.modificationDate] as? Date else {
-                    continue
-                }
-                guard let fileSize = attr[FileAttributeKey.size] as? UInt32 else {
-                    continue
-                }
-                let fileInfo = FileInfo(name: item, size: resultStorage.boolValue ? nil:fileSize, isDir: resultStorage.boolValue, modifiedDate: dateFormatter.string(from: modifiedDate))
-                result.append(fileInfo)
+        for item in items where fm.fileExists(atPath: "\(url.path)/\(item)", isDirectory: &resultStorage) {
+            let attr = try fm.attributesOfItem(atPath: "\(url.path)/\(item)")
+            guard let modifiedDate = attr[FileAttributeKey.modificationDate] as? Date else {
+                continue
             }
-        
+            guard let fileSize = attr[FileAttributeKey.size] as? UInt32 else {
+                continue
+            }
+            let fileInfo = FileInfo(name: item, size: resultStorage.boolValue ? nil:fileSize, isDir: resultStorage.boolValue, modifiedDate: dateFormatter.string(from: modifiedDate))
+            result.append(fileInfo)
         }
     } catch {
         throw GeotabDriveErrors.FileException(error: "Failed to load contents for directory at path \(path)")

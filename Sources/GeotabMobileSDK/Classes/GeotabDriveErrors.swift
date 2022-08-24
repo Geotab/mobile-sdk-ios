@@ -3,7 +3,7 @@ import Foundation
 /**
  Geotab SDK Error Types
  */
-enum GeotabDriveErrors: Error {
+public enum GeotabDriveErrors: Error {
     /**
      Indicates there's a duplicate Module Function existed.
      */
@@ -86,6 +86,8 @@ enum GeotabDriveErrors: Error {
      Error related to IOX Data Parsing.
      */
     case IoxEventParsingError(error: String)
+    
+    case OperationCallFailed(error: String)
 }
 
 extension GeotabDriveErrors: LocalizedError {
@@ -135,6 +137,8 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[SamlLoginCancelled]"
         case .IoxEventParsingError(let errMsg):
             return "GeotabDriveErrors[IoxEventParsingError]: \(errMsg)"
+        case .OperationCallFailed(let errMsg):
+            return "GeotabDriveErrors[OperationCallFailed]: \(errMsg)"
         }
     }
 }
