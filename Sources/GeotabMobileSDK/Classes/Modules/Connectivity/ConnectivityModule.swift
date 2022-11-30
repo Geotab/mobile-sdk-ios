@@ -58,7 +58,7 @@ class ConnectivityModule: Module {
         case .none:     return .NONE
         case .wifi: return .WIFI
         case .cellular: return getWWANNetworkType()
-        case .unavailable:return .NONE
+        case .unavailable: return .NONE
         }
     }
     
