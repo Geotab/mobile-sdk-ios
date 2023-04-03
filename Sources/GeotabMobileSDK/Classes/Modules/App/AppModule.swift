@@ -4,6 +4,7 @@ import AVFoundation
 
 class AppModule: Module {
     let webDriveDelegate: WebDriveDelegate
+    let appLogEventSource: AppLogEventSource
     var lastServerAddressUpdated: LastServerAddressUpdatedCallbackType?
     var keepAlive = "{}"
     
@@ -28,6 +29,7 @@ class AppModule: Module {
     
     init(webDriveDelegate: WebDriveDelegate) {
         self.webDriveDelegate = webDriveDelegate
+        appLogEventSource = AppLogEventSource(webDriveDelegate: webDriveDelegate)
         super.init(name: "app")
         NotificationCenter.default.addObserver(self, selector: #selector(self.applicationFinishedLaunching), name: UIApplication.didFinishLaunchingNotification, object: nil)
         functions.append(UpdateLastServerFunction(module: self))

@@ -8,7 +8,10 @@ import Mustache
  - Extends: WebDriveDelegate. Provides modules functions to push 'window' CustomEvent to the Web Drive.
  */
 open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPresenter {
-        
+
+    @TaggedLogger("DriveViewController")
+    private var logger
+
     private var completedViewDidLoad = false
     
     private var loginCredentials: CredentialResult?
@@ -267,6 +270,14 @@ extension DriveViewController: WKNavigationDelegate {
             decisionHandler(.cancel)
             return
         }
+        
+        if let frame = navigationAction.targetFrame,
+           let domain = navigationAction.request.url?.domain,
+           frame.isMainFrame,
+           "geotab.com" != domain {
+            $logger.warn("Navigating to out of bounds domain \(domain)")
+        }
+        
         decisionHandler(.allow)
     }
     
@@ -632,5 +643,17 @@ extension DriveViewController {
             return
         }
         ioxBleModule.ioxDeviceEventCallback = callback
+    }
+}
+
+// MARK: - helper extensions
+
+extension URL {
+    var domain: String? {
+        if let components = host?.components(separatedBy: "."),
+           components.count > 2 {
+            return components.suffix(2).joined(separator: ".")
+        }
+        return host
     }
 }

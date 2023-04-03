@@ -237,6 +237,23 @@ declare namespace geotabModules {
          */
         // event: "app.background.keepalive"
 
+        enum LogLevel {
+            Info = 0,
+            Warn,
+            Error
+        }
+
+        /*******
+         * Window event fires with logging information from the mobile SDK
+         * @param detail: object
+         *  Detail contains a JSON object with log value. Format:
+         *  {
+         *      "message": String value of message,
+         *      "level": LogLevel
+         *  }
+         */
+        // event: "app.log"
+
         /*******
          * notify SDK the "last server address".
          * @param server: string, format like "my3.geotab.com", must be ended with "geotab.com" with a subdomain name.
