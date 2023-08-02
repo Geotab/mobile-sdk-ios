@@ -179,7 +179,6 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         guard let msg = message.body as? String else {
             return
         }
-        
         let module = message.name
         let data = Data(msg.utf8)
         do {
