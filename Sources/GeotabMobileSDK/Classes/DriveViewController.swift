@@ -125,6 +125,13 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         SsoModule(viewPresenter: self),
         AppearanceModule(webDriveDelegate: self, appearanceSource: self)
     ]
+    
+    /**
+     Holds the registered script that conforms to `ScriptInjectable`.
+     Use this property to manage the optional script injection into the web view.
+     */
+    private var scriptInjectable: ScriptInjectable?
+    
     /**
      Initializer
      
@@ -173,7 +180,13 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         guard let msg = message.body as? String else {
             return
         }
+        
         let module = message.name
+        
+        if let scriptInjectable = scriptInjectable, scriptInjectable.messageHandlerName == module {
+            scriptInjectable.handle(message: message)
+        }
+        
         let data = Data(msg.utf8)
         do {
             guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
@@ -643,6 +656,27 @@ extension DriveViewController {
             return
         }
         ioxBleModule.ioxDeviceEventCallback = callback
+    }
+}
+
+extension DriveViewController {
+    /**
+     Registers a script that conforms to the `ScriptInjectable` protocol with the view controller's content controller.
+
+     This method takes an object conforming to the `ScriptInjectable` protocol and configures the view controller to inject the script into the web view's content. It also registers the view controller as the message handler for any messages sent by the script, if the `messageHandlerName` property of the `ScriptInjectable` object is set.
+
+     - Parameter scriptInjectable: An object conforming to the `ScriptInjectable` protocol, encapsulating the script to be injected and any associated behavior.
+     */
+    public func registerInjectableScript(_ scriptInjectable: ScriptInjectable) {
+        self.scriptInjectable = scriptInjectable
+        let userScript = WKUserScript(source: scriptInjectable.source,
+                                      injectionTime: scriptInjectable.injectionTime,
+                                      forMainFrameOnly: true)
+        self.contentController.addUserScript(userScript)
+
+        if let injectableScript = scriptInjectable.messageHandlerName {
+            self.contentController.add(self, name: injectableScript)
+        }
     }
 }
 
