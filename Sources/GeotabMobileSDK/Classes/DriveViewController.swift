@@ -314,7 +314,9 @@ extension DriveViewController: WKUIDelegate {
             completionHandler()
         }))
 
-        self.present(alertController, animated: true, completion: nil)
+        if isPresentInViewHierarchy {
+            self.present(alertController, animated: true, completion: nil)
+        }
     }
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
@@ -336,7 +338,9 @@ extension DriveViewController: WKUIDelegate {
             completionHandler(false)
         }))
 
-        self.present(alertController, animated: true, completion: nil)
+        if isPresentInViewHierarchy {
+            self.present(alertController, animated: true, completion: nil)
+        }
     }
     
 }
