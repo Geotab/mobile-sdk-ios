@@ -11,6 +11,5 @@ import WebKit
 public protocol ScriptInjectable {
     var source: String { get }
     var injectionTime: WKUserScriptInjectionTime { get }
-    var messageHandlerName: String? { get }
-    func handle(message: WKScriptMessage)
+    var messageHandlerName: String { get }
 }

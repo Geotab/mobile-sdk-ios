@@ -127,10 +127,9 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
     ]
     
     /**
-     Holds the registered script that conforms to `ScriptInjectable`.
-     Use this property to manage the optional script injection into the web view.
+     A dictionary holding registered scripts, keyed by their message handler names.
      */
-    private var scriptInjectable: ScriptInjectable?
+    private var scriptInjectables: [String: ScriptInjectable] = [:]
     
     /**
      Initializer
@@ -182,11 +181,6 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         }
         
         let module = message.name
-        
-        if let scriptInjectable = scriptInjectable, scriptInjectable.messageHandlerName == module {
-            scriptInjectable.handle(message: message)
-        }
-        
         let data = Data(msg.utf8)
         do {
             guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
@@ -661,22 +655,34 @@ extension DriveViewController {
 
 extension DriveViewController {
     /**
-     Registers a script that conforms to the `ScriptInjectable` protocol with the view controller's content controller.
+     Registers a given ScriptInjectable object with the content controller, allowing it to be executed within the web view.
 
-     This method takes an object conforming to the `ScriptInjectable` protocol and configures the view controller to inject the script into the web view's content. It also registers the view controller as the message handler for any messages sent by the script, if the `messageHandlerName` property of the `ScriptInjectable` object is set.
+     The ScriptInjectable object encapsulates the source code, injection time, and message handler name for the custom script. By registering it, the custom script will be injected into the web view at the specified injection time and be able to communicate with native code using the provided message handler name.
 
-     - Parameter scriptInjectable: An object conforming to the `ScriptInjectable` protocol, encapsulating the script to be injected and any associated behavior.
-     */
-    public func registerInjectableScript(_ scriptInjectable: ScriptInjectable) {
-        self.scriptInjectable = scriptInjectable
+     - Parameter scriptInjectable: The script injectable object containing the properties and logic needed to define and control the custom script.
+    */
+    public func registerScriptInjectable(_ scriptInjectable: ScriptInjectable) {
         let userScript = WKUserScript(source: scriptInjectable.source,
                                       injectionTime: scriptInjectable.injectionTime,
                                       forMainFrameOnly: true)
         self.contentController.addUserScript(userScript)
+        self.contentController.add(self, name: scriptInjectable.messageHandlerName)
+        self.scriptInjectables[scriptInjectable.messageHandlerName] = scriptInjectable
+    }
+    
+    /**
+     Unregisters a given script injectable object from the content controller, removing it from execution within the web view.
 
-        if let injectableScript = scriptInjectable.messageHandlerName {
-            self.contentController.add(self, name: injectableScript)
-        }
+     If the provided script injectable object is not found in the registered scripts, the method returns early without making any changes.
+
+     - Parameter scriptInjectable: The script injectable object to be unregistered.
+    */
+    public func unregisterScriptInjectable(_ scriptInjectable: ScriptInjectable) {
+        let handlerName = scriptInjectable.messageHandlerName
+        guard scriptInjectables[handlerName] != nil else { return }
+        
+        contentController.removeScriptMessageHandler(forName: handlerName)
+        scriptInjectables.removeValue(forKey: handlerName)
     }
 }
 
