@@ -132,6 +132,11 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
     private var scriptInjectables: [String: ScriptInjectable] = [:]
     
     /**
+     Delegate to handle WebView interactions such as navigation decisions and receiving script messages.
+    */
+    public weak var webInteractionDelegate: WebInteractionDelegate?
+
+    /**
      Initializer
      
      - Parameters:
@@ -179,6 +184,10 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         guard let msg = message.body as? String else {
             return
         }
+        if let delegate = webInteractionDelegate {
+            delegate.didReceive(scriptMessage: message)
+        }
+        
         let module = message.name
         let data = Data(msg.utf8)
         do {
@@ -282,6 +291,10 @@ extension DriveViewController: WKNavigationDelegate {
            frame.isMainFrame,
            "geotab.com" != domain {
             $logger.warn("Navigating to out of bounds domain \(domain)")
+        }
+        
+        if let delegate = webInteractionDelegate {
+            delegate.onDecidePolicy(navigationAction: navigationAction)
         }
         
         decisionHandler(.allow)
