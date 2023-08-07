@@ -308,7 +308,7 @@ extension DriveViewController: WKUIDelegate {
 
     public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
-        guard let bundle = languageBundle else {
+        guard let bundle = languageBundle, isPresentInViewHierarchy else {
             completionHandler()
             return
         }
@@ -325,7 +325,7 @@ extension DriveViewController: WKUIDelegate {
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         
-        guard let bundle = languageBundle else {
+        guard let bundle = languageBundle, isPresentInViewHierarchy else {
             completionHandler(false)
             return
         }
@@ -341,7 +341,7 @@ extension DriveViewController: WKUIDelegate {
         alertController.addAction(UIAlertAction(title: cancelText, style: .cancel, handler: { _ in
             completionHandler(false)
         }))
-
+        
         self.present(alertController, animated: true, completion: nil)
     }
     
@@ -664,9 +664,9 @@ extension DriveViewController {
         let userScript = WKUserScript(source: scriptInjectable.source,
                                       injectionTime: scriptInjectable.injectionTime,
                                       forMainFrameOnly: true)
-        self.contentController.addUserScript(userScript)
-        self.contentController.add(self, name: scriptInjectable.messageHandlerName)
-        self.scriptInjectables[scriptInjectable.messageHandlerName] = scriptInjectable
+        contentController.addUserScript(userScript)
+        contentController.add(self, name: scriptInjectable.messageHandlerName)
+        scriptInjectables[scriptInjectable.messageHandlerName] = scriptInjectable
     }
     
     /**
@@ -674,11 +674,10 @@ extension DriveViewController {
 
      If the provided script injectable object is not found in the registered scripts, the method returns early without making any changes.
 
-     - Parameter scriptInjectable: The script injectable object to be unregistered.
+     - Parameter handlerName: The script injectable object's message handler name to be unregistered.
     */
-    public func unregisterScriptInjectable(_ scriptInjectable: ScriptInjectable) {
-        let handlerName = scriptInjectable.messageHandlerName
-        guard scriptInjectables[handlerName] != nil else { return }
+    public func unregisterScriptInjectable(_ handlerName: String) {
+        guard let _ = scriptInjectables[handlerName] else { return }
         
         contentController.removeScriptMessageHandler(forName: handlerName)
         scriptInjectables.removeValue(forKey: handlerName)
