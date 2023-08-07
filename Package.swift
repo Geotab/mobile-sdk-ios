@@ -31,9 +31,5 @@ let package = Package(
                 "native-sdk.d.ts"],
             resources: [
                 .process("Assets")]),
-        .testTarget(
-            name: "GeotabMobileSDKTests",
-            dependencies: ["GeotabMobileSDK"],
-            exclude: ["Info.plist", "rulesets.json"]),
     ]
 )
