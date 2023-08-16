@@ -302,7 +302,7 @@ extension DriveViewController: WKUIDelegate {
 
     public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
-        guard let bundle = languageBundle, isPresentInViewHierarchy else {
+        guard let bundle = languageBundle, isPresentInViewHierarchy, !(presentedViewController is UIAlertController) else {
             completionHandler()
             return
         }
@@ -319,7 +319,7 @@ extension DriveViewController: WKUIDelegate {
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         
-        guard let bundle = languageBundle, isPresentInViewHierarchy else {
+        guard let bundle = languageBundle, isPresentInViewHierarchy, !(presentedViewController is UIAlertController) else {
             completionHandler(false)
             return
         }
