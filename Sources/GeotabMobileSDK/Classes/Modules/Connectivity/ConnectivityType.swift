@@ -10,3 +10,4 @@ enum ConnectivityType: String {
     case CELL_5G = "CELL_5G"
     case CELL = "CELL"
 }
+// swiftlint:enable redundant_string_enum_value

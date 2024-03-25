@@ -1,8 +1,10 @@
 class StateModule: Module {
-    let webDriveDelegate: WebDriveDelegate
-    init(webDriveDelegate: WebDriveDelegate) {
-        self.webDriveDelegate = webDriveDelegate
-        super.init(name: "state")
+    static let moduleName = "state"
+
+    let scriptGateway: ScriptGateway
+    init(scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(name: StateModule.moduleName)
         functions.append(DeviceFunction(module: self))
     }
 }

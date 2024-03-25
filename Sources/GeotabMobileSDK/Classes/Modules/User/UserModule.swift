@@ -1,11 +1,13 @@
 class UserModule: Module {
-    let webDriveDelegate: WebDriveDelegate
+    static let moduleName = "user"
+
+    let scriptGateway: ScriptGateway
     var driverActionNecessaryCallback: DriverActionNecessaryCallbackType?
     var pageNavigationCallback: PageNavigationCallbackType?
     var loginRequiredCallback: LoginRequiredCallbackType?
-    init(webDriveDelegate: WebDriveDelegate) {
-        self.webDriveDelegate = webDriveDelegate
-        super.init(name: "user")
+    init(scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(name: UserModule.moduleName)
         functions.append(GetAllUsersFunction(module: self))
         functions.append(GetAvailabilityFunction(module: self))
         functions.append(GetViolationsFunction(module: self))

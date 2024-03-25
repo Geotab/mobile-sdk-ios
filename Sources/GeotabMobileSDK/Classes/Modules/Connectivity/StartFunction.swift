@@ -1,9 +1,14 @@
+protocol ConnectivityStarting: Module {
+    var started: Bool { get }
+    func start() -> Bool
+}
+
 class StartFunction: ModuleFunction {
-    private let module: ConnectivityModule
+    private weak var starter: ConnectivityStarting?
     
-    init(module: ConnectivityModule) {
-        self.module = module
-        super.init(module: module, name: "start")
+    init(starter: ConnectivityStarting) {
+        self.starter = starter
+        super.init(module: starter, name: "start")
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         let result = start()
@@ -11,16 +16,14 @@ class StartFunction: ModuleFunction {
     }
     
     func start() -> Bool {
-        if module.started {
-            return module.started
-        }
-
-        do {
-            try module.reachability?.startNotifier()
-            module.started = true
-            return true
-        } catch {
+        guard let starter = starter else {
             return false
         }
+        
+        guard !starter.started else {
+            return true
+        }
+
+        return starter.start()
     }
 }

@@ -1,10 +1,12 @@
 import Foundation
 
+/// :nodoc:
 public protocol Logging {
     func log(level: Logger.Level, tag: String, message: String)
     func event(level: Logger.Level, tag: String, message: String, error: Error?)
 }
 
+/// :nodoc:
 public enum Logger {
     
     public static internal(set) var shared: Logging = DefaultLogger()
@@ -17,10 +19,12 @@ public enum Logger {
     }
 }
 
+/// :nodoc:
 public extension Notification.Name {
     static let log = Notification.Name("GeotabMobileSDKLog")
 }
 
+/// :nodoc:
 class DefaultLogger: Logging {
     
     private func toNotificationCenter(level: Logger.Level, tag: String, message: String, error: Error?) {
@@ -54,6 +58,7 @@ class DefaultLogger: Logging {
     }
 }
 
+/// :nodoc:
 @propertyWrapper
 struct TaggedLogger {
     

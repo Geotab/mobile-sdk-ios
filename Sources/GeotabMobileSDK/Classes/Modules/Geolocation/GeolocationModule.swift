@@ -1,37 +1,67 @@
 import Foundation
 import CoreLocation
+import UIKit
 
-class GeolocationModule: Module {
+protocol LocationManager {
+    var distanceFilter: CLLocationDistance { get set }
+    var desiredAccuracy: CLLocationAccuracy { get set }
+    var allowsBackgroundLocationUpdates: Bool { get set }
+    var pausesLocationUpdatesAutomatically: Bool { get set }
+    var showsBackgroundLocationIndicator: Bool { get set }
     
+    func requestAlwaysAuthorization()
+    func requestWhenInUseAuthorization()
+    
+    func startUpdatingLocation()
+    func stopUpdatingLocation()
+    
+    func getAuthorizationStatus() -> CLAuthorizationStatus
+    func setDelegate(_ delegate: CLLocationManagerDelegate)
+    func locationServicesEnabled() -> Bool
+}
+
+/// :nodoc:
+class GeolocationModule: Module {
+    static let moduleName = "geolocation"
     static let PERMISSION_DENIED = "PERMISSION_DENIED"
     static let POSITION_UNAVAILABLE = "POSITION_UNAVAILABLE"
     
-    let webDriveDelegate: WebDriveDelegate
-    let locationManager: CLLocationManager
+    let scriptGateway: ScriptGateway
+    var locationManager: LocationManager
+    let isInBackground: () -> Bool
     
     var lastLocationResult = GeolocationResult(position: nil, error: nil)
     var started = false
+    var stopLocationUpdatesWhenForegrounded = false
     
     private var requestedHighAccuracy = false
     
-    private let defaultDistanceFilter: CLLocationDistance
     private let defaultAccuracy: CLLocationAccuracy
     
-    init(webDriveDelegate: WebDriveDelegate) {
-        self.webDriveDelegate = webDriveDelegate
-        locationManager = CLLocationManager()
-        defaultDistanceFilter = locationManager.distanceFilter
+    let options: MobileSdkOptions
+    
+    init(scriptGateway: ScriptGateway,
+         options: MobileSdkOptions,
+         locationbManager: LocationManager = CLLocationManager(),
+         isInBackground: @escaping (() -> Bool) = { UIApplication.shared.applicationState != .active }) {
+        self.scriptGateway = scriptGateway
+        self.options = options
+        self.locationManager = locationbManager
+        self.isInBackground = isInBackground
         defaultAccuracy = locationManager.desiredAccuracy
-        super.init(name: "geolocation")
-        functions.append(StartLocationServiceFunction(module: self))
-        functions.append(StopLocationServiceFunction(module: self))
-        functions.append(RequestLocationAuthorizationFunction(module: self))
-        locationManager.delegate = self
-//        requestAuthorization()
+        super.init(name: GeolocationModule.moduleName)
+        functions.append(StartLocationServiceFunction(starter: self))
+        functions.append(StopLocationServiceFunction(stopper: self))
+        locationManager.setDelegate(self)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(backgroundModeChanged),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
     }
     
     var isLocationServicesEnabled: Bool {
-        return CLLocationManager.locationServicesEnabled()
+        locationManager.locationServicesEnabled()
     }
     
     override func scripts() -> String {
@@ -42,25 +72,22 @@ class GeolocationModule: Module {
         scripts += (try? extraTemplate.render(scriptData)) ?? ""
         
         if let data = try? JSONEncoder().encode(lastLocationResult), let json = String(data: data, encoding: .utf8) {
-            scripts += """
-            window.\(Module.geotabModules).\(name).result = \(json);
-            """
+            scripts +=
+                """
+                    if (window.\(Module.geotabModules) != null && window.\(Module.geotabModules).\(name) != null) {
+                        window.\(Module.geotabModules).\(name).result = \(json);
+                    }
+                """
         } else {
-            scripts += """
-            window.\(Module.geotabModules).\(name).result = {};
-            """
+            scripts +=
+                """
+                    if (window.\(Module.geotabModules) != null && window.\(Module.geotabModules).\(name) != null) {
+                        window.\(Module.geotabModules).\(name).result = {};
+                    }
+                """
         }
         
         return scripts
-    }
-    
-    func requestAuthorizationAlways() {
-        locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.requestAlwaysAuthorization()
-    }
-    
-    func requestAuthorizationWhenInUse() {
-        locationManager.requestWhenInUseAuthorization()
     }
     
     func updateLastLocation(result: GeolocationResult) {
@@ -74,12 +101,80 @@ class GeolocationModule: Module {
             return
         }
         
-        let script = "window.\(Module.geotabModules).\(name).result = \(json);"
-        webDriveDelegate.evaluate(script: script) { _ in }
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
+        evaluateScript(json: json)
+        scriptGateway.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
     }
     
+    deinit {
+        // make sure to stop when DriveViewController is destroyed.
+        stopService()
+    }
+}
+
+// MARK: - LocationServiceAuthorizing
+/// :nodoc:
+extension GeolocationModule: LocationServiceAuthorizing {
+    
+    func isNotDetermined() -> Bool {
+        return locationManager.getAuthorizationStatus() == .notDetermined
+    }
+    
+    func isDeniedOrRestricted() -> Bool {
+        let authorizationStatus = locationManager.getAuthorizationStatus()
+        return (authorizationStatus == .denied || authorizationStatus == .restricted)
+    }
+    
+    func isAuthorizedWhenInUse() -> Bool {
+        return locationManager.getAuthorizationStatus() == .authorizedWhenInUse
+    }
+    
+    func isAuthorizedAlways() -> Bool {
+        return locationManager.getAuthorizationStatus() == .authorizedAlways
+    }
+    
+    func requestAuthorizationAlways() {
+        if options.shouldPromptForPermissions {
+            locationManager.allowsBackgroundLocationUpdates = true
+            locationManager.requestAlwaysAuthorization()
+        }
+    }
+    
+    func requestAuthorizationWhenInUse() {
+        if options.shouldPromptForPermissions {
+            locationManager.requestWhenInUseAuthorization()
+        }
+    }
+}
+
+// MARK: - LocationServiceStopping
+/// :nodoc:
+extension GeolocationModule: LocationServiceStopping {
+    
+    func stopService() {
+        guard started else {
+            return
+        }
+        
+        guard !isInBackground() else {
+            stopLocationUpdatesWhenForegrounded = true
+            return
+        }
+        
+        locationManager.stopUpdatingLocation()
+        locationManager.desiredAccuracy = defaultAccuracy
+        started = false
+    }
+}
+
+// MARK: - LocationServiceStarting
+/// :nodoc:
+extension GeolocationModule: LocationServiceStarting {
+    
     func startService(enableHighAccuracy: Bool) throws {
+        
+        if stopLocationUpdatesWhenForegrounded {
+            stopLocationUpdatesWhenForegrounded = false
+        }
         
         requestedHighAccuracy = enableHighAccuracy
         guard isLocationServicesEnabled else {
@@ -95,10 +190,13 @@ class GeolocationModule: Module {
         // note: startService could be called by different times, if one of the calls requested high accuracy, set it.
         var accuChanged = false
         if enableHighAccuracy {
-            accuChanged = locationManager.distanceFilter != 0.01 || locationManager.desiredAccuracy != kCLLocationAccuracyBest
-            locationManager.distanceFilter = 0.01
+            accuChanged = (locationManager.desiredAccuracy != kCLLocationAccuracyBest)
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
         }
+
+        locationManager.distanceFilter = kCLDistanceFilterNone
+        locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.pausesLocationUpdatesAutomatically = false
         
         guard !started else {
             if isNotDetermined() {
@@ -117,11 +215,9 @@ class GeolocationModule: Module {
         }
         
         if isAuthorizedAlways() {
-            locationManager.stopUpdatingLocation()
             locationManager.startUpdatingLocation()
             started = true
         } else if isAuthorizedWhenInUse() {
-            locationManager.stopUpdatingLocation()
             locationManager.startUpdatingLocation()
             started = true
             requestAuthorizationAlways()
@@ -130,56 +226,10 @@ class GeolocationModule: Module {
             started = true
         }
     }
-    
-    func isNotDetermined() -> Bool {
-        if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .notDetermined
-        } else {
-            return CLLocationManager.authorizationStatus() == .notDetermined
-        }
-    }
-    
-    func isDeniedOrRestricted() -> Bool {
-        if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted
-        } else {
-            return CLLocationManager.authorizationStatus() == .denied || CLLocationManager.authorizationStatus() == .restricted
-        }
-    }
-    
-    func isAuthorizedWhenInUse() -> Bool {
-        if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .authorizedWhenInUse
-        } else {
-            return CLLocationManager.authorizationStatus() == .authorizedWhenInUse
-        }
-    }
-    
-    func isAuthorizedAlways() -> Bool {
-        if #available(iOS 14.0, *) {
-            return locationManager.authorizationStatus == .authorizedAlways
-        } else {
-            return CLLocationManager.authorizationStatus() == .authorizedAlways
-        }
-    }
-    
-    func stopService() {
-        guard started else {
-            return
-        }
-        locationManager.stopUpdatingLocation()
-        locationManager.distanceFilter = defaultDistanceFilter
-        locationManager.desiredAccuracy = defaultAccuracy
-        started = false
-    }
-    
-    deinit {
-        // make sure to stop when DriveViewController is destroyed.
-        stopService()
-    }
-    
 }
 
+// MARK: - CLLocationManagerDelegate
+/// :nodoc:
 extension GeolocationModule: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways {
@@ -212,6 +262,7 @@ extension GeolocationModule: CLLocationManagerDelegate {
             updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.POSITION_UNAVAILABLE))
         }
     }
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let lastLocation = locations.last else {
             return
@@ -223,7 +274,36 @@ extension GeolocationModule: CLLocationManagerDelegate {
         
         let result = GeolocationResult(position: pos, error: nil)
         updateLastLocation(result: result)
-
     }
     
+    func evaluateScript(json: String) {
+        let script =
+            """
+                if (window.\(Module.geotabModules) != null && window.\(Module.geotabModules).\(name) != null) {
+                    window.\(Module.geotabModules).\(name).result = \(json);
+                }
+            """
+        scriptGateway.evaluate(script: script) { _ in }
+    }
+    
+}
+
+// MARK: - Background status changes
+/// :nodoc:
+extension GeolocationModule {
+    @objc
+    func backgroundModeChanged(notification: NSNotification) {
+        if stopLocationUpdatesWhenForegrounded {
+            stopLocationUpdatesWhenForegrounded = false
+            stopService()
+        }
+    }
+}
+
+// MARK: - CLLocationManager adapter
+
+extension CLLocationManager: LocationManager {
+    func setDelegate(_ delegate: CLLocationManagerDelegate) {
+        self.delegate = delegate
+    }
 }

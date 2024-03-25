@@ -6,12 +6,12 @@
 
 ### Installation
 
-Geotab Mobile SDK is a Swift Package. Refer to Apple document for how to add the SDK to your project: https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app
+The Geotab Mobile SDK is a Swift Package. Refer to Apple's documentation for how to add the SDK to your project: https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app
 
 Using the Mobile SDK with SwiftUI is not recommended. 
 
 
-**Add Background mode capabilities**
+**Add background mode capabilities**
 
 In your app's "Signing and Capabilities" section, add "Background mode" section and check the "Audio, Airplay and Picture in Picture" and "Location updates" options. 
 
@@ -27,30 +27,31 @@ The following keys must be added to your app's Info.plist:
 - "Privacy - Photo Library Usage Description"
 - "Privacy - Face ID Usage Description"
 - "Privacy - Bluetooth Always Usage Description"
+- "Privacy - Bluetooth Peripheral Usage Description"
 - "Privacy - Motion Usage Description"
 
-### What is DriveViewController
+### What is DriveViewController?
 
-DriveViewController is the starting point of integrating Geotab Drive SDK. It's the container of the Geotab Drive Web app equipped with native APIs for accessing Geotab Drive web app's data.
+DriveViewController is the starting point to integrate the Geotab Mobile SDK. It's the container for the Geotab Drive web app equipped with native APIs for accessing the contained app's data.
 
 ### Initialization
 
-Inside your `main` controller, define a property that holds the instance of DriveViewController
+Inside your `main` controller, define a property that holds a singleton instance of `DriveViewController`.
 
 ```swift
 private var driveVC: DriveViewController!
 ```
 
-If your drivers should login from a specific Geotab server, then you should set the serverAddress first:
+If your drivers should login from a specific Geotab server, then you should set `serverAddress` first:
 
 ```swift
 DriveSdkConfig.serverAddress = "<server-name>.geotab.com"
 ```
 
-Note: Do not prefix with "https://". SDK prefixes "https://" by default.
+Do not prefix the address with "https://".
 
 
-You should also set up a listener for `LastServerAddress` update:
+You should also set up a listener for `LastServerAddress` updates:
 
 ```swift
 driveVC.setLastServerAddressUpdatedCallback { server in
@@ -60,7 +61,7 @@ driveVC.setLastServerAddressUpdatedCallback { server in
 }
 ```
 
-Whenever `LastServerAddress` is changed. it should be saved in persistent storage. At the next launch of your app, you should read the value from your persistent storage and set it to `DriveSdkConfig.serverAddress` before executing any Drive SDK APIs.
+Save the last the value of `LastServerAddress` in persistent storage. To allow for offline caching, on app launch read the value from persistent storage and set it to `DriveSdkConfig.serverAddress` before executing any Drive SDK APIs.
 
 Initialize the instance during `viewDidLoad()` of your `main` controller
 
@@ -70,15 +71,15 @@ driveVC = DriveViewController(modules: [])
 
 ### Login
 
-GeotabDriveSDK allow integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is user's credential. 
+The Geotab Mobile SDK allows integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is a user's credential. 
 
-Tell DriveViewController about the user credential as follows:
+Supply credentials to `DriveViewController` as follows:
 
 ```swift
 driveVC.setSession(credentialResult: CredentialResult, isCoDriver: <set to true if it's a co-driver login>)
 ```
 
-where credentials is a type of: 
+where credentials is an instance of: 
 
 ```swift
 public struct GeotabCredentials: Codable {
@@ -97,19 +98,17 @@ public struct GeotabCredentials: Codable {
 
 See `GeotabCredentials.swift`.
 
+### Present the `DriveViewController`
 
-
-### Present the DriveViewController
-
-Once user credentials are given, present the driveVC to user. DriveViewController will automatically validate the session and continue through the normal Drive workflow.
+Once user credentials are supplied, present the view controller to the user. `DriveViewController` will automatically validate the session and continue through the normal Geotab Drive workflow.
 
 ```swift
 self.present(driveVC, animated: true)
 ```
 
-### Session expire/Invalid/No-session and co-driver Login
+### Session expired/invalid/no-session and co-Driver Login
 
-To get notified when a user session is expired. Set a listener callback as follows:
+To be notified when a user session has expired, set a listener:
 
 ```swift
 driveVC.setLoginRequiredCallback { (status, errorMessage) in
@@ -117,40 +116,39 @@ driveVC.setLoginRequiredCallback { (status, errorMessage) in
 }
 ```
 
-Set a callback to listen for session changes. That includes: no session, invalid session, session expired, co-driver login is requested.
+Set a listener for session changes, including: no session, invalid session, session expired, or co-driver login is requested.
 
 - Parameters:
    - callback: `LoginRequiredCallbackType`
            - status: `""` `"LoginRequired"`, `"AddCoDriver"`.
-           - errorMessage: Error happened during login process and error info is given in `errorMessage`.
+           - errorMessage: An error occurred during login. Error info is contained in `errorMessage`.
 
-There are three defined values and variance of different error messages that could be passed in the callback.
+There are three predefined speical values for error messages that may be passed to the callback.
 
-- "", empty string, indicates no login required or login is successful, or the login is in progress. At this state, implementor should presents the DriveViewControlleFragment.
-- "LoginRequired": indicates the login UI is going to show a login form(No valid user is available or the current activeSession is expired/invalid). At this stateimplementor presents its own login screen.
-- "AddCoDriver": indicates that a co-driver login is requested. At this state, implementor presents its own co-driver login screen.
-- Any error message, any other error messages. At this state, implementor presents its own login screen.
+- `""`: an empty string indicates no login is required, login is successful, or the login is in progress. At this state, an implementor should present `DriveViewController`.
+- `"LoginRequired"`: indicates the login UI is going to show a login form (No valid user is available or the current activeSession is expired/invalid). At this state an implementor should present a custom login screen.
+- `"AddCoDriver"`: indicates that a co-driver login is requested. At this state and implementor should present a custom co-driver login screen.
 
-After receiving such session expired callback call. Integrator usually dismisses the presented `DriveViewController` and present user with its Login screen.
+For any other error message an implementor should present a custom login screen.
+
+After receiving a session expired callback. An integrator should dismiss the presented `DriveViewController` and present user with a login screen.
 
 ### Other important callbacks
 
-There are couple of other callbacks you that can be useful for managing and watching DriveViewController.
+There are few other callbacks useful for managing `DriveViewController`.
 
-- `DriveViewController::setDriverActionNecessaryCallback`: driverActionNecessary is a list of events that occur in our app where the application owner needs to bring the Drive app activity UI to the foreground. Example: "Your vehicle has been selected by another driver. You now need to select a vehicle".
+- `DriveViewController::setDriverActionNecessaryCallback`: `driverActionNecessary` is a collection of events that may occur where the application should bring the Drive view contoller to the foreground. For example: "Your vehicle has been selected by another driver. You now need to select a vehicle".
 
-- `DriveViewController::setPageNavigationCallback`: pageNavigation event indicates any navigation changes by the driver in Geotab Drive.
-
-- `DriveViewController::setLastServerAddressUpdatedCallback`: Drive tells the integrator which server address is used after a user successful login. This server address must be used for future logins of other users of the same company. Integrators can save the received `server` address to a persistant storage and when the app restarts next time, update the `DriveSdkConfig.serverAddress` with the saved one. This will let SDK know which Geotab server to use.
+- `DriveViewController::setPageNavigationCallback`: `pageNavigation` indicates any navigation changes made by the driver in Geotab Drive.
 
 See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html).
 
 
-### Overwrite Default Background color, font color and icon
+### Overwrite Default Background Color, Font Color, and Icon
 
-To override default background color in the network error page, create a property in Info.plist with the name "NetworkErrorScreenBckColor" of type String and add a hex value for the color
-To override default font color in the network error page, create a property in Info.plist with the name "NetworkErrorScreenFontColor" of type String and add a hex value for the color
-To override default font color in the network error page, create a property in Info.plist with the name "NetworkErrorScreenIcon" of type String and add the name of the image. The image must also be added to the project.
+To override default background color in the network error page, create a property in `Info.plist` named `"NetworkErrorScreenBckColor"` of type `String`. Add a hex value for the color.
+To override default font color in the network error page, create a property in `Info.plist` named `"NetworkErrorScreenFontColor"` of type `String`. Add a hex value for the color
+To override default icon in the network error page, create a property in `Info.plist` named `"NetworkErrorScreenIcon"` of type String and add the name of the image. The image must also be added to the project.
 
 
 ## Drive APIs

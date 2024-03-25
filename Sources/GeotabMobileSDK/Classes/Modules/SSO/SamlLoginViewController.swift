@@ -1,6 +1,7 @@
 import Foundation
 import WebKit
 
+/// :nodoc:
 class SamlLoginViewController: UIViewController {
     
     private var swipeDownDismissal = true
@@ -89,6 +90,7 @@ class SamlLoginViewController: UIViewController {
     
 }
 
+/// :nodoc:
 extension SamlLoginViewController: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard navigationAction.request.url?.absoluteString.lowercased().hasPrefix("http") == true else {
@@ -97,7 +99,13 @@ extension SamlLoginViewController: WKNavigationDelegate {
         }
         decisionHandler(.allow)
     }
-    
+
+    // Uncomment this method to allow testing against localhost and other self signed https
+    //    public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    //        let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+    //        completionHandler(.useCredential, cred)
+    //    }
+
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Network error"))
     }

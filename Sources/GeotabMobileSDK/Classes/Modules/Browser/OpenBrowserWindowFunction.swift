@@ -1,5 +1,10 @@
 import SafariServices
 
+protocol BrowserWindowOpening: Module {
+    func openInExternalBrowser(url: URL)
+    func openInAppBrowser(url: URL)
+}
+
 private enum HtmlTarget: String {
     case blank = "_blank"
     case `self` = "_self"
@@ -16,10 +21,10 @@ struct OpenBrowserWindowArguments: Codable {
 }
 
 class OpenBrowserWindowFunction: ModuleFunction {
-    private let module: BrowserModule
-    init(module: BrowserModule) {
-        self.module = module
-        super.init(module: module, name: "openBrowserWindow")
+    private weak var browserOpener: BrowserWindowOpening?
+    init(browserOpener: BrowserWindowOpening) {
+        self.browserOpener = browserOpener
+        super.init(module: browserOpener, name: "openBrowserWindow")
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -44,17 +49,12 @@ class OpenBrowserWindowFunction: ModuleFunction {
             let target = HtmlTarget(rawValue: targetString)
             switch target {
             case .blank, .system, .none:
-                UIApplication.shared.open(url)
-            case .parent, .top, .`self`, .iab:
-                if self.module.inAppBrowserVC != nil {
-                    self.module.inAppBrowserVC?.dismiss(animated: true)
-                    self.module.inAppBrowserVC = nil
-                }
+                self.browserOpener?.openInExternalBrowser(url: url)
                 
-                self.module.inAppBrowserVC = SFSafariViewController(url: url)
-                self.module.viewPresenter.present(self.module.inAppBrowserVC!, animated: true, completion: nil)
-             
+            case .parent, .top, .`self`, .iab:
+                self.browserOpener?.openInAppBrowser(url: url)
             }
+            
             jsCallback(Result.success("\"\(urlString)\""))
         }
     }

@@ -6,4 +6,5 @@ public typealias LoginRequiredCallbackType = (_ status: String, _ errorMessage: 
 
 public typealias LastServerAddressUpdatedCallbackType = (_ server: String) -> Void
 
+/// :nodoc:
 public typealias IOXDeviceEventCallbackType = (_ data: (Result<IOXDeviceEvent, Error>)) -> Void

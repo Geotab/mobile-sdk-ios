@@ -44,7 +44,7 @@ class GetHosRuleSetFunction: ModuleFunction {
         self.callbacks[callerId] = callback
         
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetHosRuleSetFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
-        module.webDriveDelegate.evaluate(script: script) { result in
+        module.scriptGateway.evaluate(script: script) { result in
             switch result {
             case .success: return
             case .failure:

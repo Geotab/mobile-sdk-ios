@@ -8,14 +8,17 @@ class RequestPermissionFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            
+        guard module.options.shouldPromptForPermissions else {
+            jsCallback(Result.success("true"))
+            return
+        }
+
+        module.notificationAdapter.requestAuth(options: [.alert, .sound, .badge]) { granted in
             if granted != true {
                 jsCallback(Result.success("false"))
             } else {
                 jsCallback(Result.success("true"))
             }
-            
         }        
     }
 }

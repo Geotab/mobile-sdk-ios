@@ -38,8 +38,8 @@ class CancelFunction: ModuleFunction {
             }
             
             let requestId = "\(id)"
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [requestId])
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [requestId])
+            self.module.notificationAdapter.removeDelivered(withIdentifiers: [requestId])
+            self.module.notificationAdapter.removePendingRequests(withIdentifiers: [requestId])
             
             jsCallback(Result.success(notification))
         }

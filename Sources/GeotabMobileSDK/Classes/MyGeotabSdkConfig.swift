@@ -1,9 +1,9 @@
 /**
- Configuration options for MyGeotabViewController
+ Configuration options for  MyGeotabViewController
  */
 public class MyGeotabSdkConfig: MobileSdkConfig {
     /**
-     The server address to which MyGeotab is going to launch from.
+     The server address to launch MyGeotab from
      */
     public static var serverAddress: String = "my.geotab.com"
 }

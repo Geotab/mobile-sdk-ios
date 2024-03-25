@@ -1,0 +1,117 @@
+import WebKit
+
+protocol NavigationHost: UIDocumentInteractionControllerDelegate {
+    func navigationFailed(with error: NSError)
+    var useAppBoundDomains: Bool { get }
+}
+
+/// :nodoc:
+class NavigationDelegate: NSObject, WKNavigationDelegate {
+    
+    @TaggedLogger("NavigationDelegate")
+    private var logger
+
+    private var fileDestinationURL: URL?
+
+    private weak var navigationHost: NavigationHost?
+
+    private lazy var boundDomains: [String] = {
+        if navigationHost?.useAppBoundDomains ?? false,
+           let values = Bundle.main.object(forInfoDictionaryKey: "WKAppBoundDomains") as? [String] {
+            return values
+        }
+        return ["geotab.com"]
+    }()
+    
+    init(navigationHost: NavigationHost) {
+        self.navigationHost = navigationHost
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.request.url?.scheme == "blob",
+            #available(iOS 14.5, *) {
+            guard navigationAction.request.url?.absoluteString.lowercased().hasPrefix("blob:https") == true else {
+                // the full URL may contain credentials, do not log it
+                $logger.info("Navigation cancelled for page with scheme \(navigationAction.request.url?.scheme ?? "nil")")
+                decisionHandler(.cancel)
+                return
+            }
+            decisionHandler(.download)
+            return
+        }
+
+        guard navigationAction.request.url?.scheme == "https" else {
+            // the full URL may contain credentials, do not log it
+            $logger.info("Navigation cancelled for page with scheme \(navigationAction.request.url?.scheme ?? "nil")")
+            decisionHandler(.cancel)
+            return
+        }
+
+        if let frame = navigationAction.targetFrame,
+           let domain = navigationAction.request.url?.domain,
+           frame.isMainFrame,
+           !boundDomains.contains(domain) {
+            $logger.warn("Navigating to out of bounds domain \(domain)")
+        }
+
+        decisionHandler(.allow)
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+
+        if (error as NSError).code == NSURLErrorCancelled {
+            return
+        }
+        
+        navigationHost?.navigationFailed(with: error as NSError)
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        if #available(iOS 14.0, *) {
+            if let error = error as? WKError,
+               error.code == .navigationAppBoundDomain {
+                $logger.warn("Navigating to out of bounds domain: \(error.localizedDescription)")
+            }
+        }
+
+        navigationHost?.navigationFailed(with: error as NSError)
+    }
+}
+
+/// :nodoc:
+@available(iOS 14.5, *)
+extension NavigationDelegate: WKDownloadDelegate {
+
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        let fileName = NSTemporaryDirectory() + suggestedFilename
+        if FileManager.default.fileExists(atPath: fileName) {
+            try? FileManager.default.removeItem(atPath: fileName)
+        }
+        let url = URL(fileURLWithPath: fileName)
+        fileDestinationURL = url
+        completionHandler(url)
+    }
+
+    func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        $logger.debug("Download failed: \(error)")
+    }
+
+    func downloadDidFinish(_ download: WKDownload) {
+        guard let url = fileDestinationURL else {
+            $logger.debug("Download completed with no file ")
+            return
+        }
+
+        let documentInteractionController = UIDocumentInteractionController(url: url)
+        documentInteractionController.delegate = navigationHost
+        documentInteractionController.presentPreview(animated: true)
+    }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+}

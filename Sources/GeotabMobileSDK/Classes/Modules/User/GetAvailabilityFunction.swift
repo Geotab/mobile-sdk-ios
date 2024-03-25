@@ -45,7 +45,7 @@ class GetAvailabilityFunction: ModuleFunction {
         
         // TODO: window.webViewLayer.getApiUserNames, webViewLayer.getApi should be nativelized first before get.user()
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetAvailabilityFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
-        module.webDriveDelegate.evaluate(script: script) { result in
+        module.scriptGateway.evaluate(script: script) { result in
             switch result {
             case .success: return
             case .failure:

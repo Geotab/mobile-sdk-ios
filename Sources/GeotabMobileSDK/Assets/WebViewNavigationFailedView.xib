@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -64,14 +64,27 @@
                         <constraint firstAttribute="height" constant="80" id="Gd7-Sn-Jra"/>
                     </constraints>
                 </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="akt-Xw-nYx">
+                    <rect key="frame" x="20" y="746" width="335" height="0.0"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="setKey" value="No Network Connection"/>
+                    </userDefinedRuntimeAttributes>
+                </label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" red="0.17254901960784313" green="0.38823529411764707" blue="0.5725490196078431" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
                 <constraint firstItem="Gbn-ku-1co" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="9I1-uM-V6d"/>
+                <constraint firstItem="akt-Xw-nYx" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" constant="-32" id="9Wl-MT-eRC"/>
                 <constraint firstItem="83p-gV-QGj" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="ONH-jb-zDy"/>
                 <constraint firstItem="Gbn-ku-1co" firstAttribute="top" secondItem="zRH-eT-AiK" secondAttribute="bottom" constant="15" id="PNw-B3-bs3"/>
+                <constraint firstItem="akt-Xw-nYx" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" constant="-20" id="QT5-K3-tul"/>
                 <constraint firstItem="zRH-eT-AiK" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="RH1-aM-Aeb"/>
+                <constraint firstItem="akt-Xw-nYx" firstAttribute="top" relation="greaterThanOrEqual" secondItem="83p-gV-QGj" secondAttribute="bottom" id="eR3-kr-jrB"/>
+                <constraint firstItem="akt-Xw-nYx" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="20" id="hcz-mr-mmE"/>
                 <constraint firstItem="zRH-eT-AiK" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="jlg-Qh-qY1"/>
                 <constraint firstItem="83p-gV-QGj" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="jsV-Vh-6Qu"/>
                 <constraint firstAttribute="trailing" secondItem="zRH-eT-AiK" secondAttribute="trailing" id="oYd-gq-wqh"/>
@@ -80,6 +93,7 @@
                 <constraint firstItem="83p-gV-QGj" firstAttribute="top" secondItem="DQP-1Q-ngR" secondAttribute="bottom" constant="20" id="va7-vg-rqI"/>
             </constraints>
             <connections>
+                <outlet property="errorInfoLabel" destination="akt-Xw-nYx" id="oFc-2d-yaS"/>
                 <outlet property="imageLogo" destination="zRH-eT-AiK" id="BOb-fB-Pjv"/>
                 <outlet property="noNetworkLabel" destination="Gbn-ku-1co" id="k1k-jA-M71"/>
                 <outlet property="refreshButton" destination="83p-gV-QGj" id="8mE-vF-R1B"/>

@@ -11,7 +11,7 @@ class AppLogEventSource {
         let level: LogLevel
     }
 
-    private weak var webDriveDelegate: WebDriveDelegate?
+    private weak var scriptGateway: ScriptGateway?
     
     private let logLimit: Int
     private let interval: TimeInterval
@@ -20,8 +20,8 @@ class AppLogEventSource {
     private var lastReset = Date()
     
     // default is no more than 10 logs fired per 30 mins
-    init(webDriveDelegate: WebDriveDelegate, logLimit: Int = 10, interval: TimeInterval = 30 * 60) {
-        self.webDriveDelegate = webDriveDelegate
+    init(scriptGateway: ScriptGateway, logLimit: Int = 10, interval: TimeInterval = 30 * 60) {
+        self.scriptGateway = scriptGateway
         self.logLimit = logLimit
         self.interval = interval
         
@@ -47,7 +47,7 @@ class AppLogEventSource {
                 guard let self else {
                     return
                 }
-                guard let webDriveDelegate = self.webDriveDelegate,
+                guard let scriptGateway = self.scriptGateway,
                       let userInfo = notification.userInfo,
                       let level = userInfo["level"] as? Logger.Level,
                       let tag = userInfo["tag"] as? String,
@@ -73,7 +73,7 @@ class AppLogEventSource {
 
                 if let encodedDetailData = try? JSONEncoder().encode(eventDetail),
                    let encodedDetailString = String(data: encodedDetailData, encoding: .utf8) {
-                    webDriveDelegate.push(moduleEvent: ModuleEvent(event: "app.log", params: encodedDetailString)) { _ in }
+                    scriptGateway.push(moduleEvent: ModuleEvent(event: "app.log", params: encodedDetailString)) { _ in }
                 }
             }
     }
@@ -95,10 +95,4 @@ extension Logger.Level {
             return AppLogEventSource.LogLevel.Info
         }
     }
-}
-
-// MARK: - utilities
-
-struct MobileEvent<T: Codable>: Codable {
-    let detail: T
 }

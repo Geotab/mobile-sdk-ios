@@ -1,6 +1,22 @@
 import Foundation
 import UIKit
 
+protocol AppBundle {
+    var bundleIdentifier: String? { get }
+    var displayName: String? { get }
+    var version: String? { get }
+    var buildNumber: String? { get }
+}
+
+protocol CurrentDevice {
+    var modelName: String { get }
+}
+
+protocol AppStorage {
+    func string(forKey defaultName: String) -> String?
+    func set(_ value: Any?, forKey defaultName: String)
+}
+
 class Device {
     let model: String
     let platform: String
@@ -11,25 +27,43 @@ class Device {
     let sdkVersion: String
     let manufacturer: String
     
-    init() {
-        self.platform = "iOS"
-        self.manufacturer = "Apple"
-        self.appId = Bundle.main.bundleIdentifier ?? ""
+    init(bundle: AppBundle = Bundle.main,
+         device: CurrentDevice = UIDevice.current,
+         userDefaults: AppStorage = UserDefaults.standard) {
         
-        self.appName = Bundle.main.displayName ?? ""
-        self.version = Bundle.main.version ?? ""
-        self.sdkVersion = DriveSdkConfig.sdkVersion
-        self.model = UIDevice.current.modelName
-        var uuid = UserDefaults.standard.string(forKey: "uuid")
-        if uuid == nil {
-            uuid = UUID().uuidString
-            UserDefaults.standard.set(uuid, forKey: "uuid")
+        platform = "iOS"
+        manufacturer = "Apple"
+        appId = bundle.bundleIdentifier ?? ""
+        appName = bundle.displayName ?? ""
+        sdkVersion = DriveSdkConfig.sdkVersion
+        model = device.modelName
+
+        if let version = bundle.version {
+            if let buildNumber = bundle.buildNumber {
+                self.version = "\(version)_\(buildNumber)"
+            } else {
+                self.version = version
+            }
+        } else {
+            self.version = ""
         }
-        self.uuid = uuid!
+
+        if let uuid = userDefaults.string(forKey: "uuid") {
+            self.uuid = uuid
+        } else {
+            self.uuid = UUID().uuidString
+            userDefaults.set(self.uuid, forKey: "uuid")
+        }
     }
 }
 
-extension UIDevice {
+extension Bundle: AppBundle {
+    var displayName: String? { object(forInfoDictionaryKey: "CFBundleDisplayName") as? String }
+    var version: String? { return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String }
+    var buildNumber: String? { object(forInfoDictionaryKey: "CFBundleVersion") as? String }
+}
+
+extension UIDevice: CurrentDevice {
     var modelName: String {
         var systemInfo = utsname()
         uname(&systemInfo)
@@ -40,4 +74,7 @@ extension UIDevice {
         }
         return identifier
     }
+}
+
+extension UserDefaults: AppStorage {
 }

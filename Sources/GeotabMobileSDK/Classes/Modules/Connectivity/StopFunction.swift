@@ -1,11 +1,16 @@
 import Foundation
 
+protocol ConnectivityStopping: Module {
+    var started: Bool { get }
+    func stop()
+}
+
 class StopFunction: ModuleFunction {
-    private let module: ConnectivityModule
+    private weak var stopper: ConnectivityStopping?
     
-    init(module: ConnectivityModule) {
-        self.module = module
-        super.init(module: module, name: "stop")
+    init(stopper: ConnectivityStopping) {
+        self.stopper = stopper
+        super.init(module: stopper, name: "stop")
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -14,7 +19,6 @@ class StopFunction: ModuleFunction {
     }
     
     func stop() {
-        module.reachability?.stopNotifier()
-        module.started = false
+        stopper?.stop()
     }
 }

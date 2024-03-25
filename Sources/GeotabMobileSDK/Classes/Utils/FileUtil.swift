@@ -56,11 +56,29 @@ func writeFile(fsPrefix: String, drvfsDir: URL, path: String, data: Data, offset
     }
     
     if let offset = offset {
-        fileHandle.seek(toFileOffset: offset)
+        if #available(iOS 13.0, *) {
+            do {
+                try fileHandle.seek(toOffset: offset)
+            } catch {
+                throw GeotabDriveErrors.FileException(error: "Failed to seek to offset")
+            }
+        } else {
+            fileHandle.seek(toFileOffset: offset)
+        }
     } else {
         fileHandle.seekToEndOfFile()
     }
-    fileHandle.write(data)
+    
+    if #available(iOS 13.4, *) {
+        do {
+            try fileHandle.write(contentsOf: data)
+        } catch {
+            throw GeotabDriveErrors.FileException(error: "Failed to write")
+        }
+    } else {
+        fileHandle.write(data)
+    }
+    
     fileHandle.seekToEndOfFile()
     let size = fileHandle.offsetInFile
     fileHandle.closeFile()
@@ -89,8 +107,16 @@ func readFile(fsPrefix: String, drvfsDir: URL, path: String, offset: UInt64, siz
         throw GeotabDriveErrors.FileException(error: "Failed opening file for reading")
     }
     
-    fileHandle.seek(toFileOffset: offset)
-    
+    if #available(iOS 13.0, *) {
+        do {
+            try fileHandle.seek(toOffset: offset)
+        } catch {
+            throw GeotabDriveErrors.FileException(error: "Failed to seek writing")
+        }
+    } else {
+        fileHandle.seek(toFileOffset: offset)
+    }
+
     let data: Data!
     if let sz = size {
         if sz > Int.max {
@@ -240,7 +266,6 @@ func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo
     
     do {
         let items = try fm.contentsOfDirectory(atPath: url.path)
-        
         for item in items where fm.fileExists(atPath: "\(url.path)/\(item)", isDirectory: &resultStorage) {
             let attr = try fm.attributesOfItem(atPath: "\(url.path)/\(item)")
             guard let modifiedDate = attr[FileAttributeKey.modificationDate] as? Date else {

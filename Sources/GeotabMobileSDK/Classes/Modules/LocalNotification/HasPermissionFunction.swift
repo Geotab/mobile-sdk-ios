@@ -8,13 +8,8 @@ class HasPermissionFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            if settings.authorizationStatus != .authorized {
-                jsCallback(Result.success("false"))
-            } else {
-                jsCallback(Result.success("true"))
-            }
+        module.notificationAdapter.isAuthorized {
+            jsCallback(Result.success(String($0)))
         }
-        
     }
 }

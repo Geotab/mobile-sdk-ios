@@ -1,10 +1,11 @@
 class DeviceModule: Module {
+    static let moduleName = "device"
     static let device = Device()
-    let webDriveDelegate: WebDriveDelegate
+    let scriptGateway: ScriptGateway
     
-    init(webDriveDelegate: WebDriveDelegate) {
-        self.webDriveDelegate = webDriveDelegate
-        super.init(name: "device")
+    init(scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(name: DeviceModule.moduleName)
     }
     
     override func scripts() -> String {
@@ -30,9 +31,5 @@ class DeviceModule: Module {
         window.device = window.\(Module.geotabModules).\(name);
         """
         return scripts
-    }
-    
-    func geotabDriveReady() {
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "sdkready", params: "undefined")) { _ in }
     }
 }

@@ -1,20 +1,21 @@
 import Mustache
 import WebKit
 /**
- Module Function. This class is used for creating a Geotab Module function in the WKWebview/Javascript environment. Mostly intended for Drive and MyGeotab.
+ Defines a  function to be included in a Geotab module's Javascript API. Intended for internal Drive and MyGeotab use.
  */
 open class ModuleFunction {
     private let _module: Module
     public let name: String
     /**
      - Parameters:
-        - module: Module. The module this module function should reside in.
-        - name: String. Name of the module in Javascript environment.
+        - module: Module. The module this function should reside in.
+        - name: String. Name of the Javascript function defined.
      */
     public init(module: Module, name: String) {
         self._module = module
         self.name = name
     }
+    
     func apiCallScript(templateRepo: TemplateRepository, template: String, scriptData: [String: Any]) -> String {
         let apiCallTemplate = try? templateRepo.template(named: template)
         guard let script = try? apiCallTemplate?.render(scriptData) else {
@@ -31,6 +32,7 @@ open class ModuleFunction {
         }
         return functionScript
     }
+    
     open func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         fatalError("Must Override")
     }

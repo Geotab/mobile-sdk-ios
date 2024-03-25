@@ -43,7 +43,7 @@ class SetDriverSeatFunction: ModuleFunction {
         self.callbacks[callerId] = callback
         
         let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.SetDriverSeatFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "driverId": driverId])
-        module.webDriveDelegate.evaluate(script: script) { result in
+        module.scriptGateway.evaluate(script: script) { result in
             switch result {
             case .success: return
             case .failure:

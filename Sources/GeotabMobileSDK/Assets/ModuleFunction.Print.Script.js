@@ -1,5 +1,3 @@
-
-
-window.print = function() {
-    window.geotabModules.print.print(undefined, () => {});
+window.print = () => {
+  window.geotabModules.print.print(undefined, () => {});
 };

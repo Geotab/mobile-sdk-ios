@@ -10,17 +10,19 @@ protocol DeviceBatteryStateAdapter: AnyObject {
 }
 
 class BatteryModule: Module {
+    static let moduleName = "battery"
+
     private let adapter: DeviceBatteryStateAdapter
-    private let webDriveDelegate: WebDriveDelegate
+    private let scriptGateway: ScriptGateway
     var started: Bool {
         return adapter.isBatteryMonitoringEnabled
     }
     var isCharging = false
     var batteryLevel = 0
-    init(webDriveDelegate: WebDriveDelegate, adapter: DeviceBatteryStateAdapter = UIDevice.current) {
-        self.webDriveDelegate = webDriveDelegate
+    init(scriptGateway: ScriptGateway, adapter: DeviceBatteryStateAdapter = UIDevice.current) {
+        self.scriptGateway = scriptGateway
         self.adapter = adapter
-        super.init(name: "battery")
+        super.init(name: BatteryModule.moduleName)
         monitorBatteryStatus()
         updateState()
     }
@@ -48,7 +50,7 @@ class BatteryModule: Module {
 
     @objc private func batteryStatusDidChange(notification: NSNotification) {
         updateState()
-        webDriveDelegate.push(moduleEvent: ModuleEvent(event: "batterystatus", params: "{ \"detail\": { \"isPlugged\": \(isCharging), \"level\": \(batteryLevel) } }")) { _ in }
+        scriptGateway.push(moduleEvent: ModuleEvent(event: "batterystatus", params: "{ \"detail\": { \"isPlugged\": \(isCharging), \"level\": \(batteryLevel) } }")) { _ in }
     }
 }
 

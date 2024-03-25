@@ -9,20 +9,20 @@ class AppearanceModule: Module {
     static let eventName = "geotab.appearance"
     static let appearanceProperty = "appearanceType"
 
-    private weak var webDriveDelegate: WebDriveDelegate?
+    private weak var scriptGateway: ScriptGateway?
     private weak var appearanceSource: AppearanceSource?
 
-    init(webDriveDelegate: WebDriveDelegate, appearanceSource: AppearanceSource) {
-        self.webDriveDelegate = webDriveDelegate
+    init(scriptGateway: ScriptGateway, appearanceSource: AppearanceSource) {
+        self.scriptGateway = scriptGateway
         self.appearanceSource = appearanceSource
         super.init(name: AppearanceModule.moduleName)
     }
     
     func appearanceChanged() {
-        webDriveDelegate?.evaluate(script: updateAppearancePropertyScript()) { _ in }        
+        scriptGateway?.evaluate(script: updateAppearancePropertyScript()) { _ in }        
         let event = ModuleEvent(event: AppearanceModule.eventName,
                                 params: appearanceEventDetailJson())
-        webDriveDelegate?.push(moduleEvent: event) { _ in }
+        scriptGateway?.push(moduleEvent: event) { _ in }
     }
     
     func appearanceType() -> AppearanceType {
@@ -53,6 +53,7 @@ class AppearanceModule: Module {
 
 // MARK: - DriveViewController extension implements AppearanceSource
 
+/// :nodoc:
 extension DriveViewController: AppearanceSource {
     
     var appearanceType: AppearanceType {

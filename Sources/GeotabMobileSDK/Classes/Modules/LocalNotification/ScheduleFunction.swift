@@ -35,13 +35,13 @@ class ScheduleFunction: ModuleFunction {
         let id = String(notification.id)
         let category = UNNotificationCategory(identifier: id, actions: actions, intentIdentifiers: [])
 
-        UNUserNotificationCenter.current().getNotificationCategories { cats in
+        module.notificationAdapter.getCategories { cats in
             var mcats = cats
             if let index = cats.firstIndex(where: { $0.identifier == id }) {
                 mcats.remove(at: index)
             }
             mcats.insert(category)
-            UNUserNotificationCenter.current().setNotificationCategories(mcats)
+            self.module.notificationAdapter.setCategories(mcats)
             callback(id)
         }
     }
@@ -63,7 +63,7 @@ class ScheduleFunction: ModuleFunction {
             
             let request = UNNotificationRequest(identifier: String(notification.id), content: content, trigger: nil)
 
-            UNUserNotificationCenter.current().add(request) { error in
+            self.module.notificationAdapter.addRequest(request) { error in
                 if error != nil {
                     jsCallback(false)
                 } else {
