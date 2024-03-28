@@ -122,13 +122,13 @@ extension SamlLoginViewController: WKNavigationDelegate {
         webView.evaluateJavaScript("sessionStorage.getItem('geotab_sso_credentials');") { result, error in
             if error != nil {
                 DispatchQueue.main.async {
-                    self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Failed retrieving session"))
+                    self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: SsoError.sessionRetrieveFailedError.rawValue))
                     
                 }
             } else {
                 guard let s = result as? String else {
                     DispatchQueue.main.async {
-                        self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Failed parsing session"))
+                        self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: SsoError.sessionParseFailedError.rawValue))
                     }
                     return
                 }
@@ -142,7 +142,7 @@ extension SamlLoginViewController: WKNavigationDelegate {
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Failed parsing session"))
+                        self.dismissWith(error: GeotabDriveErrors.SamlLoginError(error: SsoError.sessionParseFailedError.rawValue))
                     }
                 }
             }

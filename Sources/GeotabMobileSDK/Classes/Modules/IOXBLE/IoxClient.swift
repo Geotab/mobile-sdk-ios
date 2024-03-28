@@ -61,7 +61,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     private let notifyCharId = CBUUID(nsuuid: UUID(uuidString: "430F2EA3-C765-4051-9134-A341254CFD00")!)
     private let writeCharId = CBUUID(nsuuid: UUID(uuidString: "906EE7E0-D8DB-44F3-AF54-6B0DFCECDF1C")!)
     private lazy var notifyChar = CBMutableCharacteristic(type: notifyCharId, properties: [.notify, .read], value: nil, permissions: [.readable, .writeable])
-    private lazy var writeChar = CBMutableCharacteristic(type: writeCharId, properties: [.writeWithoutResponse], value: nil, permissions: [.writeable])
+    private lazy var writeChar = CBMutableCharacteristic(type: writeCharId, properties: [.write], value: nil, permissions: [.writeable])
     private lazy var descriptor = CBMutableDescriptor(type: CBUUID(string: "2902"), value: nil)
     
     weak var delegate: IoxClientDelegate?
@@ -82,7 +82,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     func start(serviceId: String) {
         
         guard !isStarted else {
-            delegate?.clientDidStart(self, error: .IoxBleError(error: "Service is already started"))
+            delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.bleServiceAlreadyStarted.rawValue))
             return
         }
         
@@ -94,19 +94,19 @@ class DefaultIoxClient: NSObject, IoxClient {
         
         switch peripheralManager.state {
         case .poweredOff:
-            delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE is power off state"))
+            delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.blePoweredOffError.rawValue))
             stop()
         case .unauthorized:
-            delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE is unauthorized"))
+            delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.bleUnauthorizedError.rawValue))
             stop()
         case .unsupported:
-            delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE is unsupported"))
+            delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.bleUnsupportedError.rawValue))
             stop()
         case .poweredOn:
             startServiceIfNotYet()
         default:
             if authStateDeniedOrRestricted() {
-                delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE usage is unauthorized"))
+                delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.blePoweredOffError.rawValue))
                 stop()
             } else if authStateNotDetermined() {
                 print("Not Determined")
@@ -124,7 +124,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     
     private func startServiceIfNotYet() {
         guard !isStarted else {
-            delegate?.clientDidStart(self, error: .IoxBleError(error: "Another service is already started"))
+            delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.bleServiceAlreadyStarted.rawValue))
             return
         }
         
@@ -214,7 +214,7 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
         case .unknown:
             break
         case .unsupported:
-            let error = GeotabDriveErrors.IoxBleError(error: "BLE is unsupported")
+            let error = GeotabDriveErrors.IoxBleError(error: IoxBleError.bleUnsupportedError.rawValue)
             if isStarted {
                 // this should not be possible
                 delegate?.clientDidStopUnexpectedly(self, error: error)
@@ -223,7 +223,7 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
             }
             stop()
         case .unauthorized:
-            let error = GeotabDriveErrors.IoxBleError(error: "BLE usage is unauthorized")
+            let error = GeotabDriveErrors.IoxBleError(error: IoxBleError.blePoweredOffError.rawValue)
             if isStarted {
                 delegate?.clientDidStopUnexpectedly(self, error: error)
             } else {
@@ -235,7 +235,7 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
         case .poweredOn:
             startServiceIfNotYet()
         case .poweredOff:
-            let error = GeotabDriveErrors.IoxBleError(error: "BLE is in Power off state")
+            let error = GeotabDriveErrors.IoxBleError(error: IoxBleError.blePoweredOffError.rawValue)
             if isStarted {
                 delegate?.clientDidStopUnexpectedly(self, error: error)
             } else {
@@ -295,11 +295,17 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         $logger.debug("CBPeripheralManager received write")
+        
+        // didReceiveWrite must be responded only once for a sequences of requests
+        if let request = requests.first {
+            peripheral.respond(to: request, withResult: .success)
+        }
+        
         for req in requests {
             guard let data = req.value, req.characteristic == writeChar, req.central == central else {
                 continue
             }
-            
+
             let operation = BlockOperation()
             let byteArray = [UInt8](data)
             operation.addExecutionBlock {

@@ -1,5 +1,10 @@
 import Foundation
 
+enum SsoError: String {
+    case sessionParseFailedError = "Failed parsing session."
+    case sessionRetrieveFailedError = "Failed retrieving session."
+}
+
 class SsoModule: Module {
     static let moduleName = "sso"
 

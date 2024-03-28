@@ -1,6 +1,13 @@
 import Foundation
 import CoreBluetooth
 
+enum IoxBleError: String {
+    case blePoweredOffError = "BLE is in the power off state."
+    case bleUnauthorizedError = "BLE usage is unauthorized."
+    case bleUnsupportedError = "BLE is unsupported."
+    case bleServiceAlreadyStarted = "Another service has already been started."
+}
+
 class IoxBleModule: Module {
     static let moduleName = "ioxble"
     

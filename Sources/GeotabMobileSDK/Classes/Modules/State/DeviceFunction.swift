@@ -28,8 +28,8 @@ class DeviceFunction: ModuleFunction {
             return
         }
         guard let state = arg.result else {
-            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DeviceState returned")))
-            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DeviceState returned")))
+            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: StateError.noStateReturned.rawValue)))
+            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: StateError.noStateReturned.rawValue)))
             callbacks[arg.callerId] = nil
             return
         }
@@ -50,7 +50,7 @@ class DeviceFunction: ModuleFunction {
                 if self.callbacks[callerId] == nil {
                     return
                 }
-                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "Evaluating JS failed")))
+                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.jsEvalFailed.rawValue)))
                 self.callbacks[callerId] = nil
             }
         }

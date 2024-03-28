@@ -28,7 +28,7 @@ class WriteFileAsBinaryFunction: ModuleFunction {
             let data = Data(_: arg.data)
             
             guard let drvfsDir = self.module.drvfsDir else {
-                jsCallback(Result.failure(GeotabDriveErrors.FileException(error: "Drvfs filesystem doesn't exist.")))
+                jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemError.fileSystemDoesNotExist.rawValue)))
                 return
             }
             

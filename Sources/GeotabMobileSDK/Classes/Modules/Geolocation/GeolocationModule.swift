@@ -20,11 +20,14 @@ protocol LocationManager {
     func locationServicesEnabled() -> Bool
 }
 
+enum GeolocationError: String {
+    case permissionDenied = "Permission denied."
+    case positionUnavailable = "Position unavailable."
+}
+
 /// :nodoc:
 class GeolocationModule: Module {
     static let moduleName = "geolocation"
-    static let PERMISSION_DENIED = "PERMISSION_DENIED"
-    static let POSITION_UNAVAILABLE = "POSITION_UNAVAILABLE"
     
     let scriptGateway: ScriptGateway
     var locationManager: LocationManager
@@ -178,13 +181,13 @@ extension GeolocationModule: LocationServiceStarting {
         
         requestedHighAccuracy = enableHighAccuracy
         guard isLocationServicesEnabled else {
-            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.POSITION_UNAVAILABLE))
-            throw GeotabDriveErrors.GeolocationError(error: GeolocationModule.POSITION_UNAVAILABLE)
+            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationError.positionUnavailable.rawValue))
+            throw GeotabDriveErrors.GeolocationError(error: GeolocationError.positionUnavailable.rawValue)
         }
         
         if isDeniedOrRestricted() {
-            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
-            throw GeotabDriveErrors.GeolocationError(error: GeolocationModule.PERMISSION_DENIED)
+            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationError.permissionDenied.rawValue))
+            throw GeotabDriveErrors.GeolocationError(error: GeolocationError.permissionDenied.rawValue)
         }
         
         // note: startService could be called by different times, if one of the calls requested high accuracy, set it.
@@ -244,7 +247,7 @@ extension GeolocationModule: CLLocationManagerDelegate {
                 locationManager.startUpdatingLocation()
             }
         } else if status == .denied {
-            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
+            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationError.permissionDenied.rawValue))
         }
     }
     
@@ -252,14 +255,17 @@ extension GeolocationModule: CLLocationManagerDelegate {
         if let err = error as? CLError {
             switch err {
             case CLError.locationUnknown:
-                updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.POSITION_UNAVAILABLE))
+                updateLastLocation(result: GeolocationResult(position: nil, 
+                                                             error: GeolocationError.positionUnavailable.rawValue))
             case CLError.denied:
-                updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.PERMISSION_DENIED))
+                updateLastLocation(result: GeolocationResult(position: nil, 
+                                                             error: GeolocationError.permissionDenied.rawValue))
             default:
-                updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.POSITION_UNAVAILABLE))
+                updateLastLocation(result: GeolocationResult(position: nil, 
+                                                             error: GeolocationError.positionUnavailable.rawValue))
             }
         } else {
-            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationModule.POSITION_UNAVAILABLE))
+            updateLastLocation(result: GeolocationResult(position: nil, error: GeolocationError.positionUnavailable.rawValue))
         }
     }
     

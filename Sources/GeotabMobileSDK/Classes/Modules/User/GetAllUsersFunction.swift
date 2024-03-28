@@ -28,8 +28,8 @@ class GetAllUsersFunction: ModuleFunction {
             return
         }
         guard let users = arg.result else {
-            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No users returned")))
-            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No users returned")))
+            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noUsersReturned.rawValue)))
+            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noUsersReturned.rawValue)))
             callbacks[arg.callerId] = nil
             return
         }
@@ -50,7 +50,7 @@ class GetAllUsersFunction: ModuleFunction {
                 if self.callbacks[callerId] == nil {
                     return
                 }
-                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "Evaluating JS failed")))
+                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.jsEvalFailed.rawValue)))
                 self.callbacks[callerId] = nil
             }
         }

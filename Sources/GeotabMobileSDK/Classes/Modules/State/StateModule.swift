@@ -1,3 +1,7 @@
+enum StateError: String {
+    case noStateReturned = "No DeviceState returned."
+}
+
 class StateModule: Module {
     static let moduleName = "state"
 

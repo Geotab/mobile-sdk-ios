@@ -27,7 +27,7 @@ class ReadFileAsBinaryFunction: ModuleFunction {
             let path = arg.path
             
             guard let drvfsDir = self.module.drvfsDir else {
-                jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemModule.DRVS_DOESNT_EXIST)))
+                jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemError.fileSystemDoesNotExist.rawValue)))
                 return
             }
             

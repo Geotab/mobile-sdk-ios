@@ -28,8 +28,8 @@ class GetViolationsFunction: ModuleFunction {
             return
         }
         guard let result = arg.result else {
-            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DutyStatusViolations returned")))
-            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No DutyStatusViolations returned")))
+            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noViolationsReturned.rawValue)))
+            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noViolationsReturned.rawValue)))
             callbacks[arg.callerId] = nil
             return
         }
@@ -50,7 +50,7 @@ class GetViolationsFunction: ModuleFunction {
                 if self.callbacks[callerId] == nil {
                     return
                 }
-                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "Evaluating JS failed")))
+                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.jsEvalFailed.rawValue)))
                 self.callbacks[callerId] = nil
             }
         }

@@ -28,8 +28,8 @@ class SetDriverSeatFunction: ModuleFunction {
             return
         }
         guard let user = arg.result else {
-            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No user returned")))
-            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "No user returned")))
+            callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noUsersReturned.rawValue)))
+            jsCallback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.noUsersReturned.rawValue)))
             callbacks[arg.callerId] = nil
             return
         }
@@ -50,7 +50,7 @@ class SetDriverSeatFunction: ModuleFunction {
                 if self.callbacks[callerId] == nil {
                     return
                 }
-                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: "Evaluating JS failed")))
+                callback(Result.failure(GeotabDriveErrors.JsIssuedError(error: UserError.jsEvalFailed.rawValue)))
                 self.callbacks[callerId] = nil
             }
         }

@@ -1,8 +1,12 @@
 import Foundation
 
+enum FileSystemError: String {
+    case fileSystemDoesNotExist = "drvfs filesystem doesn't exist."
+}
+
 class FileSystemModule: Module {
     static let moduleName = "fileSystem"
-    static let DRVS_DOESNT_EXIST = "Drvfs filesystem doesn't exist."
+    
     static let fsPrefix = "drvfs:///"
     let queue: DispatchQueue
     let drvfsDir: URL?

@@ -67,14 +67,14 @@ class SamlLoginWithASFunction: ModuleFunction {
                    asError.errorCode == ASWebAuthenticationSessionError.canceledLogin.rawValue {
                     jsCallback(Result.failure(GeotabDriveErrors.SamlLoginCancelled))
                 } else {
-                    jsCallback(Result.failure(GeotabDriveErrors.SamlLoginError(error: "Failed retrieving session")))
+                    jsCallback(Result.failure(GeotabDriveErrors.SamlLoginError(error: SsoError.sessionRetrieveFailedError.rawValue)))
                 }
                 return
             }
             
             guard let credentialsUrl = credentialsUrl,
                   let credentials = self.credentialsFrom(url: credentialsUrl) else {
-                jsCallback(Result.failure(GeotabDriveErrors.SamlLoginError(error: "Failed parsing session")))
+                jsCallback(Result.failure(GeotabDriveErrors.SamlLoginError(error: SsoError.sessionParseFailedError.rawValue)))
                 return
             }
             
