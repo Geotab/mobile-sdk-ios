@@ -531,7 +531,7 @@ declare namespace geotabModules {
 
     namespace sso {
         /**********
-         * initiatiate a SAML Login request. Please note if a SAML login request hasn't completed(callback function wasn't called),
+         * Initiate a SAML Login request. Please note if a SAML login request hasn't completed(callback function wasn't called),
          * and a new SAML Login is initiated, the previous request will be terminated first with callback(error).
          * @param argument: { samlLoginUrl: string }. Where samlLoginUrl is a URL of the thirdparty's website.
          * @param callback: (err?: Error, result?: string) => void
@@ -539,6 +539,17 @@ declare namespace geotabModules {
          *      - result: string. The `JSON.stringify(sessionStorage.getItem('geotab_sso_credentials'))` value from the sso.html page. That means, Drive is responsible for deserializing the result and checking if the result is null/undefined or has a value.
          */
         function samlLogin(argument: { samlLoginUrl: string }, callback: (err?: Error, result?: string) => void);
+
+        /**********
+         * Initiates a SAML Login request, similar to samlLogin, but instead run through Apple's ASWebAuthenticationSession API. The session
+         * for the ASWebAuthenticationSession API is shared with Safari, or the user's default browser on iOS. It's not intuitive, but if you
+         * need to clear it, it must be cleared from the default browser's settings, not from Geotab Drive.
+         * @param argument: { samlLoginUrl: string, ephemeralSession: bool }. Where samlLoginUrl is a URL of the third party's website. ephemeralSession controls whether state created during the login session (e.g. cookies) is saved or not. If not passed the default value is true, so no session state is saved.
+         * @param callback: (err?: Error, result?: string) => void
+         *      - err: Error. An error will be sent if anything other than success happened. This includes can't load the samlLoginUrl, user cancel's the SAML login, terminated due to a new SAML login is requested etc.
+         *      - result: string. A JSON object of the form { "credentials":{ "database":"value", "sessionId":"value", "userName":"value"), "server":"value" }
+         */
+        function samlLoginWithAS(argument: { samlLoginUrl: string }, callback: (err?: Error, result?: string) => void);
     }
 
     namespace appearance {

@@ -16,13 +16,14 @@ enum Saml {
     
     struct LoginFunctionArgument: Codable {
         let samlLoginUrl: String
+        let ephemeralSession: Bool?
     }
     
     static let scheme = "geotabdrive"
 }
 
 protocol SamlAuthenticating {
-    func authenticate(url: URL, completion: @escaping (URL?, Error?) -> Void)
+    func authenticate(url: URL, ephemeralSession: Bool, completion: @escaping (URL?, Error?) -> Void)
 }
 
 @available(iOS 12.0, *)
@@ -57,7 +58,9 @@ class SamlLoginWithASFunction: ModuleFunction {
             return
         }
 
-        authenticator.authenticate(url: loginUrl) { [weak self] (credentialsUrl, error) in
+        let useEmphemeralSession = arg.ephemeralSession ?? true        
+        authenticator.authenticate(url: loginUrl,
+                                   ephemeralSession: useEmphemeralSession) { [weak self] (credentialsUrl, error) in
             guard let self = self else {
                 return
             }
@@ -118,7 +121,9 @@ class SamlLoginWithASFunction: ModuleFunction {
 @available(iOS 12.0, *)
 class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticationPresentationContextProviding {
     var session: ASWebAuthenticationSession?
-    func authenticate(url: URL, completion: @escaping (URL?, Error?) -> Void) {
+    func authenticate(url: URL,
+                      ephemeralSession: Bool,
+                      completion: @escaping (URL?, Error?) -> Void) {
         session = ASWebAuthenticationSession(url: url,
                                              callbackURLScheme: Saml.scheme,
                                              completionHandler: { [weak self] url, err in
@@ -131,7 +136,7 @@ class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticatio
         
         if #available(iOS 13.0, *) {
             session?.presentationContextProvider = self
-            session?.prefersEphemeralWebBrowserSession = true
+            session?.prefersEphemeralWebBrowserSession = ephemeralSession
         }
         
         session?.start()
