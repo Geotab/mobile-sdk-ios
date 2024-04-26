@@ -30,14 +30,7 @@ class OpenBrowserWindowFunction: ModuleFunction {
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         DispatchQueue.main.async {
             
-            guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!) else {
-                jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-                return
-            }
-            guard let arg = try? JSONDecoder().decode(OpenBrowserWindowArguments.self, from: argData) else {
-                jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-                return
-            }
+            guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: OpenBrowserWindowArguments.self) else { return }
             
             guard let urlString = arg.url as String?,
                 let url = URL(string: urlString),

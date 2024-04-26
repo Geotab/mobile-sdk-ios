@@ -10,15 +10,7 @@ class ScheduleFunction: ModuleFunction {
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let data = try? JSONSerialization.data(withJSONObject: argument!) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
-
-        guard let nativeNotify = try? JSONDecoder().decode(NativeNotify.self, from: data) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
+        guard let nativeNotify = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: NativeNotify.self) else { return }
         
         schedule(notification: nativeNotify) { jsCallback(Result.success("\($0)")) }
         

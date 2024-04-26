@@ -57,14 +57,7 @@ class SamlLoginFunction: ModuleFunction {
         
         DispatchQueue.main.async {
             
-            guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let argData = try? JSONSerialization.data(withJSONObject: argument!) else {
-                jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-                return
-            }
-            guard let arg = try? JSONDecoder().decode(SamlLoginFunctionArgument.self, from: argData) else {
-                jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-                return
-            }
+            guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: SamlLoginFunctionArgument.self) else { return }
             
             guard URL(string: arg.samlLoginUrl) != nil else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))

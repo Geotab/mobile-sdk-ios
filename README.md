@@ -155,6 +155,17 @@ To override default icon in the network error page, create a property in `Info.p
 
 All drive APIs are accessible directly under an instance of `DriveViewController` or `MyGeotabbViewController`. See more details in the [API document](https://geotab.github.io/mobile-sdk-ios/).
 
+## App-Bound Domains
+
+Incorporating App-Bound Domains into your application using the Geotab Drive SDK is recommended. For guidance, refer to [Apple’s documentation](https://webkit.org/blog/10882/app-bound-domains/) on enabling App-Bound Domains, and ensure you include `geotab.com` in your set of approved domains.
+
+If you decide not to use App-Bound Domains, you'll need to set up the Mobile SDK to operate accordingly. When creating a `DriveViewController` instance, adjust the options to disable App-Bound Domains:
+
+```swift
+let options = MobileSdkOptions(useAppBoundDomains: false)
+let driveViewController = DriveViewController(options: options)
+```
+
 ## License
 
 GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.

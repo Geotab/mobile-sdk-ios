@@ -15,15 +15,7 @@ class NativeSpeakFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let data = try? JSONSerialization.data(withJSONObject: argument!) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
-        
-        guard let arg = try? JSONDecoder().decode(NativeSpeakArgument.self, from: data) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
+        guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: NativeSpeakArgument.self) else { return }
         
         let text = arg.text
         // JS uses a rate from 0.1-10, where 1 is normal. iOS uses 0.1-1, where 0.5 is normal.

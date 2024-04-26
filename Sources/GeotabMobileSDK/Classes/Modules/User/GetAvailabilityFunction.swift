@@ -10,14 +10,8 @@ class GetAvailabilityFunction: ModuleFunction {
         super.init(module: module, name: "getAvailability")
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let data = try? JSONSerialization.data(withJSONObject: argument!) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
-        guard let arg = try? JSONDecoder().decode(DriveApiFunctionArgument.self, from: data) else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
+        guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriveApiFunctionArgument.self) else { return }
+        
         guard let callback = callbacks[arg.callerId] else {
             jsCallback(Result.failure(GeotabDriveErrors.InvalidCallError))
             return
