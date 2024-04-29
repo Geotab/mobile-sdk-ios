@@ -28,27 +28,39 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if navigationAction.request.url?.scheme == "blob",
-            #available(iOS 14.5, *) {
-            guard navigationAction.request.url?.absoluteString.lowercased().hasPrefix("blob:https") == true else {
-                // the full URL may contain credentials, do not log it
-                $logger.info("Navigation cancelled for page with scheme \(navigationAction.request.url?.scheme ?? "nil")")
-                decisionHandler(.cancel)
-                return
-            }
-            decisionHandler(.download)
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.allow)
             return
         }
 
-        guard navigationAction.request.url?.scheme == "https" else {
-            // the full URL may contain credentials, do not log it
-            $logger.info("Navigation cancelled for page with scheme \(navigationAction.request.url?.scheme ?? "nil")")
+        switch url.scheme {
+        case "blob":
+            if #available(iOS 14.5, *) {
+                guard url.absoluteString.lowercased().hasPrefix("blob:https") == true else {
+                    // the full URL may contain credentials, do not log it
+                    $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
+                    decisionHandler(.cancel)
+                    return
+                }
+                decisionHandler(.download)
+                return
+            }
+        case "https":
+            break
+        case "mailto", "tel", "sms":
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+            decisionHandler(.cancel)
+            return
+        default:
+            $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
             decisionHandler(.cancel)
             return
         }
 
         if let frame = navigationAction.targetFrame,
-           let domain = navigationAction.request.url?.domain,
+           let domain = url.domain,
            frame.isMainFrame,
            !boundDomains.contains(domain) {
             $logger.warn("Navigating to out of bounds domain \(domain)")
