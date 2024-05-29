@@ -135,7 +135,7 @@ extension SamlLoginViewController: WKNavigationDelegate {
                 do {
                     let array = [s]
                     let json: Data = try JSONSerialization.data(withJSONObject: array, options: [])
-                    var data: String = String(data: json, encoding: .utf8)!
+                    var data: String = String(decoding: json, as: UTF8.self)
                     data = String(data.dropFirst().dropLast())
                     DispatchQueue.main.async {
                         self.dismissWith(result: data)

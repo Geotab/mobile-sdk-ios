@@ -29,7 +29,7 @@ class ReadFileAsBinaryFunction: ModuleFunction {
                 let data = try readFile(fsPrefix: FileSystemModule.fsPrefix, drvfsDir: drvfsDir, path: path, offset: arg.offset ?? 0, size: arg.size)
                 let uint8Array = [UInt8](data)
                 let jsonData = try JSONSerialization.data(withJSONObject: uint8Array)
-                let arrayJson = String(data: jsonData, encoding: .utf8)! // unlikely to fail
+                let arrayJson = String(decoding: jsonData, as: UTF8.self)
                 
                 jsCallback(Result.success("new Uint8Array(\(arrayJson)).buffer"))
             } catch {

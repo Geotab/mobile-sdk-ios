@@ -125,8 +125,8 @@ extension IoxBleModule: IoxClientDelegate {
         if let error = error {
             fireErrorEvent(error: error)
         } else if let event = event,
-                  let eventData = try? JSONEncoder().encode(event),
-                  let deviceJson = String(data: eventData, encoding: .utf8) {
+                  let eventData = try? JSONEncoder().encode(event) {
+            let deviceJson = String(decoding: eventData, as: UTF8.self)
             fireEvent(name: IoxBleModule.deviceEventName, detailValue: deviceJson)
             let ioxBLEDeviceEvent = IOXDeviceEvent(type: 0, deviceEvent: event)
             ioxDeviceEventCallback?(.success(ioxBLEDeviceEvent))

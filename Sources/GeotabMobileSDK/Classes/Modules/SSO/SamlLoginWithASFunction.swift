@@ -112,7 +112,7 @@ class SamlLoginWithASFunction: ModuleFunction {
             return nil
         }
 
-        let jsonString = "'\(String(data: jsonData, encoding: .utf8) ?? "")'"
+        let jsonString = "'\( String(decoding: jsonData, as: UTF8.self))'"
         return jsonString
     }
 }

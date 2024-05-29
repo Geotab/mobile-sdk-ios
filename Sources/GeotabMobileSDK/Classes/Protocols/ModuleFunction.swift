@@ -33,7 +33,7 @@ open class ModuleFunction {
         return functionScript
     }
     
-    func validateAndDecodeJSONObject<T>(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void, decodeType: T.Type) -> T? where T : Decodable {
+    func validateAndDecodeJSONObject<T>(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void, decodeType: T.Type) -> T? where T: Decodable {
         guard argument != nil, JSONSerialization.isValidJSONObject(argument!), let data = try? JSONSerialization.data(withJSONObject: argument!) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return nil

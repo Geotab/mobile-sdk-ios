@@ -162,7 +162,7 @@ func readFileAsText(fsPrefix: String, drvfsDir: URL, path: String) throws -> Str
     
     do {
         let json: Data = try JSONSerialization.data(withJSONObject: array, options: [])
-        var data: String = String(data: json, encoding: .utf8)!
+        var data = String(decoding: json, as: UTF8.self)
         data = String(data.dropFirst().dropLast())
         return data
     } catch {

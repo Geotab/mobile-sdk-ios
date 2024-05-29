@@ -74,7 +74,8 @@ class GeolocationModule: Module {
         let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": name, "geotabNativeCallbacks": Module.geotabNativeCallbacks, "callbackPrefix": Module.callbackPrefix]
         scripts += (try? extraTemplate.render(scriptData)) ?? ""
         
-        if let data = try? JSONEncoder().encode(lastLocationResult), let json = String(data: data, encoding: .utf8) {
+        if let data = try? JSONEncoder().encode(lastLocationResult) {
+            let json = String(decoding: data, as: UTF8.self)
             scripts +=
                 """
                     if (window.\(Module.geotabModules) != null && window.\(Module.geotabModules).\(name) != null) {
@@ -99,11 +100,8 @@ class GeolocationModule: Module {
         guard let data = try? JSONEncoder().encode(result) else {
             return
         }
-        
-        guard let json = String(data: data, encoding: .utf8) else {
-            return
-        }
-        
+                
+        let json = String(decoding: data, as: UTF8.self)
         evaluateScript(json: json)
         scriptGateway.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
     }

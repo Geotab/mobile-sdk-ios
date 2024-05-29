@@ -71,8 +71,8 @@ class AppLogEventSource {
                 
                 let eventDetail = MobileEvent(detail: LogDetail(message: detailMessage, level: level.toLogLevel()))
 
-                if let encodedDetailData = try? JSONEncoder().encode(eventDetail),
-                   let encodedDetailString = String(data: encodedDetailData, encoding: .utf8) {
+                if let encodedDetailData = try? JSONEncoder().encode(eventDetail) {
+                   let encodedDetailString = String(decoding: encodedDetailData, as: UTF8.self)
                     scriptGateway.push(moduleEvent: ModuleEvent(event: "app.log", params: encodedDetailString)) { _ in }
                 }
             }

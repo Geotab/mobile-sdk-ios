@@ -14,8 +14,7 @@ class Encrypter: Encrypting {
     func decrypt(_ value: Data) throws -> String {
         guard let key = try getKey() else { throw SecureStorageError.cryptoError }
         let data = try cryptCC(data: value, key: key, operation: kCCDecrypt)
-        guard let decryptedString = String(data: data, encoding: .utf8) else { throw SecureStorageError.cryptoError }
-        return decryptedString
+        return String(decoding: data, as: UTF8.self)
     }
     
     private func generateSymmetricEncryptionKey() throws -> Data {

@@ -73,7 +73,7 @@ class UIDelegate: NSObject, WKUIDelegate {
         let cancelText = NSLocalizedString("Cancel", tableName: "Localizable", bundle: languageBundle, comment: "nil")
         let alertController = UIAlertController(title: prompt, message: nil, preferredStyle: .alert)
 
-        alertController.addTextField { (textField) -> Void in
+        alertController.addTextField { textField in
             textField.text = defaultText
         }
 
