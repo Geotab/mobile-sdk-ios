@@ -20,7 +20,7 @@ enum IoxClientState {
 protocol IoxClient {
     var state: IoxClientState { get }
     var delegate: IoxClientDelegate? { get set }
-    func start(serviceId: String)
+    func start(serviceId: String, reconnect: Bool)
     func stop()
 }
 
@@ -29,6 +29,8 @@ class DefaultIoxClient: NSObject, IoxClient {
 
     @TaggedLogger("DefaultIoxClient")
     private var logger
+    
+    private var reconnect = false
     
     private let executer: AsyncMainExecuterAdapter
     private let queue: OperationQueue
@@ -79,12 +81,14 @@ class DefaultIoxClient: NSObject, IoxClient {
         self.queue.maxConcurrentOperationCount = 1
     }
     
-    func start(serviceId: String) {
+    func start(serviceId: String, reconnect: Bool) {
         
         guard !isStarted else {
             delegate?.clientDidStart(self, error: .IoxBleError(error: IoxBleError.bleServiceAlreadyStarted.rawValue))
             return
         }
+        
+        self.reconnect = reconnect
         
         guard let uuid = UUID(uuidString: serviceId) else {
             delegate?.clientDidStart(self, error: .IoxBleError(error: "\(serviceId) is not an UUID"))
@@ -289,8 +293,14 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
         $logger.debug("CBPeripheralManager characteristic unsubscribed from")
-        state = .advertising
-        self.central = nil
+        
+        // this is an unexpected disconnect
+        if reconnect {
+            state = .advertising
+            self.central = nil
+        } else {
+            stop()
+        }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {

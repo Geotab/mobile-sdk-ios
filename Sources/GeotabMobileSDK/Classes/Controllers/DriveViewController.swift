@@ -34,7 +34,8 @@ open class DriveViewController: SDKViewController {
         MotionModule(scriptGateway: scriptDelegate, options: options),
         IoxBleModule(scriptGateway: scriptDelegate),
         SsoModule(viewPresenter: self),
-        AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self)
+        AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),
+        SecureStorageModule()
     ]
     
     /**
@@ -46,11 +47,7 @@ open class DriveViewController: SDKViewController {
      */
     public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
         super.init(modules: modules, options: options)
-        self.modules.formUnion(modulesInternal)
-        #if INCLUDE_LOCAL_STORAGE
-        self.modules.insert(SecureStorageModule())
-        #endif
-        
+        self.modules.formUnion(modulesInternal)        
     }
     
     /// :nodoc:

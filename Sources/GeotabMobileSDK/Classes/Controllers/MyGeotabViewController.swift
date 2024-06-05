@@ -35,7 +35,7 @@ public class MyGeotabViewController: SDKViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)") {
+        if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
         }

@@ -60,13 +60,13 @@ class IoxBleModule: Module {
         startListener = nil
     }
     
-    func start(serviceId: String, _ jsCallback: @escaping (Result<String, Error>) -> Void) {
+    func start(serviceId: String, reconnect: Bool, _ jsCallback: @escaping (Result<String, Error>) -> Void) {
         guard startListener == nil else {
             jsCallback(Result.failure(GeotabDriveErrors.IoxBleError(error: "One call at a time only")))
             return
         }
         startListener = jsCallback
-        client.start(serviceId: serviceId)
+        client.start(serviceId: serviceId, reconnect: reconnect)
     }
     
     func stop() {
