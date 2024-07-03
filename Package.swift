@@ -29,7 +29,7 @@ let package = Package(
             name: "GeotabMobileSDK",
             dependencies: [.product(name: "Mustache", package: "GRMustache.swift"),
                            .product(name: "Reachability", package: "Reachability.swift"),
-                           "SwiftRison"],
+                           .product(name: "SwiftRison", package: "mobile-swift-rison")],
             exclude: [
                 "native-sdk.d.ts"],
             resources: [
