@@ -162,9 +162,12 @@ extension DriveViewController {
         let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
         if let url = URL(string: urlString) {
             customUrl = url
-            if isViewLoaded {
-                webView.load(URLRequest(url: customUrl!))
+            if isViewLoaded,
+               let url = webView.url?.with(fragment: path) {
                 customUrl = nil
+                if !path.isEmpty {
+                    webView.load(URLRequest(url: url))
+                }
             }
         }
     }
@@ -279,5 +282,13 @@ extension DriveViewController {
             return
         }
         ioxBleModule.ioxDeviceEventCallback = callback
+    }
+}
+
+extension URL {
+    func with(fragment: String) -> URL? {
+        var urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: true)
+        urlComponents?.fragment = fragment.removingPercentEncoding
+        return urlComponents?.url
     }
 }
