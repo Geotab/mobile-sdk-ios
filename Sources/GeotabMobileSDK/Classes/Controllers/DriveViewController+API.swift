@@ -162,11 +162,20 @@ extension DriveViewController {
         let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
         if let url = URL(string: urlString) {
             customUrl = url
-            if isViewLoaded,
-               let url = webView.url?.with(fragment: path) {
-                customUrl = nil
-                if !path.isEmpty {
-                    webView.load(URLRequest(url: url))
+            
+            let setFragment = UserDefaults.standard.bool(forKey: FeatureFlags.iosOnlySetFragmentOnDeepLinks)
+            if setFragment {
+                if isViewLoaded,
+                   let url = webView.url?.with(fragment: path) {
+                    customUrl = nil
+                    if !path.isEmpty {
+                        webView.load(URLRequest(url: url))
+                    }
+                }
+            } else {
+                if isViewLoaded {
+                    webView.load(URLRequest(url: customUrl!))
+                    customUrl = nil
                 }
             }
         }
