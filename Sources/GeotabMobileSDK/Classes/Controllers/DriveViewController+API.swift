@@ -163,8 +163,8 @@ extension DriveViewController {
         if let url = URL(string: urlString) {
             customUrl = url
             
-            let setFragment = UserDefaults.standard.bool(forKey: FeatureFlags.iosOnlySetFragmentOnDeepLinks)
-            if setFragment {
+            if FeatureFlag.iosOnlySetFragmentOnDeepLinks.isEnabled {
+                $logger.warn("Deep link opened using DRIVE.IOS_ONLY_SET_FRAGMENT_ON_DEEP_LINKS")
                 if isViewLoaded,
                    let url = webView.url?.with(fragment: path) {
                     customUrl = nil
