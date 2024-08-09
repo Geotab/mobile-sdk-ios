@@ -59,6 +59,7 @@ class Encrypter: Encrypting {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrAccount as String: Self.account,
                                     kSecAttrService as String: Self.service,
+                                    kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
                                     kSecValueData as String: keyData]
         var status = SecItemAdd(query as CFDictionary, nil)
         
