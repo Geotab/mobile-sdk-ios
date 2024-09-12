@@ -162,20 +162,11 @@ extension DriveViewController {
         let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#\(path)"
         if let url = URL(string: urlString) {
             customUrl = url
-            
-            if FeatureFlag.iosOnlySetFragmentOnDeepLinks.isEnabled {
-                $logger.warn("Deep link opened using DRIVE.IOS_ONLY_SET_FRAGMENT_ON_DEEP_LINKS")
-                if isViewLoaded,
-                   let url = webView.url?.with(fragment: path) {
-                    customUrl = nil
-                    if !path.isEmpty {
-                        webView.load(URLRequest(url: url))
-                    }
-                }
-            } else {
-                if isViewLoaded {
-                    webView.load(URLRequest(url: customUrl!))
-                    customUrl = nil
+            if isViewLoaded,
+               let url = webView.url?.with(fragment: path) {
+                customUrl = nil
+                if !path.isEmpty {
+                    webView.load(URLRequest(url: url))
                 }
             }
         }
