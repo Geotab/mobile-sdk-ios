@@ -12,7 +12,7 @@ typealias ApplicationState = () -> UIApplication.State
 class AppModule: Module {
     
     static let moduleName = "app"
-    private let scriptGateway: ScriptGateway
+    private weak var scriptGateway: ScriptGateway?
     private let appLogEventSource: AppLogEventSource
     let options: MobileSdkOptions
     
@@ -112,12 +112,14 @@ class AppModule: Module {
     }
     
     func fireBackgroundChangedEvent(background: Bool) {
+        guard let scriptGateway else { return }
         keepAlive = "{}"
         evaluateScript(background: background)
         scriptGateway.push(moduleEvent: ModuleEvent(event: "app.background", params: "{ \"detail\": \(background) }")) { _ in }
     }
     
     func fireBackgroundFailureEvent(error: String) {
+        guard let scriptGateway else { return }
         let background = applicationState() == .active ? false : true
         keepAlive = "{ error: \"\(error)\" }"
         evaluateScript(background: background)
@@ -125,6 +127,7 @@ class AppModule: Module {
     }
     
     func evaluateScript(background: Bool) {
+        guard let scriptGateway else { return }
         let script =
             """
                 if (window.\(Module.geotabModules) != null && window.\(Module.geotabModules).\(name) != null) {

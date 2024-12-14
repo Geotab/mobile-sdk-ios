@@ -92,6 +92,12 @@ public enum GeotabDriveErrors: Error {
      Error related to Local Storage Module
      */
     case StorageModuleError(error: String)
+    /**
+    Indicates a required object is invalid or has been released from memory
+    */
+    case InvalidObjectError
+    
+    case PushNotificationModuleError(error: String)
 }
 
 extension GeotabDriveErrors: LocalizedError {
@@ -145,6 +151,10 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[OperationCallFailed]: \(errMsg)"
         case .StorageModuleError(let errMsg):
             return "GeotabDriveErrors[StorageModuleError]: \(errMsg)"
+        case .InvalidObjectError:
+            return "GeotabDriveErrors[InvalidObjectError]"
+        case .PushNotificationModuleError(let errMsg):
+            return "GeotabDriveErrors[PushNotificationModuleError]: \(errMsg)"
         }
     }
 }

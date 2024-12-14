@@ -12,7 +12,8 @@ public class MyGeotabViewController: SDKViewController {
         BrowserModule(viewPresenter: self),
         DeviceModule(scriptGateway: scriptDelegate),
         PrintModule(scriptGateway: scriptDelegate, viewPresenter: self),
-        SsoModule(viewPresenter: self)
+        SsoModule(viewPresenter: self),
+        LocalNotificationModule(options: options)
     ]
     
     /**

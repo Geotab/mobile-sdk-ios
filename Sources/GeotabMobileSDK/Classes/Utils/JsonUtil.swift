@@ -6,7 +6,7 @@ enum JsonContants {
     static let zero = "0"
 }
 
-func toJson<T: Encodable>(_ val: T) -> String? {
+public func toJson<T: Encodable>(_ val: T) -> String? {
     guard let data = try? JSONEncoder().encode(val) else {
         return nil
     }

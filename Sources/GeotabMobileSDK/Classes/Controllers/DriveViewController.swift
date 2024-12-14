@@ -31,7 +31,6 @@ open class DriveViewController: SDKViewController {
         CameraModule(viewPresenter: self, moduleContainer: self),
         PhotoLibraryModule(viewPresenter: self, moduleContainer: self),
         GeolocationModule(scriptGateway: scriptDelegate, options: options),
-        MotionModule(scriptGateway: scriptDelegate, options: options),
         IoxBleModule(scriptGateway: scriptDelegate),
         SsoModule(viewPresenter: self),
         AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),

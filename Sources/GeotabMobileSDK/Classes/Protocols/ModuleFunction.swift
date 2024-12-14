@@ -4,7 +4,7 @@ import WebKit
  Defines a  function to be included in a Geotab module's Javascript API. Intended for internal Drive and MyGeotab use.
  */
 open class ModuleFunction {
-    private let _module: Module
+    private let moduleName: String
     public let name: String
     /**
      - Parameters:
@@ -12,7 +12,7 @@ open class ModuleFunction {
         - name: String. Name of the Javascript function defined.
      */
     public init(module: Module, name: String) {
-        self._module = module
+        moduleName = module.name
         self.name = name
     }
     
@@ -26,7 +26,7 @@ open class ModuleFunction {
     
     func scripts() -> String {
         let functionTemplate = try! Module.templateRepo.template(named: "ModuleFunction.Script")
-        let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": _module.name, "geotabNativeCallbacks": Module.geotabNativeCallbacks, "callbackPrefix": Module.callbackPrefix, "functionName": name]        
+        let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": moduleName, "geotabNativeCallbacks": Module.geotabNativeCallbacks, "callbackPrefix": Module.callbackPrefix, "functionName": name]        
         guard let functionScript = try? functionTemplate.render(scriptData) else {
             return ""
         }

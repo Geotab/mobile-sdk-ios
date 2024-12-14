@@ -3,9 +3,7 @@ import WebKit
 
 class ClearWebViewCacheFunction: ModuleFunction {
 
-    private let module: AppModule
     init(module: AppModule) {
-        self.module = module
         super.init(module: module, name: "clearWebViewCache")
     }
 

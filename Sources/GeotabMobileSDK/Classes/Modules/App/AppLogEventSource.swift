@@ -20,7 +20,7 @@ class AppLogEventSource {
     private var lastReset = Date()
     
     // default is no more than 10 logs fired per 30 mins
-    init(scriptGateway: ScriptGateway, logLimit: Int = 10, interval: TimeInterval = 30 * 60) {
+    init(scriptGateway: ScriptGateway?, logLimit: Int = 10, interval: TimeInterval = 30 * 60) {
         self.scriptGateway = scriptGateway
         self.logLimit = logLimit
         self.interval = interval
