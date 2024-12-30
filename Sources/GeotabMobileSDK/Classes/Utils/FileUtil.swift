@@ -65,27 +65,19 @@ func writeFile(fsPrefix: String, drvfsDir: URL, path: String, data: Data, offset
     }
     
     if let offset = offset {
-        if #available(iOS 13.0, *) {
-            do {
-                try fileHandle.seek(toOffset: offset)
-            } catch {
-                throw GeotabDriveErrors.FileException(error: "Failed to seek to offset")
-            }
-        } else {
-            fileHandle.seek(toFileOffset: offset)
+        do {
+            try fileHandle.seek(toOffset: offset)
+        } catch {
+            throw GeotabDriveErrors.FileException(error: "Failed to seek to offset")
         }
     } else {
         fileHandle.seekToEndOfFile()
     }
     
-    if #available(iOS 13.4, *) {
-        do {
-            try fileHandle.write(contentsOf: data)
-        } catch {
-            throw GeotabDriveErrors.FileException(error: "Failed to write")
-        }
-    } else {
-        fileHandle.write(data)
+    do {
+        try fileHandle.write(contentsOf: data)
+    } catch {
+        throw GeotabDriveErrors.FileException(error: "Failed to write")
     }
     
     fileHandle.seekToEndOfFile()
@@ -116,14 +108,10 @@ func readFile(fsPrefix: String, drvfsDir: URL, path: String, offset: UInt64, siz
         throw GeotabDriveErrors.FileException(error: "Failed opening file for reading")
     }
     
-    if #available(iOS 13.0, *) {
-        do {
-            try fileHandle.seek(toOffset: offset)
-        } catch {
-            throw GeotabDriveErrors.FileException(error: "Failed to seek writing")
-        }
-    } else {
-        fileHandle.seek(toFileOffset: offset)
+    do {
+        try fileHandle.seek(toOffset: offset)
+    } catch {
+        throw GeotabDriveErrors.FileException(error: "Failed to seek writing")
     }
 
     let data: Data!

@@ -14,8 +14,6 @@ class SsoModule: Module {
         self.viewPresenter = viewPresenter
         super.init(name: SsoModule.moduleName)
         functions.append(SamlLoginFunction(module: self, name: "samlLogin"))
-        if #available(iOS 12.0, *) {
-            functions.append(SamlLoginWithASFunction(module: self))
-        }
+        functions.append(SamlLoginWithASFunction(module: self))
     }
 }

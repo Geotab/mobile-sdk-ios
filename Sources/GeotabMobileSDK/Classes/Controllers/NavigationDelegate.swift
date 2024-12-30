@@ -35,16 +35,14 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
 
         switch url.scheme {
         case "blob":
-            if #available(iOS 14.5, *) {
-                guard url.absoluteString.lowercased().hasPrefix("blob:https") == true else {
-                    // the full URL may contain credentials, do not log it
-                    $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
-                    decisionHandler(.cancel)
-                    return
-                }
-                decisionHandler(.download)
+            guard url.absoluteString.lowercased().hasPrefix("blob:https") == true else {
+                // the full URL may contain credentials, do not log it
+                $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
+                decisionHandler(.cancel)
                 return
             }
+            decisionHandler(.download)
+            return
         case "https":
             break
         case "mailto", "tel", "sms":
@@ -79,11 +77,9 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        if #available(iOS 14.0, *) {
-            if let error = error as? WKError,
-               error.code == .navigationAppBoundDomain {
-                $logger.warn("Navigating to out of bounds domain: \(error.localizedDescription)")
-            }
+        if let error = error as? WKError,
+           error.code == .navigationAppBoundDomain {
+            $logger.warn("Navigating to out of bounds domain: \(error.localizedDescription)")
         }
 
         navigationHost?.navigationFailed(with: error as NSError)
@@ -91,7 +87,6 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
 }
 
 /// :nodoc:
-@available(iOS 14.5, *)
 extension NavigationDelegate: WKDownloadDelegate {
 
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {

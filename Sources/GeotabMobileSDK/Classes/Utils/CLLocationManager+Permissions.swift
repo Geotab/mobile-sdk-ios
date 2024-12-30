@@ -9,11 +9,7 @@ extension CLLocationManager {
     }
     
     func getAuthorizationStatus() -> CLAuthorizationStatus {
-        if #available(iOS 14.0, *) {
-            return authorizationStatus
-        } else {
-            return CLLocationManager.authorizationStatus()
-        }
+        return authorizationStatus
     }
     
     static func isAuthorizedForAlways() -> Bool {

@@ -11,9 +11,7 @@ extension WKWebView {
         
         webviewConfig.processPool = WKProcessPool()
         
-        if #available(iOS 14.0, *) {
-            webviewConfig.limitsNavigationsToAppBoundDomains = useAppBoundDomains
-        }
+        webviewConfig.limitsNavigationsToAppBoundDomains = useAppBoundDomains
         
         webviewConfig.mediaTypesRequiringUserActionForPlayback = []
 

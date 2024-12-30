@@ -193,23 +193,13 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
     
     func authStateDeniedOrRestricted() -> Bool {
         var denRes = false
-        if #available(iOS 13, *) {
-            let authStatus = peripheralManager.authorization
-            denRes = authStatus == .restricted || authStatus == .denied
-        } else {
-            let authStatus = CBPeripheralManager.authorizationStatus()
-            denRes = authStatus == .restricted || authStatus == .denied
-        }
+        let authStatus = peripheralManager.authorization
+        denRes = authStatus == .restricted || authStatus == .denied
         return denRes
     }
     
     func authStateNotDetermined() -> Bool {
-        var notDet = false
-        if #available(iOS 13, *) {
-            notDet = peripheralManager.authorization == .notDetermined
-        } else {
-            notDet = CBPeripheralManager.authorizationStatus() == .notDetermined
-        }
+        var notDet = peripheralManager.authorization == .notDetermined
         return notDet
     }
     

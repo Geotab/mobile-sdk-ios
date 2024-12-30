@@ -26,7 +26,6 @@ protocol SamlAuthenticating {
     func authenticate(url: URL, ephemeralSession: Bool, completion: @escaping (URL?, Error?) -> Void)
 }
 
-@available(iOS 12.0, *)
 class SamlLoginWithASFunction: ModuleFunction {
     
     let jsonArgumentDecoder: JsonArgumentDecoding
@@ -118,7 +117,6 @@ class SamlLoginWithASFunction: ModuleFunction {
 }
 
 // MARK: - DefaultSamlAuthenticator
-@available(iOS 12.0, *)
 class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticationPresentationContextProviding {
     var session: ASWebAuthenticationSession?
     func authenticate(url: URL,
@@ -134,10 +132,8 @@ class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticatio
             self.session = nil}
         )
         
-        if #available(iOS 13.0, *) {
-            session?.presentationContextProvider = self
-            session?.prefersEphemeralWebBrowserSession = ephemeralSession
-        }
+        session?.presentationContextProvider = self
+        session?.prefersEphemeralWebBrowserSession = ephemeralSession
         
         session?.start()
     }
