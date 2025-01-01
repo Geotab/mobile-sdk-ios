@@ -1,10 +1,8 @@
 class DeviceModule: Module {
-    static let moduleName = "device"
+    private static let moduleName = "device"
     static let device = Device()
-    let scriptGateway: ScriptGateway
     
-    init(scriptGateway: ScriptGateway) {
-        self.scriptGateway = scriptGateway
+    init() {
         super.init(name: DeviceModule.moduleName)
     }
     

@@ -3,8 +3,10 @@ import WebKit
 
 class ClearWebViewCacheFunction: ModuleFunction {
 
+    static let functionName: String = "clearWebViewCache"
+    
     init(module: AppModule) {
-        super.init(module: module, name: "clearWebViewCache")
+        super.init(module: module, name: Self.functionName)
     }
 
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

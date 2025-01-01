@@ -10,7 +10,7 @@ public class MyGeotabViewController: SDKViewController {
     private lazy var modulesInternal: Set<Module> = [
         AppModule(scriptGateway: scriptDelegate, options: options),
         BrowserModule(viewPresenter: self),
-        DeviceModule(scriptGateway: scriptDelegate),
+        DeviceModule(),
         PrintModule(scriptGateway: scriptDelegate, viewPresenter: self),
         SsoModule(viewPresenter: self),
         LocalNotificationModule(options: options)

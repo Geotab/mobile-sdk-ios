@@ -1,6 +1,6 @@
 import SafariServices
 
-protocol InAppBrowser {
+protocol InAppBrowser: AnyObject {
     var isBeingDismissed: Bool { get }
     func viewController() -> UIViewController
     func dismiss(animated flag: Bool, completion: (() -> Void)?)
@@ -9,9 +9,9 @@ protocol InAppBrowser {
 class BrowserModule: Module {
     static let moduleName = "browser"
 
-    private let viewPresenter: ViewPresenter
+    private weak var viewPresenter: ViewPresenter?
+    weak var inAppBrowser: InAppBrowser?
     private let browserFactory: (URL) -> InAppBrowser
-    var inAppBrowser: InAppBrowser?
 
     init(viewPresenter: ViewPresenter,
          browserFactory: @escaping (URL) -> InAppBrowser = { SFSafariViewController(url: $0) }) {
@@ -53,7 +53,7 @@ extension BrowserModule: BrowserWindowOpening {
         
         let browser = getBrowserWithUrl(url: url)
         inAppBrowser = browser
-        viewPresenter.present(browser.viewController(), animated: true, completion: nil)
+        viewPresenter?.present(browser.viewController(), animated: true, completion: nil)
     }
 }
 

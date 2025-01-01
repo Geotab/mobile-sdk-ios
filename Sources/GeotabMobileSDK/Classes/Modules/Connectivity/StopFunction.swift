@@ -6,11 +6,12 @@ protocol ConnectivityStopping: Module {
 }
 
 class StopFunction: ModuleFunction {
+    private static let functionName: String = "stop"
     private weak var stopper: ConnectivityStopping?
     
     init(stopper: ConnectivityStopping) {
         self.stopper = stopper
-        super.init(module: stopper, name: "stop")
+        super.init(module: stopper, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

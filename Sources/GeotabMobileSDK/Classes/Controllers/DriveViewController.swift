@@ -20,7 +20,7 @@ open class DriveViewController: SDKViewController {
         AppModule(scriptGateway: scriptDelegate, options: options),
         ScreenModule(),
         UserModule(scriptGateway: scriptDelegate),
-        DeviceModule(scriptGateway: scriptDelegate),
+        DeviceModule(),
         StateModule(scriptGateway: scriptDelegate),
         LocalNotificationModule(options: options),
         SpeechModule(),

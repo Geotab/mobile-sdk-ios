@@ -4,11 +4,12 @@ protocol ConnectivityStarting: Module {
 }
 
 class StartFunction: ModuleFunction {
+    private static let functionName: String = "start"
     private weak var starter: ConnectivityStarting?
     
     init(starter: ConnectivityStarting) {
         self.starter = starter
-        super.init(module: starter, name: "start")
+        super.init(module: starter, name: Self.functionName)
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         let result = start()

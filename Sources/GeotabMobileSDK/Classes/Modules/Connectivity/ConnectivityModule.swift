@@ -1,7 +1,7 @@
 import CoreTelephony
 import Reachability
 
-protocol NetworkReachability {
+protocol NetworkReachability: AnyObject {
     var whenReachable: Reachability.NetworkReachable? { get set }
     var whenUnreachable: Reachability.NetworkUnreachable? { get set }
     var connection: Reachability.Connection { get }
@@ -13,10 +13,10 @@ protocol NetworkReachability {
 }
 
 class ConnectivityModule: Module {
-    static let moduleName = "connectivity"
+    private static let moduleName = "connectivity"
 
-    let scriptGateway: ScriptGateway
-    var reachability: NetworkReachability?
+    private weak var scriptGateway: ScriptGateway?
+    private weak var reachability: NetworkReachability?
     var started = false
     init(scriptGateway: ScriptGateway,
          reachability: NetworkReachability? = try? Reachability(notificationQueue: .global())) {
@@ -41,7 +41,7 @@ class ConnectivityModule: Module {
               let json = stateJson(online: online) else {
             return
         }
-        scriptGateway.push(moduleEvent: ModuleEvent(event: "connectivity", params: "{ \"detail\": \(json) }")) { _ in }
+        scriptGateway?.push(moduleEvent: ModuleEvent(event: "connectivity", params: "{ \"detail\": \(json) }")) { _ in }
     }
     
     func stateJson(online: Bool) -> String? {
@@ -111,7 +111,7 @@ class ConnectivityModule: Module {
                     window.\(Module.geotabModules).\(name).state = \(json);
                 }
             """
-        scriptGateway.evaluate(script: script) { _ in }
+        scriptGateway?.evaluate(script: script) { _ in }
     }
 }
 
