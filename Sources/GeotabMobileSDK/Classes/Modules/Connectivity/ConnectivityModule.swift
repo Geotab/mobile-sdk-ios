@@ -16,7 +16,7 @@ class ConnectivityModule: Module {
     private static let moduleName = "connectivity"
 
     private weak var scriptGateway: ScriptGateway?
-    private weak var reachability: NetworkReachability?
+    private let reachability: NetworkReachability?
     var started = false
     init(scriptGateway: ScriptGateway,
          reachability: NetworkReachability? = try? Reachability(notificationQueue: .global())) {
