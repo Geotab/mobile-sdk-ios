@@ -5,10 +5,11 @@ protocol LocationServiceStopping: Module {
 }
 
 class StopLocationServiceFunction: ModuleFunction {
+    static let functionName: String = "___stopLocationService"
     private weak var stopper: LocationServiceStopping?
     init(stopper: LocationServiceStopping) {
         self.stopper = stopper
-        super.init(module: stopper, name: "___stopLocationService")
+        super.init(module: stopper, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

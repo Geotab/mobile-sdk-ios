@@ -1,11 +1,12 @@
 import UIKit
 
 class GetAllFunction: ModuleFunction {
-    private let module: LocalNotificationModule
+    private static let functionName: String = "getAll"
+    private weak var module: LocalNotificationModule?
     
     init(module: LocalNotificationModule) {
         self.module = module
-        super.init(module: module, name: "getAll")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -20,9 +21,9 @@ class GetAllFunction: ModuleFunction {
     
     func getAll(_ result: @escaping ([NativeNotify]) -> Void) {
         var notifications: [NativeNotify] = []
-        module.notificationAdapter.getDelivered { nts in
+        module?.notificationAdapter?.getDelivered { [weak self] nts in
             notifications += nts
-            self.module.notificationAdapter.getPendingRequests { reqs in
+            self?.module?.notificationAdapter?.getPendingRequests { reqs in
                 notifications += reqs
                 result(notifications)
             }

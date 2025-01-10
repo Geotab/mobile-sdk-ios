@@ -9,10 +9,11 @@ protocol LocationServiceStarting: Module {
 }
 
 class StartLocationServiceFunction: ModuleFunction {
+    static let functionName: String = "___startLocationService"
     private weak var starter: LocationServiceStarting?
     init(starter: LocationServiceStarting) {
         self.starter = starter
-        super.init(module: starter, name: "___startLocationService")
+        super.init(module: starter, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

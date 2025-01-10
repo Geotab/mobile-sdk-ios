@@ -9,11 +9,9 @@ protocol PrintViewPresenter: ViewPresenter {
 class PrintModule: Module {
     static let moduleName = "print"
 
-    let scriptGateway: ScriptGateway
-    let viewPresenter: PrintViewPresenter
+    weak var viewPresenter: PrintViewPresenter?
 
-    init(scriptGateway: ScriptGateway, viewPresenter: PrintViewPresenter) {
-        self.scriptGateway = scriptGateway
+    init(viewPresenter: PrintViewPresenter) {
         self.viewPresenter = viewPresenter
         super.init(name: PrintModule.moduleName)
         functions.append(PrintFunction(module: self))

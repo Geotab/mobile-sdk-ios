@@ -1,10 +1,9 @@
 import UIKit
 
 class KeepAwakeFunction: ModuleFunction {
-    private let module: ScreenModule
+    private static let functionName: String = "keepAwake"
     init(module: ScreenModule) {
-        self.module = module
-        super.init(module: module, name: "keepAwake")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

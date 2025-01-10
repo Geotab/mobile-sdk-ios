@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 import UIKit
 
-protocol LocationManager {
+protocol LocationManager: AnyObject {
     var distanceFilter: CLLocationDistance { get set }
     var desiredAccuracy: CLLocationAccuracy { get set }
     var allowsBackgroundLocationUpdates: Bool { get set }
@@ -29,8 +29,8 @@ enum GeolocationError: String {
 class GeolocationModule: Module {
     static let moduleName = "geolocation"
     
-    let scriptGateway: ScriptGateway
-    var locationManager: LocationManager
+    private weak var scriptGateway: ScriptGateway?
+    private let locationManager: LocationManager
     let isInBackground: () -> Bool
     
     var lastLocationResult = GeolocationResult(position: nil, error: nil)
@@ -45,11 +45,11 @@ class GeolocationModule: Module {
     
     init(scriptGateway: ScriptGateway,
          options: MobileSdkOptions,
-         locationbManager: LocationManager = CLLocationManager(),
+         locationManager: LocationManager = CLLocationManager(),
          isInBackground: @escaping (() -> Bool) = { UIApplication.shared.applicationState != .active }) {
         self.scriptGateway = scriptGateway
         self.options = options
-        self.locationManager = locationbManager
+        self.locationManager = locationManager
         self.isInBackground = isInBackground
         defaultAccuracy = locationManager.desiredAccuracy
         super.init(name: GeolocationModule.moduleName)
@@ -64,7 +64,7 @@ class GeolocationModule: Module {
     }
     
     var isLocationServicesEnabled: Bool {
-        locationManager.locationServicesEnabled()
+        locationManager.locationServicesEnabled() ?? false
     }
     
     override func scripts() -> String {
@@ -103,7 +103,7 @@ class GeolocationModule: Module {
                 
         let json = String(decoding: data, as: UTF8.self)
         evaluateScript(json: json)
-        scriptGateway.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
+        scriptGateway?.push(moduleEvent: ModuleEvent(event: "geolocation.result", params: "{ \"detail\": \(json) }")) { _ in }
     }
     
     deinit {
@@ -287,7 +287,7 @@ extension GeolocationModule: CLLocationManagerDelegate {
                     window.\(Module.geotabModules).\(name).result = \(json);
                 }
             """
-        scriptGateway.evaluate(script: script) { _ in }
+        scriptGateway?.evaluate(script: script) { _ in }
     }
     
 }

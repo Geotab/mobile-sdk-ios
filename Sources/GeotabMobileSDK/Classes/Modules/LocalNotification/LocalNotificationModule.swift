@@ -18,7 +18,7 @@ protocol UserNotifcationAdapter: AnyObject {
 class LocalNotificationModule: Module {
     static let moduleName = "localNotification"
     private static let DEFAULT_OPEN_ACTION_IDENTIFIER = "com.apple.UNNotificationDefaultActionIdentifier"
-    let notificationAdapter: UserNotifcationAdapter
+    weak var notificationAdapter: UserNotifcationAdapter?
     let options: MobileSdkOptions
     
     // remember what the client is listening for

@@ -1,14 +1,15 @@
 import Foundation
 
 class StopIoxBleFunction: ModuleFunction {
-    private let module: IoxBleModule
+    private static let functionName: String = "stop"
+    private weak var module: IoxBleModule?
     init(module: IoxBleModule) {
         self.module = module
-        super.init(module: module, name: "stop")
+        super.init(module: module, name: Self.functionName)
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        DispatchQueue.main.async {
-            self.module.stop()
+        DispatchQueue.main.async { [weak self] in
+            self?.module?.stop()
             jsCallback(Result.success("undefined"))
         }
         

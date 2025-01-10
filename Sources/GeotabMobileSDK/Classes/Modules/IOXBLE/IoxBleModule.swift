@@ -20,7 +20,7 @@ class IoxBleModule: Module {
     private static let stateEventName = "ioxble.state"
     private static let statePropertyName = "state"
     
-    private let scriptGateway: ScriptGateway
+    private weak var scriptGateway: ScriptGateway?
     private var startListener: ((Result<String, Error>) -> Void)?
     private var client: IoxClient
     private let executer: AsyncMainExecuterAdapter
@@ -91,7 +91,7 @@ extension IoxBleModule: IoxClientDelegate {
     }
 
     private func fireEvent(name: String, detailValue: String) {
-        scriptGateway.push(moduleEvent: ModuleEvent(event: name,
+        scriptGateway?.push(moduleEvent: ModuleEvent(event: name,
                                                     params: "{ \"detail\": \(detailValue) }")) { _ in }
     }
     
@@ -103,7 +103,7 @@ extension IoxBleModule: IoxClientDelegate {
     func clientDidUpdateState(_ client: IoxClient, state: IoxClientState) {
         executer.run { [weak self] in
             guard let self = self else { return }
-            self.scriptGateway.evaluate(script: self.updateStatePropertyScript(state: state)) { _ in }
+            self.scriptGateway?.evaluate(script: self.updateStatePropertyScript(state: state)) { _ in }
             self.fireEvent(name: IoxBleModule.stateEventName, detailValue: self.stateEventDetailJson(state: state))
         }
     }

@@ -1,13 +1,15 @@
 class OnFunction: ModuleFunction {
-    private let module: LocalNotificationModule
+    private static let functionName: String = "on"
+    private weak var module: LocalNotificationModule?
     init(module: LocalNotificationModule) {
         self.module = module
-        super.init(module: module, name: "on")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        guard let actionIdentifiers = argument as? [String] else {
+        guard let module,
+              let actionIdentifiers = argument as? [String] else {
             return
         }
         
@@ -16,6 +18,7 @@ class OnFunction: ModuleFunction {
     }
     
     override func scripts() -> String {
+        guard let module else { return "" }
         
         let functionTemplate = try! Module.templateRepo.template(named: "ModuleFunction.On.Script")
         

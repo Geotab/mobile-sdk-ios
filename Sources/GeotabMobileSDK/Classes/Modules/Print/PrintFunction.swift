@@ -1,29 +1,30 @@
 import UIKit
 
 class PrintFunction: ModuleFunction {
-    private let module: PrintModule
+    private static let functionName: String = "print"
+    private weak var module: PrintModule?
     init(module: PrintModule) {
         self.module = module
-        super.init(module: module, name: "print")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        if let presentedViewController = module.viewPresenter.presentedViewController {
+        if let presentedViewController = module?.viewPresenter?.presentedViewController {
             guard presentedViewController.isBeingPresented == false
                     && presentedViewController.isBeingDismissed == false else {
                 jsCallback(Result.success("undefined"))
                 return
             }
 
-          presentedViewController.dismiss(animated: true, completion: {
-              self.module.viewPresenter.presentPrintController {
+          presentedViewController.dismiss(animated: true, completion: { [weak self] in
+              self?.module?.viewPresenter?.presentPrintController {
                   jsCallback(Result.success("undefined"))
               }
           })
 
         } else {
-            self.module.viewPresenter.presentPrintController {
+            module?.viewPresenter?.presentPrintController {
                 jsCallback(Result.success("undefined"))
             }
         }

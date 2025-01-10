@@ -6,10 +6,11 @@ struct StartIoxBleArgument: Codable {
 }
 
 class StartIoxBleFunction: ModuleFunction {
-    private let module: IoxBleModule
+    private static let functionName: String = "start"
+    private weak var module: IoxBleModule?
     init(module: IoxBleModule) {
         self.module = module
-        super.init(module: module, name: "start")
+        super.init(module: module, name: Self.functionName)
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument,
@@ -20,8 +21,8 @@ class StartIoxBleFunction: ModuleFunction {
             return
         }
         
-        DispatchQueue.main.async {
-            self.module.start(serviceId: uuid, reconnect: arg.reconnect ?? false, jsCallback)
+        DispatchQueue.main.async { [weak self] in
+            self?.module?.start(serviceId: uuid, reconnect: arg.reconnect ?? false, jsCallback)
         }
         
     }
