@@ -4,7 +4,7 @@ import WebKit
  Defines a  function to be included in a Geotab module's Javascript API. Intended for internal Drive and MyGeotab use.
  */
 open class ModuleFunction {
-    private let moduleName: String
+    public let moduleName: String
     public let name: String
     /**
      - Parameters:

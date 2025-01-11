@@ -1,12 +1,15 @@
 import WebKit
 
 class GetHosRuleSetFunction: ModuleFunction {
-    private let module: UserModule
+    private static let functionName: String = "getHosRuleSet"
+    
+    private weak var scriptGateway: ScriptGateway?
     var userName = ""
     var callbacks: [String: (Result<String, Error>) -> Void] = [:]
-    init(module: UserModule) {
-        self.module = module
-        super.init(module: module, name: "getHosRuleSet")
+    
+    init(module: UserModule, scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -34,11 +37,18 @@ class GetHosRuleSetFunction: ModuleFunction {
     }
     
     func call(_ callback: @escaping (Result<String, Error>) -> Void) {
-        let callerId = UUID().uuidString
-        self.callbacks[callerId] = callback
+        guard let scriptGateway else {
+            callback(Result.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetHosRuleSetFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
-        module.scriptGateway.evaluate(script: script) { result in
+        let callerId = UUID().uuidString
+        callbacks[callerId] = callback
+        
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetHosRuleSetFunction.Api", scriptData: ["moduleName": moduleName, "functionName": name, "callerId": callerId, "userName": userName])
+        scriptGateway.evaluate(script: script) { [weak self] result in
+            guard let self else { return }
+            
             switch result {
             case .success: return
             case .failure:
@@ -49,8 +59,9 @@ class GetHosRuleSetFunction: ModuleFunction {
                 self.callbacks[callerId] = nil
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + DriveSdkConfig.apiCallTimeoutSeconds) {
-            guard let callback = self.callbacks[callerId] else {
+        DispatchQueue.main.asyncAfter(deadline: .now() + DriveSdkConfig.apiCallTimeoutSeconds) { [weak self] in
+            guard let self,
+                  let callback = self.callbacks[callerId] else {
                 return
             }
             callback(Result.failure(GeotabDriveErrors.ApiCallTimeoutError))

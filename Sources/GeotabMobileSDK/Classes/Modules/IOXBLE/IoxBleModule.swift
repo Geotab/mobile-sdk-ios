@@ -24,6 +24,8 @@ class IoxBleModule: Module {
     private var startListener: ((Result<String, Error>) -> Void)?
     private var client: IoxClient
     private let executer: AsyncMainExecuterAdapter
+    
+    private let jsonEncoder: JSONEncoder
 
     var ioxDeviceEventCallback: IOXDeviceEventCallbackType?
     
@@ -39,11 +41,14 @@ class IoxBleModule: Module {
         self.scriptGateway = scriptGateway
         self.executer = executer
         self.client = client
+        self.jsonEncoder = JSONEncoder()
         super.init(name: IoxBleModule.moduleName)
         functions.append(StartIoxBleFunction(module: self))
         functions.append(StopIoxBleFunction(module: self))
             
         self.client.delegate = self
+        
+        initJsonEncoder()
     }
     
     override func scripts() -> String {
@@ -75,6 +80,17 @@ class IoxBleModule: Module {
 }
 
 extension IoxBleModule: IoxClientDelegate {
+    
+    private func initJsonEncoder() {
+        self.jsonEncoder.dataEncodingStrategy = .custom { data, encoder in
+            var container = encoder.unkeyedContainer()
+            data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+                bytes
+                    .map { Int8(bitPattern: $0) }
+                    .forEach{ try? container.encode($0) }
+            }
+        }
+    }
     
     private func updateStatePropertyScript(state: IoxClientState) -> String {
         return """
@@ -125,7 +141,7 @@ extension IoxBleModule: IoxClientDelegate {
         if let error = error {
             fireErrorEvent(error: error)
         } else if let event = event,
-                  let eventData = try? JSONEncoder().encode(event) {
+                  let eventData = try? jsonEncoder.encode(event) {
             let deviceJson = String(decoding: eventData, as: UTF8.self)
             fireEvent(name: IoxBleModule.deviceEventName, detailValue: deviceJson)
             let ioxBLEDeviceEvent = IOXDeviceEvent(type: 0, deviceEvent: event)

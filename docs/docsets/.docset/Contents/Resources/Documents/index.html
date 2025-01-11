@@ -119,273 +119,146 @@
         <section>
           <section class="section">
             
-            <h1 id='geotab-ios' class='heading'>geotab-ios</h1>
+            <p><a href="https://github.com/Geotab/mobile-sdk-ios/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Geotab/mobile-sdk-ios" alt="GitHub license"></a> <a href="https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html"><img src="https://img.shields.io/badge/docs-passing-brightgreen" alt="GitHub docs"></a> <a href="https://swift.org/"><img src="https://img.shields.io/badge/swift-4%20%7C%204.2%20%7C%205-brightgreen" alt="GitHub swift"></a> <a href="https://github.com/Geotab/mobile-sdk-ios/tags"><img src="https://img.shields.io/github/v/tag/Geotab/mobile-sdk-ios?label=release" alt="GitHub tag (latest by date)"></a></p>
+<h1 id='mobile-sdk-ios' class='heading'>Mobile SDK iOS</h1>
+<h2 id='how-to-start' class='heading'>How to start</h2>
+<h3 id='installation' class='heading'>Installation</h3>
 
-<p>The monorepo for Geotab&rsquo;s iOS specific mobile code.</p>
-<h2 id='orientation' class='heading'>Orientation</h2>
-<h3 id='drive' class='heading'>Drive/</h3>
+<p>The Geotab Mobile SDK is a Swift Package. Refer to Apple&rsquo;s documentation for how to add the SDK to your project: <a href="https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app">https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app</a></p>
 
-<p>The source code for the Geotab Drive mobile app <a href="Drive/README.md">README</a>. To open the project:</p>
-<pre class="highlight shell"><code>git submodule update --init --recursive
-<span class="nb">cd </span>Drive
-pod install
-open GeotabDrive.xcworkspace
-</code></pre>
-<h3 id='example' class='heading'>Example/</h3>
+<p>Using the Mobile SDK with SwiftUI is not recommended. </p>
 
-<p>An internal test/example app for the Geotab Mobile SDK. Open the <code>geotab-mobile-sdk-ios.xcworkspace</code> in the root folder of repository.</p>
-<h3 id='geotabmobilesdk' class='heading'>GeotabMobileSDK/</h3>
+<p><strong>Add background mode capabilities</strong></p>
 
-<p>The code for the Geotab Mobile SDK <a href="GeotabMobileSDK/README.md">README</a>. The project is mirrored to Github. The contents of the folder are to be considered as open source. To work on the SDK, open any of the Drive, Example, or MyGeotab projects.</p>
-<h3 id='mygeotab' class='heading'>MyGeotab/</h3>
+<p>In your app&rsquo;s &ldquo;Signing and Capabilities&rdquo; section, add &ldquo;Background mode&rdquo; section and check the &ldquo;Audio, Airplay and Picture in Picture&rdquo; and &ldquo;Location updates&rdquo; options. </p>
 
-<p>The source code for the Geotab Drive mobile app <a href="MyGeotab/README.md">README</a>. To open the project:</p>
-<pre class="highlight shell"><code><span class="nb">cd </span>MyGeotab
-open MyGeotabProject.xcodeproj
-</code></pre>
-<h3 id='swiftrison' class='heading'>SwiftRison/</h3>
+<p><strong>Info.plist</strong></p>
 
-<p>The SwiftRison open sourced library for encoding and decoding RISON objects in Swift <a href="SwiftRison/README.md">README</a>. Mirrored to Github. To work on the SDK, open any of the Drive, Example, or MyGeotab projects.</p>
-<h3 id='scripts' class='heading'>scripts/</h3>
-
-<p>Common scripts used by the CI build.</p>
-<h2 id='mobile-sdk-architecture-notes' class='heading'>Mobile SDK Architecture Notes</h2>
-<h3 id='javascript-global-variables-and-injected-native-code-wrappers' class='heading'>Javascript global variables and injected native code wrappers</h3>
-
-<ol>
-<li>window.geotabModules: is a global javascript object that contains all native modules and functions of each module.</li>
-</ol>
-
-<p>In the example app, ViewController defines a module called &ldquo;testMod&rdquo; with a function in the module called &ldquo;testFunc&rdquo;. Such module and its function can be called as follows:</p>
-<pre class="highlight javascript"><code><span class="nb">window</span><span class="p">.</span><span class="nx">geotabModules</span><span class="p">.</span><span class="nx">testMod</span><span class="p">.</span><span class="nx">testFunc</span><span class="p">(</span><span class="s2">"test Param"</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"res: "</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">)</span>
-</code></pre>
-
-<ol>
-<li>window.<strong>_geotab_native_callbacks is an internal javascript object that contains all the javascript callback functions where native codes will call using `webview.evaluate(&ldquo;</strong>_geotab_native_callbacks.some_callback_function_name(error, result)&rdquo;)` to send result back to the module function caller.</li>
-</ol>
-
-<p>After result is responded from native code and returned back to the caller, the callback function is removed from window.___geotab_native_callbacks object. </p>
-
-<p><em>Note: ___geotab_native_callbacks is an internal implementation detail, neither drive web app nor the native modlue implementor need to be aware or understand it.</em></p>
-<h3 id='how-to-write-the-native-modlue' class='heading'>How to write the native modlue</h3>
-
-<p>Step 1: Create a module class extending from Module</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">UserModule</span><span class="p">:</span> <span class="kt">Module</span> <span class="p">{</span>
-    <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"user"</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>Step 2: Create a module function class extended from ModuleFunction protocol, implement handler function. Return the result as JSON string in the handler function.</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="kd">public</span> <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"get"</span>
-    <span class="nf">init</span><span class="p">(</span><span class="nv">module</span><span class="p">:</span> <span class="kt">UserModule</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
-    <span class="p">}</span>
-
-    <span class="kd">func</span> <span class="nf">handleJavascriptCall</span><span class="p">(</span><span class="nv">arguments</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span> <span class="nv">jsCallback</span><span class="p">:</span> <span class="p">(</span><span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">jsCallback</span><span class="p">(</span><span class="kt">Result</span><span class="o">.</span><span class="nf">success</span><span class="p">(</span><span class="s">"undefined"</span><span class="p">))</span>
-    <span class="c1">//  jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))</span>
-    <span class="p">}</span>
-
-<span class="p">}</span>
-</code></pre>
-
-<p>Step 3: Add the module function to it&rsquo;s module&rsquo;s class&rsquo;s function array</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">UserModule</span><span class="p">:</span> <span class="kt">Module</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">getUserFunction</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kt">GetUserFunction</span><span class="p">(</span><span class="nv">module</span><span class="p">:</span> <span class="k">self</span><span class="p">)</span>
-    <span class="p">}()</span>
-    <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"user"</span><span class="p">)</span>
-        <span class="n">functions</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">getUserFunction</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>Step 4: Register a module instance. </p>
-
-<p>If you are writing an external Module (SDK User&rsquo;s module), register the module on construction of DriveViewController:</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">driveVC</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="p">[</span><span class="kt">UserModule</span><span class="p">()])</span>
-</code></pre>
-
-<p>If you are writing an internal Module (Module SDK itself used internnally), register the module in  <code>DriveViewController::modulesInternal</code></p>
-<pre class="highlight swift"><code><span class="kd">private</span> <span class="k">var</span> <span class="nv">modulesInternal</span><span class="p">:</span> <span class="p">[</span><span class="kt">Module</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kt">UserModule</span><span class="p">()]</span>
-</code></pre>
-<h3 id='navtive-code-sending-event-to-javascript' class='heading'>Navtive code sending Event to Javascript</h3>
-
-<p>Note: params can only be stringified javascript objects. This constraint is set by the webview.</p>
-<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="nf">push</span><span class="p">(</span><span class="nv">moduleEvent</span><span class="p">:</span> <span class="kt">ModuleEvent</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="s">"testEvent"</span><span class="p">,</span> <span class="nv">params</span><span class="p">:</span> <span class="s">"{val: 321}"</span><span class="p">))</span><span class="o">.</span><span class="n">subscribe</span> <span class="p">{</span> <span class="n">evt</span> <span class="k">in</span>
-    <span class="nf">print</span><span class="p">(</span><span class="s">"push result: </span><span class="se">\(</span><span class="n">evt</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
-<span class="p">}</span><span class="o">.</span><span class="nf">disposed</span><span class="p">(</span><span class="nv">by</span><span class="p">:</span> <span class="k">self</span><span class="o">.</span><span class="n">disposeBag</span><span class="p">)</span>
-</code></pre>
-<h2 id='native-sdk-getting-asynchronous-js-result' class='heading'>Native SDK getting asynchronous JS result</h2>
-
-<p>This design is proposed to solve the request of getting data out of Geotab Js API: <a href="https://github.com/Geotab/sdk/blob/drive-api-extensions/src/software/guides/drive-addins.md">https://github.com/Geotab/sdk/blob/drive-api-extensions/src/software/guides/drive-addins.md</a></p>
-<h3 id='sdk-api-interface' class='heading'>SDK API interface</h3>
-
-<p>API caller is expecting an API looks like below. Caller is expecting to receive its response via a callback function.</p>
-<pre class="highlight swift"><code>
-<span class="kd">public</span> <span class="kd">typealias</span> <span class="kt">GetUserCallbackType</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">Result</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">GeotabUser</span><span class="p">],</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
-
-<span class="kd">public</span> <span class="kd">func</span> <span class="nf">getUser</span><span class="p">(</span><span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt">GetUserCallbackType</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">guard</span> <span class="k">let</span> <span class="nv">fun</span> <span class="o">=</span> <span class="nf">findModuleFunction</span><span class="p">(</span><span class="nv">module</span><span class="p">:</span> <span class="s">"user"</span><span class="p">,</span> <span class="nv">function</span><span class="p">:</span> <span class="s">"get"</span><span class="p">)</span> <span class="k">as?</span> <span class="kt">GetUserFunction</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="k">return</span>
-    <span class="p">}</span>
-    <span class="n">fun</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">webView</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>The problem is that many Geotab Js APIs are Promise based. That means API implementor CANNOT retrieve the Geotab Js API result simply by: </p>
-<pre class="highlight swift"><code><span class="n">webView</span><span class="o">.</span><span class="nf">evaluateJavaScript</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="k">in</span>
-    <span class="nf">callback</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>In order to receive asynchronous result and giving the caller the ability of concurrent calls of the same API. A design is proposed as followed in the next sections.</p>
-<h3 id='modulefunction' class='heading'>ModuleFunction</h3>
-
-<p>We will be utilizing the Module class and ModuleFunction protocol to define js API to let the injected js script to return the result back to native.</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">UserModule</span><span class="p">:</span> <span class="kt">Module</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">getUserFunction</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kt">GetUserFunction</span><span class="p">(</span><span class="nv">module</span><span class="p">:</span> <span class="k">self</span><span class="p">)</span>
-    <span class="p">}()</span>
-    <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"user"</span><span class="p">)</span>
-        <span class="n">functions</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">getUserFunction</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="nv">function</span><span class="p">:</span> <span class="kt">String</span>
-    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">handleJavascriptCall</span><span class="p">(</span><span class="nv">argument</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span> <span class="nv">jsCallback</span><span class="p">:</span> <span class="p">(</span><span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>The entry point of calling the Module from the SDK caller should looks like <code>func call(...)</code>:</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="k">var</span> <span class="nv">module</span><span class="p">:</span> <span class="kt">String</span>
-    <span class="k">var</span> <span class="nv">function</span><span class="p">:</span> <span class="kt">String</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="kd">func</span> <span class="nf">call</span><span class="p">(</span><span class="n">_</span> <span class="nv">webView</span><span class="p">:</span> <span class="kt">WKWebView</span><span class="p">,</span> <span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt">GetUserCallbackType</span><span class="p">)</span> <span class="p">{</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>The SDK API interface will call this <code>call</code> function as such: <code>GetUserFunction::call(webView, callback)</code>, passing in the webView and the callback function the SDK caller is provided.</p>
-
-<p>the <code>call()</code> function now can use the webview to inject a snippy of js script to call the <code>GetUserFunction</code>. See next section for details</p>
-<h3 id='receiving-result-from-js-and-send-it-back-to-the-sdk-caller' class='heading'>Receiving result from JS and send it back to the SDK caller</h3>
-
-<p>After JS returns the result back to ModuleFunction into <code>handleJavascriptCall()</code>. ModuleFunction implementor needs to pass the result back to the SDK caller. That means, we need to store the <code>callback</code> function the SDK caller provided somewhere. The simplest is just add a property like this:</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="kd">private</span> <span class="k">var</span> <span class="nv">storedCallback</span><span class="p">:</span> <span class="kt">CallbackWithType</span><span class="o">&lt;</span><span class="kt">User</span><span class="o">&gt;</span><span class="p">?</span>
-<span class="p">}</span>
-
-</code></pre>
-
-<p>However, we don&rsquo;t want to do that. That simple approach will cause API call competition problems and bugs when multiple calls to the same API are executed at the same time.</p>
-
-<p>The proper design will be storing all callback functions in a dictionary as follows:</p>
-<pre class="highlight swift"><code>
-<span class="kd">struct</span> <span class="kt">GetUserFunctionArgument</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="nv">callerId</span><span class="p">:</span> <span class="kt">String</span>
-    <span class="k">let</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="c1">// javascript given error, when js failed providing result, it provides error</span>
-    <span class="k">let</span> <span class="nv">result</span><span class="p">:</span> <span class="p">[</span><span class="kt">GeotabUser</span><span class="p">]?</span>
-<span class="p">}</span>
-
-<span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="kd">private</span> <span class="k">var</span> <span class="nv">callbacks</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">CallbackWithType</span><span class="o">&lt;</span><span class="kt">User</span><span class="o">&gt;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:]</span>
-    <span class="kd">func</span> <span class="nf">handleJavascriptCall</span><span class="p">(</span><span class="nv">argument</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span> <span class="nv">jsCallback</span><span class="p">:</span> <span class="p">(</span><span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// next line is pseudo</span>
-        <span class="k">let</span> <span class="nv">arg</span><span class="p">:</span> <span class="kt">ModuleGetUserFunctionArgument</span> <span class="o">=</span> <span class="kt">Convert</span> <span class="n">arguments</span> <span class="n">to</span> <span class="kt">GetUserFunctionArgument</span> 
-        <span class="k">let</span> <span class="nv">callback</span> <span class="o">=</span> <span class="n">callbacks</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">callerId</span><span class="p">]</span>
-        <span class="nf">callback</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
-        <span class="c1">// clean up</span>
-        <span class="n">callbacks</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">callerId</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
-        <span class="nf">jsCallback</span><span class="p">(</span><span class="kt">Result</span><span class="o">.</span><span class="nf">success</span><span class="p">(</span><span class="s">"undefined"</span><span class="p">))</span> <span class="c1">// passing js value "undefined", since we dont care the value.</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-
-<p>The key in the dictionary is a generated ID called <code>callerId</code>. It uniquelly identifies each call the the same API and is one-on-one with the callback function.</p>
-
-<p>The handler function can simply pass the received result back to the caller&rsquo;s callback function, then remove the ID from the dictionary to clean up each call.</p>
-<h3 id='making-the-call' class='heading'>Making the call</h3>
-
-<p>To trigger the JS API call, a js wrapper function should be executed in <code>func call()</code>.</p>
-
-<p>Steps to follow:</p>
+<p>The following keys must be added to your app&rsquo;s Info.plist:</p>
 
 <ul>
-<li>Generate a callerID</li>
-<li>Store the <callId, callback></li>
-<li>Run a block of js scripts to trigger the call to Geotab JS API. The block of js script will send the result back to the native <code>handleJavascriptCall()</code> by using <code>window.geotabModules.&lt;module&gt;.&lt;function&gt;()</code> call that is installed by the <code>modulesInternal</code>.</li>
+<li>&ldquo;Privacy - Location Always Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Location Always and When In Use Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Location When In Use Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Camera Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Photo Library Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Face ID Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Bluetooth Always Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Bluetooth Peripheral Usage Description&rdquo;</li>
+<li>&ldquo;Privacy - Motion Usage Description&rdquo;</li>
 </ul>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">GetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
-    <span class="o">...</span> <span class="o">...</span>
-    <span class="kd">private</span> <span class="k">var</span> <span class="nv">callbacks</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">CallbackWithType</span><span class="o">&lt;</span><span class="kt">User</span><span class="o">&gt;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:]</span>
-    <span class="kd">func</span> <span class="nf">handleJavascriptCall</span><span class="p">(</span><span class="nv">argument</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span> <span class="nv">jsCallback</span><span class="p">:</span> <span class="p">(</span><span class="kt">Result</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
-        <span class="o">...</span> <span class="o">...</span>
-    <span class="p">}</span>
-    <span class="kd">func</span> <span class="nf">call</span><span class="p">(</span><span class="n">_</span> <span class="nv">webView</span><span class="p">:</span> <span class="kt">WKWebView</span><span class="p">,</span> <span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt">CallbackWithType</span><span class="o">&lt;</span><span class="kt">User</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// register the callerId and its callback</span>
-        <span class="k">let</span> <span class="nv">callerId</span> <span class="o">=</span> <span class="kt">UUID</span><span class="p">()</span><span class="o">.</span><span class="n">uuidString</span>
-        <span class="k">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">callerId</span><span class="p">]</span> <span class="o">=</span> <span class="n">callback</span>
-        <span class="k">let</span> <span class="nv">script</span> <span class="o">=</span> <span class="s">"""
-            (async function (callerId) {
-                try {
-                    ... ...
-                    var user = await api.mobile.user.get();
-                    window.geotabModules.</span><span class="se">\(</span><span class="n">module</span><span class="se">)</span><span class="s">.</span><span class="se">\(</span><span class="n">function</span><span class="se">)</span><span class="s">({callerId: callerId, result: user}, (error, res) =&gt; console.log("</span><span class="nv">res</span><span class="p">:</span> <span class="s">", res) );
-                } catch(err) {
-                    window.geotabModules.</span><span class="se">\(</span><span class="n">module</span><span class="se">)</span><span class="s">.</span><span class="se">\(</span><span class="n">function</span><span class="se">)</span><span class="s">({callerId: callerId, error: err.message}, (error, res) =&gt; console.log("</span><span class="nv">res</span><span class="p">:</span> <span class="s">", res) );
-                    console.log('user.get ERROR: ', err.message);
-                    throw err;
-                }
-            })("</span><span class="err">\</span><span class="p">(</span><span class="n">callerId</span><span class="p">)</span><span class="s">");
-        """</span>
-        <span class="n">webView</span><span class="o">.</span><span class="nf">evaluateJavaScript</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="k">in</span>
-            <span class="k">if</span> <span class="n">error</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="o">&amp;&amp;</span> <span class="k">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">callerId</span><span class="p">]</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-                <span class="nf">print</span><span class="p">(</span><span class="s">"Evaluating js error? </span><span class="se">\(</span><span class="n">error</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
-                <span class="nf">callback</span><span class="p">(</span><span class="kt">Result</span><span class="o">.</span><span class="nf">failure</span><span class="p">(</span><span class="kt">GeotabDriveErrors</span><span class="o">.</span><span class="kt">JsIssuedError</span><span class="p">(</span><span class="nv">error</span><span class="p">:</span> <span class="s">"Evaluating JS failed"</span><span class="p">)))</span>
-                <span class="k">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">callerId</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
-                <span class="k">return</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
+<h3 id='what-is-driveviewcontroller' class='heading'>What is DriveViewController?</h3>
+
+<p>DriveViewController is the starting point to integrate the Geotab Mobile SDK. It&rsquo;s the container for the Geotab Drive web app equipped with native APIs for accessing the contained app&rsquo;s data.</p>
+<h3 id='initialization' class='heading'>Initialization</h3>
+
+<p>Inside your <code>main</code> controller, define a property that holds a singleton instance of <code><a href="Classes/DriveViewController.html">DriveViewController</a></code>.</p>
+<pre class="highlight swift"><code><span class="kd">private</span> <span class="k">var</span> <span class="nv">driveVC</span><span class="p">:</span> <span class="kt">DriveViewController</span><span class="o">!</span>
+</code></pre>
+
+<p>If your drivers should login from a specific Geotab server, then you should set <code>serverAddress</code> first:</p>
+<pre class="highlight swift"><code><span class="kt">DriveSdkConfig</span><span class="o">.</span><span class="n">serverAddress</span> <span class="o">=</span> <span class="s">"&lt;server-name&gt;.geotab.com"</span>
+</code></pre>
+
+<p>Do not prefix the address with &ldquo;https://&rdquo;.</p>
+
+<p>You should also set up a listener for <code>LastServerAddress</code> updates:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="n">setLastServerAddressUpdatedCallback</span> <span class="p">{</span> <span class="n">server</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="nv">store</span> <span class="o">=</span> <span class="kt">UserDefaults</span><span class="o">.</span><span class="n">standard</span>
+    <span class="n">store</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="kt">MainViewController</span><span class="o">.</span><span class="kt">GEOTAB_DRIVE_LAST_SERVER_KEY</span><span class="p">)</span>
+    <span class="kt">DriveSdkConfig</span><span class="o">.</span><span class="n">serverAddress</span> <span class="o">=</span> <span class="n">server</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>Save the last the value of <code>LastServerAddress</code> in persistent storage. To allow for offline caching, on app launch read the value from persistent storage and set it to <code><a href="Classes/DriveSdkConfig.html#/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ">DriveSdkConfig.serverAddress</a></code> before executing any Drive SDK APIs.</p>
+
+<p>Initialize the instance during <code>viewDidLoad()</code> of your <code>main</code> controller</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="p">[])</span>
+</code></pre>
+<h3 id='login' class='heading'>Login</h3>
+
+<p>The Geotab Mobile SDK allows integrators use their own authentication and user management. All the SDK needs to know to log into Geotab Drive is a user&rsquo;s credential. </p>
+
+<p>Supply credentials to <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> as follows:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="nf">setSession</span><span class="p">(</span><span class="nv">credentialResult</span><span class="p">:</span> <span class="kt">CredentialResult</span><span class="p">,</span> <span class="nv">isCoDriver</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">set</span> <span class="n">to</span> <span class="kc">true</span> <span class="k">if</span> <span class="n">it</span><span class="err">'</span><span class="n">s</span> <span class="n">a</span> <span class="n">co</span><span class="o">-</span><span class="n">driver</span> <span class="n">login</span><span class="o">&gt;</span><span class="p">)</span>
+</code></pre>
+
+<p>where credentials is an instance of: </p>
+<pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">GeotabCredentials</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+
+    <span class="k">var</span> <span class="nv">userName</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">database</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">sessionID</span><span class="p">:</span> <span class="kt">String</span>
+
+    <span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">userName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">database</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">sessionID</span><span class="p">:</span> <span class="kt">String</span><span class="p">){</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">userName</span> <span class="o">=</span> <span class="n">userName</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">sessionID</span> <span class="o">=</span> <span class="n">sessionID</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
 
-<p>Injecting scripts to Webview and expecting it will return the native call something may timeout due to any possible human coding errors. To prevent a SDK API call that never received a callback. A timeout check is recommended:</p>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">ModuleGetUserFunction</span><span class="p">:</span> <span class="kt">ModuleFunction</span> <span class="p">{</span>
+<p>See <code>GeotabCredentials.swift</code>.</p>
+<h3 id='present-the-code-driveviewcontroller-code' class='heading'>Present the <code><a href="Classes/DriveViewController.html">DriveViewController</a></code></h3>
+
+<p>Once user credentials are supplied, present the view controller to the user. <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> will automatically validate the session and continue through the normal Geotab Drive workflow.</p>
+<pre class="highlight swift"><code><span class="k">self</span><span class="o">.</span><span class="nf">present</span><span class="p">(</span><span class="n">driveVC</span><span class="p">,</span> <span class="nv">animated</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span>
+</code></pre>
+<h3 id='session-expired-invalid-no-session-and-co-driver-login' class='heading'>Session expired/invalid/no-session and co-Driver Login</h3>
+
+<p>To be notified when a user session has expired, set a listener:</p>
+<pre class="highlight swift"><code><span class="n">driveVC</span><span class="o">.</span><span class="n">setLoginRequiredCallback</span> <span class="p">{</span> <span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">errorMessage</span><span class="p">)</span> <span class="k">in</span>
     <span class="o">...</span> <span class="o">...</span>
-    <span class="kd">func</span> <span class="nf">call</span><span class="p">(</span><span class="n">_</span> <span class="nv">webView</span><span class="p">:</span> <span class="kt">WKWebView</span><span class="p">,</span> <span class="n">_</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt">CallbackWithType</span><span class="o">&lt;</span><span class="kt">User</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="o">...</span> <span class="o">...</span>
-        <span class="n">webView</span><span class="o">.</span><span class="nf">evaluateJavaScript</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="k">in</span>
-            <span class="o">...</span> <span class="o">...</span>
-        <span class="p">}</span>
-        <span class="kt">DispatchQueue</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="nf">asyncAfter</span><span class="p">(</span><span class="nv">deadline</span><span class="p">:</span> <span class="o">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">+</span> <span class="mi">9</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">guard</span> <span class="k">let</span> <span class="nv">callback</span> <span class="o">=</span> <span class="k">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">callerId</span><span class="p">]</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="k">return</span>
-            <span class="p">}</span>
-            <span class="nf">callback</span><span class="p">(</span><span class="kt">Result</span><span class="o">.</span><span class="nf">failure</span><span class="p">(</span><span class="kt">GeotabDriveErrors</span><span class="o">.</span><span class="kt">ApiCallTimeoutError</span><span class="p">))</span>
-            <span class="k">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">callerId</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
+
+<p>Set a listener for session changes, including: no session, invalid session, session expired, or co-driver login is requested.</p>
+
+<p>There are three predefined speical values for error messages that may be passed to the callback.</p>
+
+<ul>
+<li><code>&quot;&quot;</code>: an empty string indicates no login is required, login is successful, or the login is in progress. At this state, an implementor should present <code><a href="Classes/DriveViewController.html">DriveViewController</a></code>.</li>
+<li><code>&quot;LoginRequired&quot;</code>: indicates the login UI is going to show a login form (No valid user is available or the current activeSession is expired/invalid). At this state an implementor should present a custom login screen.</li>
+<li><code>&quot;AddCoDriver&quot;</code>: indicates that a co-driver login is requested. At this state and implementor should present a custom co-driver login screen.</li>
+</ul>
+
+<p>For any other error message an implementor should present a custom login screen.</p>
+
+<p>After receiving a session expired callback. An integrator should dismiss the presented <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> and present user with a login screen.</p>
+<h3 id='other-important-callbacks' class='heading'>Other important callbacks</h3>
+
+<p>There are few other callbacks useful for managing <code><a href="Classes/DriveViewController.html">DriveViewController</a></code>.</p>
+
+<ul>
+<li><p><code>DriveViewController::setDriverActionNecessaryCallback</code>: <code>driverActionNecessary</code> is a collection of events that may occur where the application should bring the Drive view contoller to the foreground. For example: &ldquo;Your vehicle has been selected by another driver. You now need to select a vehicle&rdquo;.</p></li>
+<li><p><code>DriveViewController::setPageNavigationCallback</code>: <code>pageNavigation</code> indicates any navigation changes made by the driver in Geotab Drive.</p></li>
+</ul>
+
+<p>See more details in the <a href="https://geotab.github.io/mobile-sdk-ios/Classes/DriveViewController.html">API document</a>.</p>
+<h3 id='overwrite-default-background-color-font-color-and-icon' class='heading'>Overwrite Default Background Color, Font Color, and Icon</h3>
+
+<p>To override default background color in the network error page, create a property in <code>Info.plist</code> named <code>&quot;NetworkErrorScreenBckColor&quot;</code> of type <code>String</code>. Add a hex value for the color.
+To override default font color in the network error page, create a property in <code>Info.plist</code> named <code>&quot;NetworkErrorScreenFontColor&quot;</code> of type <code>String</code>. Add a hex value for the color
+To override default icon in the network error page, create a property in <code>Info.plist</code> named <code>&quot;NetworkErrorScreenIcon&quot;</code> of type String and add the name of the image. The image must also be added to the project.</p>
+<h2 id='drive-apis' class='heading'>Drive APIs</h2>
+
+<p>All drive APIs are accessible directly under an instance of <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> or <code>MyGeotabbViewController</code>. See more details in the <a href="https://geotab.github.io/mobile-sdk-ios/">API document</a>.</p>
+<h2 id='app-bound-domains' class='heading'>App-Bound Domains</h2>
+
+<p>Incorporating App-Bound Domains into your application using the Geotab Drive SDK is recommended. For guidance, refer to <a href="https://webkit.org/blog/10882/app-bound-domains/">Apple’s documentation</a> on enabling App-Bound Domains, and ensure you include <code>geotab.com</code> in your set of approved domains.</p>
+
+<p>If you decide not to use App-Bound Domains, you&rsquo;ll need to set up the Mobile SDK to operate accordingly. When creating a <code><a href="Classes/DriveViewController.html">DriveViewController</a></code> instance, adjust the options to disable App-Bound Domains:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MobileSdkOptions</span><span class="p">(</span><span class="nv">useAppBoundDomains</span><span class="p">:</span> <span class="kc">false</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">driveViewController</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span> <span class="n">options</span><span class="p">)</span>
+</code></pre>
+<h2 id='license' class='heading'>License</h2>
+
+<p>GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.</p>
 
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-01-10)</p>
+          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-01-11)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

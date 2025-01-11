@@ -7,10 +7,11 @@ struct NativeSpeakArgument: Codable {
 }
 
 class NativeSpeakFunction: ModuleFunction {
-    private let module: SpeechModule
-    init(module: SpeechModule) {
-        self.module = module
-        super.init(module: module, name: "nativeSpeak")
+    private static let functionName: String = "nativeSpeak"
+    private let speechEngine: SpeechEngine
+    init(module: SpeechModule, speechEngine: SpeechEngine) {
+        self.speechEngine = speechEngine
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -22,7 +23,7 @@ class NativeSpeakFunction: ModuleFunction {
         let rate = (arg.rate ?? 1.0) / 2 // This is an estimation, not a right transformation equation, needs to be addressed in the future.
         let lang = arg.lang ?? "en-US"
         
-        module.speechEngine.speak(text: text, rate: rate, language: lang)
+        speechEngine.speak(text: text, rate: rate, language: lang)
         jsCallback(Result.success("undefined"))
     }
 }

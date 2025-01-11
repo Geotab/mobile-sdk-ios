@@ -28,15 +28,16 @@ protocol SamlAuthenticating {
 
 class SamlLoginWithASFunction: ModuleFunction {
     
-    let jsonArgumentDecoder: JsonArgumentDecoding
-    let authenticator: SamlAuthenticating
+    private static let functionName: String = "samlLoginWithAS"
+    private let jsonArgumentDecoder: JsonArgumentDecoding
+    private let authenticator: SamlAuthenticating
     
     init(module: Module,
          authenticator: SamlAuthenticating = DefaultSamlAuthenticator(),
          jsonArgumentDecoder: JsonArgumentDecoding = JsonArgumentDecoder()) {
         self.jsonArgumentDecoder = jsonArgumentDecoder
         self.authenticator = authenticator
-        super.init(module: module, name: "samlLoginWithAS")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {

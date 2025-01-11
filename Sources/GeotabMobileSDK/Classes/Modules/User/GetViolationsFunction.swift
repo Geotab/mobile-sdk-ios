@@ -1,12 +1,15 @@
 import WebKit
 
 class GetViolationsFunction: ModuleFunction {
-    private let module: UserModule
+    private static let functionName: String = "getViolations"
+    
+    private weak var scriptGateway: ScriptGateway?
     var userName = ""
     var callbacks: [String: (Result<String, Error>) -> Void] = [:]
-    init(module: UserModule) {
-        self.module = module
-        super.init(module: module, name: "getViolations")
+    
+    init(module: UserModule, scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(module: module, name: Self.functionName)
     }
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriveApiFunctionArgument.self) else { return }
@@ -36,8 +39,9 @@ class GetViolationsFunction: ModuleFunction {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetViolationsFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId, "userName": userName])
-        module.scriptGateway.evaluate(script: script) { result in
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetViolationsFunction.Api", scriptData: ["moduleName": moduleName, "functionName": name, "callerId": callerId, "userName": userName])
+        scriptGateway?.evaluate(script: script) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .success: return
             case .failure:
@@ -48,8 +52,9 @@ class GetViolationsFunction: ModuleFunction {
                 self.callbacks[callerId] = nil
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + DriveSdkConfig.apiCallTimeoutSeconds) {
-            guard let callback = self.callbacks[callerId] else {
+        DispatchQueue.main.asyncAfter(deadline: .now() + DriveSdkConfig.apiCallTimeoutSeconds) { [weak self] in
+            guard let self,
+                  let callback = self.callbacks[callerId] else {
                 return
             }
             callback(Result.failure(GeotabDriveErrors.ApiCallTimeoutError))

@@ -1,11 +1,12 @@
 import WebKit
 
 class GetAllUsersFunction: ModuleFunction {
-    private let module: UserModule
+    private static let functionName: String = "getAll"
+    private weak var scriptGateway: ScriptGateway?
     var callbacks: [String: (Result<String, Error>) -> Void] = [:]
-    init(module: UserModule) {
-        self.module = module
-        super.init(module: module, name: "getAll")
+    init(module: UserModule, scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -33,11 +34,18 @@ class GetAllUsersFunction: ModuleFunction {
     }
     
     func call(_ callback: @escaping (Result<String, Error>) -> Void) {
+        guard let scriptGateway else {
+            callback(Result.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
+        
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetAllUsersFunction.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId])
-        module.scriptGateway.evaluate(script: script) { result in
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.GetAllUsersFunction.Api", scriptData: ["moduleName": moduleName, "functionName": name, "callerId": callerId])
+        scriptGateway.evaluate(script: script) { [weak self] result in
+            guard let self else { return }
+            
             switch result {
             case .success: return
             case .failure:

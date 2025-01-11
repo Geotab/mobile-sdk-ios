@@ -5,12 +5,14 @@ struct SamlLoginFunctionArgument: Codable {
 }
 
 class SamlLoginFunction: ModuleFunction {
+    private static let functionName = "samlLogin"
     private var isMeDismissingAnonymousVC = false
-    let module: SsoModule
-    var samlLoginQueue: [SamlLoginViewController] = []
-    init(module: SsoModule, name: String) {
-        self.module = module
-        super.init(module: module, name: name)
+    private weak var viewPresenter: ViewPresenter?
+    private var samlLoginQueue: [SamlLoginViewController] = []
+    
+    init(module: SsoModule, viewPresenter: ViewPresenter) {
+        self.viewPresenter = viewPresenter
+        super.init(module: module, name: Self.functionName)
     }
     
     func presentLastCancellAll() {
@@ -34,7 +36,7 @@ class SamlLoginFunction: ModuleFunction {
     
     func presentSamlLoginViewController(_ vc: SamlLoginViewController) {
         let nc = SamlLoginNavigationController(rootViewController: vc)
-        self.module.viewPresenter.present(nc, animated: true) {
+        viewPresenter?.present(nc, animated: true) {
             // newer call queued. dismiss myself show the latest
             guard self.samlLoginQueue.count > 0 else {
                 return
@@ -47,15 +49,17 @@ class SamlLoginFunction: ModuleFunction {
         let vc = UIStoryboard(name: "SamlLogin", bundle: Bundle.module).instantiateViewController(withIdentifier: "samlLogin") as! SamlLoginViewController
         vc.samlLoginUrl = samlLoginUrl
         vc.jsCallback = jsCallback
-        vc.onDimissal = { result in
+        vc.onDimissal = { [weak self] result in
             vc.jsCallback?(result)
-            self.presentLastCancellAll()
+            self?.presentLastCancellAll()
         }
         samlLoginQueue.append(vc)
     }
+    
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: SamlLoginFunctionArgument.self) else { return }
             
@@ -64,9 +68,9 @@ class SamlLoginFunction: ModuleFunction {
                 return
             }
             
-            if let presentedViewController = self.module.viewPresenter.presentedViewController {
+            if let presentedViewController = self.viewPresenter?.presentedViewController {
                 self.addToSamlLoginQueue(samlLoginUrl: arg.samlLoginUrl, jsCallback: jsCallback)
-                if let nc = self.module.viewPresenter.presentedViewController as? SamlLoginNavigationController, let vc = nc.topViewController as? SamlLoginViewController {
+                if let nc = self.viewPresenter?.presentedViewController as? SamlLoginNavigationController, let vc = nc.topViewController as? SamlLoginViewController {
                     guard presentedViewController.isBeingPresented == false &&
                         presentedViewController.isBeingDismissed == false else {
                         return
@@ -81,7 +85,7 @@ class SamlLoginFunction: ModuleFunction {
                         return
                     }
                     self.isMeDismissingAnonymousVC = true
-                    self.module.viewPresenter.presentedViewController?.dismiss(animated: true) {
+                    self.viewPresenter?.presentedViewController?.dismiss(animated: true) {
                         self.isMeDismissingAnonymousVC = false
                         self.presentLastCancellAll()
                     }

@@ -10,13 +10,14 @@ struct LoginRequiredFunctionArgument: Codable {
 }
 
 class LoginRequiredFunction: ModuleFunction {
-    private let module: UserModule
+    private static let functionName: String = "loginRequired"
+    private weak var module: UserModule?
     private let loginRequiredNotifier: LoginRequiredNotifying
     init(module: UserModule,
          loginRequiredNotifier: LoginRequiredNotifying = DefaulLoginRequiredNotifier()) {
         self.module = module
         self.loginRequiredNotifier = loginRequiredNotifier
-        super.init(module: module, name: "loginRequired")
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -24,7 +25,7 @@ class LoginRequiredFunction: ModuleFunction {
             guard let self else { return }
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: LoginRequiredFunctionArgument.self) else { return }
             
-            self.module.loginRequiredCallback?(arg.status, arg.errorMessage)
+            self.module?.loginRequiredCallback?(arg.status, arg.errorMessage)
             loginRequiredNotifier.loginRequired(arg: arg)
             jsCallback(Result.success("undefined"))
         }

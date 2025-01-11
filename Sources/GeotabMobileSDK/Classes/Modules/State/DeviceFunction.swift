@@ -1,11 +1,13 @@
 import WebKit
 
 class DeviceFunction: ModuleFunction {
-    private let module: StateModule
+    private static let functionName: String = "device"
+    private weak var scriptGateway: ScriptGateway?
     var callbacks: [String: (Result<String, Error>) -> Void] = [:]
-    init(module: StateModule) {
-        self.module = module
-        super.init(module: module, name: "device")
+    
+    init(module: StateModule, scriptGateway: ScriptGateway) {
+        self.scriptGateway = scriptGateway
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
@@ -36,8 +38,8 @@ class DeviceFunction: ModuleFunction {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         
-        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.DeviceState.Api", scriptData: ["moduleName": module.name, "functionName": name, "callerId": callerId])
-        module.scriptGateway.evaluate(script: script) { result in
+        let script = apiCallScript(templateRepo: Module.templateRepo, template: "ModuleFunction.DeviceState.Api", scriptData: ["moduleName": moduleName, "functionName": name, "callerId": callerId])
+        scriptGateway?.evaluate(script: script) { result in
             switch result {
             case .success: return
             case .failure:
