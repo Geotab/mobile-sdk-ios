@@ -7,27 +7,33 @@ struct WriteFileAsBinaryArgument: Codable {
 }
 
 class WriteFileAsBinaryFunction: ModuleFunction {
-    private let module: FileSystemModule
+    private static let functionName: String = "writeFileAsBinary"
+    private weak var queue: DispatchQueue?
     init(module: FileSystemModule) {
-        self.module = module
-        super.init(module: module, name: "writeFileAsBinary")
+        queue = module.queue
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        module.queue.async {
+        guard let queue else {
+            jsCallback(Result.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
+        
+        queue.async {
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: WriteFileAsBinaryArgument.self) else { return }
             
             let path = arg.path
             
             let data = Data(_: arg.data)
             
-            guard let drvfsDir = self.module.drvfsDir else {
+            guard let drvfsDir = FilesystemAccessHelper.drvfsDir else {
                 jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemError.fileSystemDoesNotExist.rawValue)))
                 return
             }
             
             do {
-                let size = try writeFile(fsPrefix: FileSystemModule.fsPrefix, drvfsDir: drvfsDir, path: path, data: data, offset: arg.offset)
+                let size = try writeFile(fsPrefix: FilesystemAccessHelper.fsPrefix, drvfsDir: drvfsDir, path: path, data: data, offset: arg.offset)
                 jsCallback(Result.success("\(size)"))
             } catch {
                 jsCallback(Result.failure(error))
@@ -38,7 +44,7 @@ class WriteFileAsBinaryFunction: ModuleFunction {
     override func scripts() -> String {
         let functionTemplate = try! Module.templateRepo.template(named: "ModuleFunction.WriteFileAsBinary.Script")
         
-        let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": module.name, "functionName": name, "geotabNativeCallbacks": Module.geotabNativeCallbacks, "callbackPrefix": Module.callbackPrefix]
+        let scriptData: [String: Any] = ["geotabModules": Module.geotabModules, "moduleName": moduleName, "functionName": name, "geotabNativeCallbacks": Module.geotabNativeCallbacks, "callbackPrefix": Module.callbackPrefix]
         
         guard let functionScript = try? functionTemplate.render(scriptData) else {
             return ""

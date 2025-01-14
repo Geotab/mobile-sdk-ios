@@ -2,14 +2,21 @@ import Foundation
 
 class DeleteFileFunction: ModuleFunction {
     
-    private let module: FileSystemModule
+    private static let functionName: String = "deleteFile"
+
+    private weak var queue: DispatchQueue?
     init(module: FileSystemModule) {
-        self.module = module
-        super.init(module: module, name: "deleteFile")
+        queue = module.queue
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        module.queue.async {
+        guard let queue else {
+            jsCallback(Result.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
+        
+        queue.async {
             
             guard argument != nil else {
                 jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
@@ -18,13 +25,13 @@ class DeleteFileFunction: ModuleFunction {
             
             let filePath = argument as? String ?? ""
             
-            guard let drvfsDir = self.module.drvfsDir else {
+            guard let drvfsDir = FilesystemAccessHelper.drvfsDir else {
                 jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemError.fileSystemDoesNotExist.rawValue)))
                 return
             }
             
             do {
-                try deleteFile(fsPrefix: FileSystemModule.fsPrefix, drvfsDir: drvfsDir, path: filePath)
+                try deleteFile(fsPrefix: FilesystemAccessHelper.fsPrefix, drvfsDir: drvfsDir, path: filePath)
                 jsCallback(Result.success("undefined"))
             } catch {
                 jsCallback(Result.failure(error))

@@ -97,7 +97,7 @@ open class SDKViewController: UIViewController, ViewPresenter {
 }
 
 /// :nodoc:
-extension SDKViewController: ModuleContainer {
+extension SDKViewController {
     public func findModuleFunction(module: String, function: String) -> ModuleFunction? {
         modules.findFunction(in: module, function: function)
     }

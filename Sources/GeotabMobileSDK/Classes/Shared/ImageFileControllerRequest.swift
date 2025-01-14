@@ -2,11 +2,11 @@ import Foundation
 import UIKit
 
 class ImageFileControllerRequest: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-    let imagePicker = UIImagePickerController()
-    let sourceType: UIImagePickerController.SourceType
-    let viewPresenter: ViewPresenter
-    var completion: ((Result<UIImage?, Error>) -> Void)?
-    var resizeTo: CGSize?
+    private let imagePicker = UIImagePickerController()
+    private let sourceType: UIImagePickerController.SourceType
+    private weak var viewPresenter: ViewPresenter?
+    private var completion: ((Result<UIImage?, Error>) -> Void)?
+    private var resizeTo: CGSize?
 
     init(viewPresenter: ViewPresenter, sourceType: UIImagePickerController.SourceType) {
         self.viewPresenter = viewPresenter
@@ -16,6 +16,10 @@ class ImageFileControllerRequest: NSObject, UINavigationControllerDelegate, UIIm
     }
     
     public func captureImage(resizeTo: CGSize?, completion: ((Result<UIImage?, Error>) -> Void)?) {
+        guard let viewPresenter else {
+            completion?(.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
         guard UIImagePickerController.isSourceTypeAvailable(sourceType) == true else {
             completion?(.failure(GeotabDriveErrors.NoImageFileAvailableError))
             return

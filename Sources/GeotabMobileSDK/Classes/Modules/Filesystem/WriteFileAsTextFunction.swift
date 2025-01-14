@@ -7,14 +7,21 @@ struct WriteFileAsTextArgument: Codable {
 }
 
 class WriteFileAsTextFunction: ModuleFunction {
-    private let module: FileSystemModule
+    private static let functionName: String = "writeFileAsText"
+    private weak var queue: DispatchQueue?
+
     init(module: FileSystemModule) {
-        self.module = module
-        super.init(module: module, name: "writeFileAsText")
+        queue = module.queue
+        super.init(module: module, name: Self.functionName)
     }
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
-        module.queue.async {
+        guard let queue else {
+            jsCallback(Result.failure(GeotabDriveErrors.InvalidObjectError))
+            return
+        }
+        
+        queue.async {
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: WriteFileAsTextArgument.self) else { return }
             
             let path = arg.path
@@ -24,19 +31,18 @@ class WriteFileAsTextFunction: ModuleFunction {
                 return
             }
             
-            guard let drvfsDir = self.module.drvfsDir else {
+            guard let drvfsDir = FilesystemAccessHelper.drvfsDir else {
                 jsCallback(Result.failure(GeotabDriveErrors.FileException(error: FileSystemError.fileSystemDoesNotExist.rawValue)))
                 return
             }
             
             do {
-                let size = try writeFile(fsPrefix: FileSystemModule.fsPrefix, drvfsDir: drvfsDir, path: path, data: data, offset: arg.offset)
+                let size = try writeFile(fsPrefix: FilesystemAccessHelper.fsPrefix, drvfsDir: drvfsDir, path: path, data: data, offset: arg.offset)
                 jsCallback(Result.success("\(size)"))
             } catch {
                 jsCallback(Result.failure(error))
                 return
             }
-            
         }
     }
 }
