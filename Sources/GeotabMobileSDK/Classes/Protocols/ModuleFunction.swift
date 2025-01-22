@@ -1,11 +1,13 @@
 import Mustache
 import WebKit
+
 /**
  Defines a  function to be included in a Geotab module's Javascript API. Intended for internal Drive and MyGeotab use.
  */
 open class ModuleFunction {
     public let moduleName: String
     public let name: String
+
     /**
      - Parameters:
         - module: Module. The module this function should reside in.
@@ -15,7 +17,7 @@ open class ModuleFunction {
         moduleName = module.name
         self.name = name
     }
-    
+
     func apiCallScript(templateRepo: TemplateRepository, template: String, scriptData: [String: Any]) -> String {
         let apiCallTemplate = try? templateRepo.template(named: template)
         guard let script = try? apiCallTemplate?.render(scriptData) else {

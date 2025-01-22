@@ -7,10 +7,8 @@ enum SsoError: String {
 
 class SsoModule: Module {
     private static let moduleName = "sso"
-    private let viewPresenter: ViewPresenter
     
     init(viewPresenter: ViewPresenter) {
-        self.viewPresenter = viewPresenter
         super.init(name: SsoModule.moduleName)
         functions.append(SamlLoginFunction(module: self, viewPresenter: viewPresenter))
         functions.append(SamlLoginWithASFunction(module: self))

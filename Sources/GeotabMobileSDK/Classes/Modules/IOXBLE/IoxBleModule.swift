@@ -87,7 +87,7 @@ extension IoxBleModule: IoxClientDelegate {
             data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
                 bytes
                     .map { Int8(bitPattern: $0) }
-                    .forEach{ try? container.encode($0) }
+                    .forEach { try? container.encode($0) }
             }
         }
     }

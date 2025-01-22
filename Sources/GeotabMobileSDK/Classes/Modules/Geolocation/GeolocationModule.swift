@@ -114,7 +114,7 @@ class GeolocationModule: Module {
 
 // MARK: - LocationServiceAuthorizing
 /// :nodoc:
-extension GeolocationModule: LocationServiceAuthorizing {
+extension GeolocationModule {
     
     func isNotDetermined() -> Bool {
         return locationManager.getAuthorizationStatus() == .notDetermined

@@ -2,9 +2,7 @@ import Foundation
 import WebKit
 
 class ClearWebViewCacheFunction: ModuleFunction {
-
-    static let functionName: String = "clearWebViewCache"
-    
+    private static let functionName: String = "clearWebViewCache"
     init(module: AppModule) {
         super.init(module: module, name: Self.functionName)
     }

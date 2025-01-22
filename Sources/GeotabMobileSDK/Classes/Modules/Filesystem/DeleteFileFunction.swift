@@ -3,7 +3,7 @@ import Foundation
 class DeleteFileFunction: ModuleFunction {
     
     private static let functionName: String = "deleteFile"
-
+    
     private weak var queue: DispatchQueue?
     init(module: FileSystemModule) {
         queue = module.queue
