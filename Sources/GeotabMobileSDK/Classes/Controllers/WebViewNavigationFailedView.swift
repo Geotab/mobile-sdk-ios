@@ -14,9 +14,6 @@ class WebViewNavigationFailedView: UIView {
 
     func configureXib() {
         
-        let buttonEdgeInset: CGFloat = 10
-        self.refreshButton.contentEdgeInsets = UIEdgeInsets(top: buttonEdgeInset, left: buttonEdgeInset, bottom: buttonEdgeInset, right: buttonEdgeInset)
-        
         guard let path = Bundle.main.path(forResource: "Info", ofType: "plist") else { return }
         let url = URL(fileURLWithPath: path)
         

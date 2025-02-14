@@ -15,8 +15,9 @@ class StartIoxBleFunction: ModuleFunction {
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument,
                                                     jsCallback: jsCallback,
-                                                    decodeType: StartIoxBleArgument.self),
-              let uuid = arg.uuid else {
+                                                    decodeType: StartIoxBleArgument.self) else { return }
+              
+        guard let uuid = arg.uuid else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }

@@ -140,8 +140,11 @@ class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticatio
     }
     
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-        return window ?? ASPresentationAnchor()
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+            let window = windowScene.windows.first(where: {$0.isKeyWindow}){
+                return window
+        }
+        return ASPresentationAnchor()
     }
 }
 
