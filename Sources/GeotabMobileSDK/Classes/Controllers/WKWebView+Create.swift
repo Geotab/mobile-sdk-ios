@@ -27,7 +27,7 @@ extension WKWebView {
         // using `frame: .zero` causes the error: [ViewportSizing] maximumViewportInset cannot be larger than frame
         let webView = WKWebView(frame: CGRect(x: 0.0, y: 0.0, width: 0.1, height: 0.1),
                                 configuration: webviewConfig)
-
+        webView.allowsLinkPreview = false
         webView.navigationDelegate = navigationDelegate
         webView.uiDelegate = uiDelegate
         
