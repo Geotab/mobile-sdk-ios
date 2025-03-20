@@ -5,7 +5,8 @@ extension WKWebView {
     static func create(userContentControllerDelegate: UserContentControllerDelegate,
                        navigationDelegate: NavigationDelegate,
                        uiDelegate: UIDelegate,
-                       useAppBoundDomains: Bool) -> WKWebView {
+                       useAppBoundDomains: Bool,
+                       userAgentTokens: String? = nil) -> WKWebView {
         
         let webviewConfig = WKWebViewConfiguration()
         
@@ -20,7 +21,11 @@ extension WKWebView {
         webviewConfig.allowsAirPlayForMediaPlayback = true
         
         let device = DeviceModule.device
-        webviewConfig.applicationNameForUserAgent = "MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
+        var userAgent = "MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
+        if let userAgentTokens {
+            userAgent += " \(userAgentTokens)"
+        }
+        webviewConfig.applicationNameForUserAgent = userAgent
 
         webviewConfig.userContentController = userContentControllerDelegate.contentController
 

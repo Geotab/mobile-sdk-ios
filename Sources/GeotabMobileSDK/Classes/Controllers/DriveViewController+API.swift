@@ -283,6 +283,37 @@ extension DriveViewController {
         }
         ioxBleModule.ioxDeviceEventCallback = callback
     }
+    
+    /**
+    Get the user's duty dtatus log.
+     
+     - Parameters:
+        - callback: String encoded list of log records
+     */
+    public func getDutyStatusLog(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+        guard let fun = findModuleFunction(module: DutyStatusLogModule.moduleName, function: "getDutyStatusLog") as? GetDutyStatusLogFunction else {
+            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
+            return
+        }
+        fun.userName = userName
+        fun.call(callback)
+    }
+    
+    /**
+    Get the user's current driving logs.
+     
+     - Parameters:
+        - callback: String encoded list of log records
+     */
+    public func getCurrentDrivingLog(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+        guard let fun = findModuleFunction(module: DutyStatusLogModule.moduleName, function: "getCurrentDrivingLog") as? GetCurrentDrivingLogFunction else {
+            callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
+            return
+        }
+        fun.userName = userName
+        fun.call(callback)
+    }
+
 }
 
 extension URL {

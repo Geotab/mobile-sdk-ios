@@ -22,8 +22,8 @@ public class MyGeotabViewController: SDKViewController {
      - Parameters:
      - modules: User implemented thirdparty modules
      */
-    public init(modules: Set<Module> = []) {
-        super.init(modules: modules)
+    public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
+        super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
     }
     

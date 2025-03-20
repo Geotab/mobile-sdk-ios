@@ -38,7 +38,8 @@ open class SDKViewController: UIViewController, ViewPresenter {
         WKWebView.create(userContentControllerDelegate: userContentControllerDelegate,
                          navigationDelegate: navigationDelegate,
                          uiDelegate: uiDelegate,
-                         useAppBoundDomains: options.useAppBoundDomains)
+                         useAppBoundDomains: options.useAppBoundDomains,
+                         userAgentTokens: options.userAgentTokens)
     }()
     
     internal var modules: Set<Module> = []
