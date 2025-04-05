@@ -125,6 +125,17 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         SsoModule(viewPresenter: self),
         AppearanceModule(webDriveDelegate: self, appearanceSource: self)
     ]
+    
+    /**
+     A dictionary holding registered scripts, keyed by their message handler names.
+     */
+    private var scriptInjectables: [String: ScriptInjectable] = [:]
+    
+    /**
+     Delegate to handle WebView interactions such as navigation decisions and receiving script messages.
+    */
+    public weak var webInteractionDelegate: WebInteractionDelegate?
+
     /**
      Initializer
      
@@ -173,6 +184,10 @@ open class DriveViewController: UIViewController, WKScriptMessageHandler, ViewPr
         guard let msg = message.body as? String else {
             return
         }
+        if let delegate = webInteractionDelegate {
+            delegate.didReceive(scriptMessage: message)
+        }
+        
         let module = message.name
         let data = Data(msg.utf8)
         do {
@@ -278,6 +293,10 @@ extension DriveViewController: WKNavigationDelegate {
             $logger.warn("Navigating to out of bounds domain \(domain)")
         }
         
+        if let delegate = webInteractionDelegate {
+            delegate.onDecidePolicy(navigationAction: navigationAction)
+        }
+        
         decisionHandler(.allow)
     }
     
@@ -335,7 +354,7 @@ extension DriveViewController: WKUIDelegate {
         alertController.addAction(UIAlertAction(title: cancelText, style: .cancel, handler: { _ in
             completionHandler(false)
         }))
-
+        
         self.present(alertController, animated: true, completion: nil)
     }
     
@@ -643,6 +662,38 @@ extension DriveViewController {
             return
         }
         ioxBleModule.ioxDeviceEventCallback = callback
+    }
+}
+
+extension DriveViewController {
+    /**
+     Registers a given ScriptInjectable object with the content controller, allowing it to be executed within the web view.
+
+     The ScriptInjectable object encapsulates the source code, injection time, and message handler name for the custom script. By registering it, the custom script will be injected into the web view at the specified injection time and be able to communicate with native code using the provided message handler name.
+
+     - Parameter scriptInjectable: The script injectable object containing the properties and logic needed to define and control the custom script.
+    */
+    public func registerScriptInjectable(_ scriptInjectable: ScriptInjectable) {
+        let userScript = WKUserScript(source: scriptInjectable.source,
+                                      injectionTime: scriptInjectable.injectionTime,
+                                      forMainFrameOnly: true)
+        contentController.addUserScript(userScript)
+        contentController.add(self, name: scriptInjectable.messageHandlerName)
+        scriptInjectables[scriptInjectable.messageHandlerName] = scriptInjectable
+    }
+    
+    /**
+     Unregisters a given script injectable object from the content controller, removing it from execution within the web view.
+
+     If the provided script injectable object is not found in the registered scripts, the method returns early without making any changes.
+
+     - Parameter handlerName: The script injectable object's message handler name to be unregistered.
+    */
+    public func unregisterScriptInjectable(_ handlerName: String) {
+        guard let _ = scriptInjectables[handlerName] else { return }
+        
+        contentController.removeScriptMessageHandler(forName: handlerName)
+        scriptInjectables.removeValue(forKey: handlerName)
     }
 }
 
