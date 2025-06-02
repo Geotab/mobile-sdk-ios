@@ -18,8 +18,11 @@ class GetItemFunction: ModuleFunction {
         secureStorage.getItem(key) { result in
             switch result {
             case .success(let result):
-                let escapedResult = result.replacingOccurrences(of: "\"", with: "\\\"")
-                jsCallback(Result.success("\"\(escapedResult)\""))
+                guard let stringResult = toJson(result) else {
+                    jsCallback(Result.failure(GeotabDriveErrors.StorageModuleError(error: "Invalid result")))
+                    return
+                }
+                jsCallback(Result.success(stringResult))
             case .failure(let internalError):
                 jsCallback(Result.failure(GeotabDriveErrors.StorageModuleError(error: internalError.localizedDescription)))
             }

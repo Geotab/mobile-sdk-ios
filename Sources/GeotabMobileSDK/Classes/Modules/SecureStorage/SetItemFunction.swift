@@ -28,9 +28,13 @@ class SetItemFunction: ModuleFunction {
         }
         
         secureStorage.setItem(arg.key, arg.value) { result in
+            guard let stringKey = toJson(arg.key) else {
+                jsCallback(Result.failure(GeotabDriveErrors.StorageModuleError(error: "Invalid key")))
+                return
+            }
             switch result {
             case .success:
-                jsCallback(Result.success("\"\(arg.key)\""))
+                jsCallback(Result.success(stringKey))
             case .failure(let internalError):
                 jsCallback(Result.failure(GeotabDriveErrors.StorageModuleError(error: internalError.localizedDescription)))
             }
