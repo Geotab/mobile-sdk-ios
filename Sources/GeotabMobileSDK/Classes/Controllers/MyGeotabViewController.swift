@@ -7,6 +7,9 @@ import Mustache
  */
 public class MyGeotabViewController: SDKViewController {
     
+    @TaggedLogger("MyGeotabViewController")
+    internal var logger
+    
     private lazy var modulesInternal: Set<Module> = [
         AppModule(scriptGateway: scriptDelegate, options: options),
         BrowserModule(viewPresenter: self),
@@ -38,6 +41,7 @@ public class MyGeotabViewController: SDKViewController {
         
         if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
             webViewNavigationFailedView.reloadURL = url
+            $logger.info("Opening URL:\(url.absoluteString)")
             webView.load(URLRequest(url: url))
         }
     }
