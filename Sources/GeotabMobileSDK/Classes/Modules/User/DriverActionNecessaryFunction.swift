@@ -13,7 +13,7 @@ class DriverActionNecessaryFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriverActionNecessaryArgument.self) else { return }
         DispatchQueue.main.async { [weak self] in
             self?.module?.driverActionNecessaryCallback?(arg.isDriverActionNecessary, arg.driverActionType)

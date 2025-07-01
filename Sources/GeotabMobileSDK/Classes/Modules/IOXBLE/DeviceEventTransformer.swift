@@ -1,7 +1,7 @@
 import Foundation
 
 class DeviceEventTransformer {
-    let jan1st2002Timestamp: UInt64 = 1009843200
+    let jan1st2002Timestamp: UInt64 = 1_009_843_200
     let milliseconds: UInt64 = 1_000
     let locationPrecision: Float = 10_000_000
     let rpmPrecision: Float = 4

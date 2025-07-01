@@ -1,3 +1,3 @@
 enum AppearanceType: Int {
-    case Unknown = 0, Light, Dark
+    case unknown = 0, light, dark
 }

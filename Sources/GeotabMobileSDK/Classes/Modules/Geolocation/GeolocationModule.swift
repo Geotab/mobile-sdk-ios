@@ -16,7 +16,7 @@ protocol LocationManager: AnyObject {
     func stopUpdatingLocation()
     
     func getAuthorizationStatus() -> CLAuthorizationStatus
-    func setDelegate(_ delegate: CLLocationManagerDelegate)
+    func setDelegate(_ delegate: any CLLocationManagerDelegate)
     func locationServicesEnabled() -> Bool
 }
 
@@ -29,8 +29,8 @@ enum GeolocationError: String {
 class GeolocationModule: Module {
     static let moduleName = "geolocation"
     
-    private weak var scriptGateway: ScriptGateway?
-    private let locationManager: LocationManager
+    private weak var scriptGateway: (any ScriptGateway)?
+    private let locationManager: any LocationManager
     let isInBackground: () -> Bool
     
     var lastLocationResult = GeolocationResult(position: nil, error: nil)
@@ -43,9 +43,9 @@ class GeolocationModule: Module {
     
     let options: MobileSdkOptions
     
-    init(scriptGateway: ScriptGateway,
+    init(scriptGateway: any ScriptGateway,
          options: MobileSdkOptions,
-         locationManager: LocationManager = CLLocationManager(),
+         locationManager: any LocationManager = CLLocationManager(),
          isInBackground: @escaping (() -> Bool) = { UIApplication.shared.applicationState != .active }) {
         self.scriptGateway = scriptGateway
         self.options = options
@@ -64,7 +64,7 @@ class GeolocationModule: Module {
     }
     
     var isLocationServicesEnabled: Bool {
-        locationManager.locationServicesEnabled() ?? false
+        locationManager.locationServicesEnabled()
     }
     
     override func scripts() -> String {
@@ -249,7 +249,7 @@ extension GeolocationModule: CLLocationManagerDelegate {
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         if let err = error as? CLError {
             switch err {
             case CLError.locationUnknown:
@@ -307,7 +307,7 @@ extension GeolocationModule {
 // MARK: - CLLocationManager adapter
 
 extension CLLocationManager: LocationManager {
-    func setDelegate(_ delegate: CLLocationManagerDelegate) {
+    func setDelegate(_ delegate: any CLLocationManagerDelegate) {
         self.delegate = delegate
     }
 }

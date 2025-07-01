@@ -10,13 +10,13 @@ protocol LocationServiceStarting: Module {
 
 class StartLocationServiceFunction: ModuleFunction {
     static let functionName: String = "___startLocationService"
-    private weak var starter: LocationServiceStarting?
-    init(starter: LocationServiceStarting) {
+    private weak var starter: (any LocationServiceStarting)?
+    init(starter: any LocationServiceStarting) {
         self.starter = starter
         super.init(module: starter, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         var enableHighAccuracy = false
         

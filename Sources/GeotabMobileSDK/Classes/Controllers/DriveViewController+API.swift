@@ -35,7 +35,7 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing an array of Users
      */
-    public func getAllUsers(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getAllUsers(_ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: UserModule.moduleName, function: "getAll") as? GetAllUsersFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -49,7 +49,7 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a HosRuleset
      */
-    public func getHosRuleSet(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getHosRuleSet(userName: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: UserModule.moduleName, function: "getHosRuleSet") as? GetHosRuleSetFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -64,7 +64,7 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a DutyStatusAvailability
      */
-    public func getUserAvailability(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getUserAvailability(userName: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: UserModule.moduleName, function: "getAvailability") as? GetAvailabilityFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -79,7 +79,7 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representing a DutyStatusViolation
      */
-    public func getUserViolations(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getUserViolations(userName: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: UserModule.moduleName, function: "getViolations") as? GetViolationsFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -95,7 +95,7 @@ extension DriveViewController {
         - driverId: String
         - callback: Result is given as a JSON string representing a User
      */
-    public func setDriverSeat(driverId: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func setDriverSeat(driverId: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: UserModule.moduleName, function: "setDriverSeat") as? SetDriverSeatFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -109,7 +109,7 @@ extension DriveViewController {
      - Parameters:
         - callback: Result is given as a JSON string representation of a GoDevice
      */
-    public func getStateDevice(_ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getStateDevice(_ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: StateModule.moduleName, function: "device") as? DeviceFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -123,7 +123,7 @@ extension DriveViewController {
      - Parameters:
         - speechEngine: `SpeechEngine`
      */
-    public func setSpeechEngine(speechEngine: SpeechEngine) {
+    public func setSpeechEngine(speechEngine: any SpeechEngine) {
         guard let speechModule = findModule(module: SpeechModule.moduleName) as? SpeechModule else {
             return
         }
@@ -290,7 +290,7 @@ extension DriveViewController {
      - Parameters:
         - callback: String encoded list of log records
      */
-    public func getDutyStatusLog(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getDutyStatusLog(userName: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: DutyStatusLogModule.moduleName, function: "getDutyStatusLog") as? GetDutyStatusLogFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return
@@ -305,7 +305,7 @@ extension DriveViewController {
      - Parameters:
         - callback: String encoded list of log records
      */
-    public func getCurrentDrivingLog(userName: String, _ callback: @escaping (_ result: Result<String, Error>) -> Void) {
+    public func getCurrentDrivingLog(userName: String, _ callback: @escaping (_ result: Result<String, any Error>) -> Void) {
         guard let fun = findModuleFunction(module: DutyStatusLogModule.moduleName, function: "getCurrentDrivingLog") as? GetCurrentDrivingLogFunction else {
             callback(Result.failure(GeotabDriveErrors.ModuleFunctionNotFoundError))
             return

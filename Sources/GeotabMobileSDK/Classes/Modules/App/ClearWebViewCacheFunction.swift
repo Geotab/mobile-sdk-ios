@@ -7,7 +7,7 @@ class ClearWebViewCacheFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
 
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
                                                 modifiedSince: Date(timeIntervalSince1970: 0)) {
             jsCallback(Result.success("undefined"))

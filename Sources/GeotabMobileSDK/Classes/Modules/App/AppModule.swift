@@ -6,24 +6,24 @@ protocol BackgroundAudioPlaying {
     func stop()
 }
 
-typealias BackgroundAudioFactory = (AppModule) -> BackgroundAudioPlaying?
+typealias BackgroundAudioFactory = (AppModule) -> (any BackgroundAudioPlaying)?
 typealias ApplicationState = () -> UIApplication.State
 
 class AppModule: Module {
     
     static let moduleName = "app"
-    private weak var scriptGateway: ScriptGateway?
+    private weak var scriptGateway: (any ScriptGateway)?
     private let appLogEventSource: AppLogEventSource
     let options: MobileSdkOptions
     
     var lastServerAddressUpdated: LastServerAddressUpdatedCallbackType?
     var keepAlive = "{}"
     
-    private var backgroundAudioPlayer: BackgroundAudioPlaying?
+    private var backgroundAudioPlayer: (any BackgroundAudioPlaying)?
     private let backgroundAudioFactory: BackgroundAudioFactory
     private let applicationState: ApplicationState
 
-    init(scriptGateway: ScriptGateway,
+    init(scriptGateway: any ScriptGateway,
          options: MobileSdkOptions,
          backgroundAudioFactory: @escaping BackgroundAudioFactory = defaultBackgroundAudioFactory,
          applicationState: @escaping ApplicationState = { UIApplication.shared.applicationState }) {
@@ -140,6 +140,6 @@ class AppModule: Module {
     
 }
 
-private func defaultBackgroundAudioFactory(_ appModule: AppModule) -> BackgroundAudioPlaying? {
+private func defaultBackgroundAudioFactory(_ appModule: AppModule) -> (any BackgroundAudioPlaying)? {
     BackgroundAudioPlayer(appModule: appModule)
 }

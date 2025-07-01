@@ -2,14 +2,14 @@ import WebKit
 
 class GetAllUsersFunction: ModuleFunction {
     private static let functionName: String = "getAll"
-    private weak var scriptGateway: ScriptGateway?
-    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
-    init(module: UserModule, scriptGateway: ScriptGateway) {
+    private weak var scriptGateway: (any ScriptGateway)?
+    var callbacks: [String: (Result<String, any Error>) -> Void] = [:]
+    init(module: UserModule, scriptGateway: any ScriptGateway) {
         self.scriptGateway = scriptGateway
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriveApiFunctionArgument.self) else { return }
         
         guard let callback = callbacks[arg.callerId] else {
@@ -33,7 +33,7 @@ class GetAllUsersFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
+    func call(_ callback: @escaping (Result<String, any Error>) -> Void) {
         guard let scriptGateway else {
             callback(Result.failure(GeotabDriveErrors.InvalidObjectError))
             return

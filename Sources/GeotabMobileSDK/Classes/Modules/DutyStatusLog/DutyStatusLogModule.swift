@@ -7,12 +7,12 @@ enum DutyStatusLogError: String {
 class DutyStatusLogModule: Module {
     static let moduleName = "dutyStatusLog"
 
-    private weak var scriptGateway: ScriptGateway?
+    private weak var scriptGateway: (any ScriptGateway)?
     var driverActionNecessaryCallback: DriverActionNecessaryCallbackType?
     var pageNavigationCallback: PageNavigationCallbackType?
     var loginRequiredCallback: LoginRequiredCallbackType?
     
-    init(scriptGateway: ScriptGateway) {
+    init(scriptGateway: any ScriptGateway) {
         self.scriptGateway = scriptGateway
         super.init(name: Self.moduleName)
         functions.append(GetDutyStatusLogFunction(module: self, scriptGateway: scriptGateway))

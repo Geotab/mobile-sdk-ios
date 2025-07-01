@@ -3,7 +3,7 @@ import UIKit
 class PhotoLibraryModule: Module {
     private static let moduleName = "photoLibrary"
 
-    init(viewPresenter: ViewPresenter) {
+    init(viewPresenter: any ViewPresenter) {
         super.init(name: PhotoLibraryModule.moduleName)
         functions.append(PickImageFunction(module: self,
                                            filesystem: FilesystemAccessHelper(),

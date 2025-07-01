@@ -5,13 +5,13 @@ protocol UIHostController: UIViewController {
 
 class UIDelegate: NSObject, WKUIDelegate {
     
-    private weak var hostController: UIHostController?
+    private weak var hostController: (any UIHostController)?
     
     private lazy var languageBundle: Bundle? = {
         GeotabMobileSDK.languageBundle()
     }()
     
-    init(hostController: UIHostController) {
+    init(hostController: any UIHostController) {
         self.hostController = hostController
     }
     

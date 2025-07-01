@@ -9,9 +9,9 @@ protocol PrintViewPresenter: ViewPresenter {
 class PrintModule: Module {
     static let moduleName = "print"
 
-    weak var viewPresenter: PrintViewPresenter?
+    weak var viewPresenter: (any PrintViewPresenter)?
 
-    init(viewPresenter: PrintViewPresenter) {
+    init(viewPresenter: any PrintViewPresenter) {
         self.viewPresenter = viewPresenter
         super.init(name: PrintModule.moduleName)
         functions.append(PrintFunction(module: self))

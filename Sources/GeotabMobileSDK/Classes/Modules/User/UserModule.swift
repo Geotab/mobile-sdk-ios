@@ -9,12 +9,12 @@ enum UserError: String {
 class UserModule: Module {
     static let moduleName = "user"
 
-    private weak var scriptGateway: ScriptGateway?
+    private weak var scriptGateway: (any ScriptGateway)?
     var driverActionNecessaryCallback: DriverActionNecessaryCallbackType?
     var pageNavigationCallback: PageNavigationCallbackType?
     var loginRequiredCallback: LoginRequiredCallbackType?
     
-    init(scriptGateway: ScriptGateway) {
+    init(scriptGateway: any ScriptGateway) {
         self.scriptGateway = scriptGateway
         super.init(name: UserModule.moduleName)
         functions.append(GetAllUsersFunction(module: self, scriptGateway: scriptGateway))

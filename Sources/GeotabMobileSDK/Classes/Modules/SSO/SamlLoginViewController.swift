@@ -6,9 +6,9 @@ class SamlLoginViewController: UIViewController {
     
     private var swipeDownDismissal = true
     
-    var onDimissal: ((Result<String, Error>) -> Void)?
+    var onDimissal: ((Result<String, any Error>) -> Void)?
     var samlLoginUrl: String!
-    var jsCallback: ((Result<String, Error>) -> Void)?
+    var jsCallback: ((Result<String, any Error>) -> Void)?
 
     @IBOutlet var webview: WKWebView!
     
@@ -106,7 +106,7 @@ extension SamlLoginViewController: WKNavigationDelegate {
     //        completionHandler(.useCredential, cred)
     //    }
 
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         dismissWith(error: GeotabDriveErrors.SamlLoginError(error: "Network error"))
     }
     

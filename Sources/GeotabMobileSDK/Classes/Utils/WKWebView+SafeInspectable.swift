@@ -1,6 +1,6 @@
 import WebKit
 
-internal extension WKWebView {
+extension WKWebView {
     func safeSetInspectable() {
         #if DEBUG
         if #available(iOS 16.4, *) {

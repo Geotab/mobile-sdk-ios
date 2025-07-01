@@ -9,15 +9,15 @@ protocol DeviceBatteryStateAdapter: AnyObject {
 class BatteryModule: Module {
     static let moduleName = "battery"
 
-    private weak var adapter: DeviceBatteryStateAdapter?
-    private weak var scriptGateway: ScriptGateway?
+    private weak var adapter: (any DeviceBatteryStateAdapter)?
+    private weak var scriptGateway: (any ScriptGateway)?
     var started: Bool {
         guard let adapter else { return false }
         return adapter.isBatteryMonitoringEnabled
     }
     var isCharging = false
     var batteryLevel = 0
-    init(scriptGateway: ScriptGateway, adapter: DeviceBatteryStateAdapter = UIDevice.current) {
+    init(scriptGateway: any ScriptGateway, adapter: any DeviceBatteryStateAdapter = UIDevice.current) {
         self.scriptGateway = scriptGateway
         self.adapter = adapter
         super.init(name: BatteryModule.moduleName)

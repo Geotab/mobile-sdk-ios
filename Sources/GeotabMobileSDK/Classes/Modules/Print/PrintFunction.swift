@@ -8,7 +8,7 @@ class PrintFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         if let presentedViewController = module?.viewPresenter?.presentedViewController {
             guard presentedViewController.isBeingPresented == false

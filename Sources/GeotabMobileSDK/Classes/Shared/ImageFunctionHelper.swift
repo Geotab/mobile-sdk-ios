@@ -12,23 +12,23 @@ protocol FilesystemAccessing {
 }
 
 protocol ImageAccessing {
-    func requestImage(resizeTo: CGSize?, completion: ((Result<UIImage?, Error>) -> Void)?)
+    func requestImage(resizeTo: CGSize?, completion: ((Result<UIImage?, any Error>) -> Void)?)
 }
 
 class ImageFunctionHelper {
-    private let filesystem: FilesystemAccessing
-    private let imageAccessor: ImageAccessing
-    private let jsonArgumentDecoder: JsonArgumentDecoding
+    private let filesystem: any FilesystemAccessing
+    private let imageAccessor: any ImageAccessing
+    private let jsonArgumentDecoder: any JsonArgumentDecoding
     
-    init(filesystem: FilesystemAccessing,
-         imageAccessor: ImageAccessing,
-         jsonArgumentDecoder: JsonArgumentDecoding = JsonArgumentDecoder()) {
+    init(filesystem: any FilesystemAccessing,
+         imageAccessor: any ImageAccessing,
+         jsonArgumentDecoder: any JsonArgumentDecoding = JsonArgumentDecoder()) {
         self.filesystem = filesystem
         self.imageAccessor = imageAccessor
         self.jsonArgumentDecoder = jsonArgumentDecoder
     }
     
-    func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         var resizeTo: CGSize?
         var fileName = fileNameFromCurrentDate()
         let maxSize = 10000

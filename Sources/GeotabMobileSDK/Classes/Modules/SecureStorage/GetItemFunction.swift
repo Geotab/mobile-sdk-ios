@@ -2,14 +2,14 @@ import Foundation
 
 class GetItemFunction: ModuleFunction {
     private static let name = "getItem"
-    private let secureStorage: SecureStorage
+    private let secureStorage: any SecureStorage
 
-    init(module: Module, secureStorage: SecureStorage) {
+    init(module: Module, secureStorage: any SecureStorage) {
         self.secureStorage = secureStorage
         super.init(module: module, name: Self.name)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let key = jsonArgumentToString(argument) else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return

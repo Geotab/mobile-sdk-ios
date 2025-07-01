@@ -5,13 +5,13 @@ protocol ConnectivityStarting: Module {
 
 class StartFunction: ModuleFunction {
     private static let functionName: String = "start"
-    private weak var starter: ConnectivityStarting?
+    private weak var starter: (any ConnectivityStarting)?
     
-    init(starter: ConnectivityStarting) {
+    init(starter: any ConnectivityStarting) {
         self.starter = starter
         super.init(module: starter, name: Self.functionName)
     }
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         let result = start()
         jsCallback(Result.success("\(result)"))
     }

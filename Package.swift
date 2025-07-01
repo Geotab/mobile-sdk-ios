@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -33,7 +33,16 @@ let package = Package(
             exclude: [
                 "native-sdk.d.ts"],
             resources: [
-                .process("Assets")]),
+                .process("Assets")],
+            swiftSettings: [
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("InternalImportsByDefault"),
+                .enableUpcomingFeature("DisableOutwardActorInference"),
+                .enableUpcomingFeature("InferSendableFromCaptures"),
+                .enableUpcomingFeature("IsolatedDefaultValues"),
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("ImplicitlyOpenedExistentials")]),
         .testTarget(
             name: "GeotabMobileSDKTests",
             dependencies: ["GeotabMobileSDK"],

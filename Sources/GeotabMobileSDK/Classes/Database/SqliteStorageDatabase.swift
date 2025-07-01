@@ -1,6 +1,7 @@
 import Foundation
 import SQLite3
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 class SqliteStorageDatabase: StorageDatabase {
     
     private var dbPointer: OpaquePointer?
@@ -104,7 +105,7 @@ class SqliteStorageDatabase: StorageDatabase {
         let queryStatement = try prepareStatement(getKeysQuery)
         defer { sqlite3_finalize(queryStatement) }
         
-        var keys = [String]()
+        var keys: [String] = []
         
         while sqlite3_step(queryStatement) == SQLITE_ROW {
             if let key = sqlite3_column_text(queryStatement, 0) {

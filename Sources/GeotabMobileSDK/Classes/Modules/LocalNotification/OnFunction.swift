@@ -6,7 +6,7 @@ class OnFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         guard let module,
               let actionIdentifiers = argument as? [String] else {

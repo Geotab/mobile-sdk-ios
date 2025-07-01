@@ -8,7 +8,7 @@ class HasPermissionFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         module?.notificationAdapter?.isAuthorized {
             jsCallback(Result.success(String($0)))
         }

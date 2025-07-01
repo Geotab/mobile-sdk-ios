@@ -2,15 +2,15 @@ import WebKit
 
 class DeviceFunction: ModuleFunction {
     private static let functionName: String = "device"
-    private weak var scriptGateway: ScriptGateway?
-    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
+    private weak var scriptGateway: (any ScriptGateway)?
+    var callbacks: [String: (Result<String, any Error>) -> Void] = [:]
     
-    init(module: StateModule, scriptGateway: ScriptGateway) {
+    init(module: StateModule, scriptGateway: any ScriptGateway) {
         self.scriptGateway = scriptGateway
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriveApiFunctionArgument.self) else { return }
         
         guard let callback = callbacks[arg.callerId] else {
@@ -34,7 +34,7 @@ class DeviceFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(_ callback: @escaping (Result<String, Error>) -> Void) {
+    func call(_ callback: @escaping (Result<String, any Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         

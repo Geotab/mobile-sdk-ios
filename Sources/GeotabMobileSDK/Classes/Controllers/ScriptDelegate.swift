@@ -1,26 +1,26 @@
 import WebKit
 
 protocol ScriptEvaluating: NSObject {
-    func evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?)
+    func evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, (any Error)?) -> Void)?)
 }
 
 class ScriptDelegate: NSObject, ScriptGateway {
  
     enum PushErrors: Error {
-        case InvalidJSON
-        case InvalidModuleEvent
+        case invalidJSON
+        case invalidModuleEvent
     }
 
     @TaggedLogger("ScriptDelegate")
     private var logger
 
-    private weak var scriptEvaluator: ScriptEvaluating?
+    private weak var scriptEvaluator: (any ScriptEvaluating)?
     
-    init(scriptEvaluator: ScriptEvaluating) {
+    init(scriptEvaluator: any ScriptEvaluating) {
         self.scriptEvaluator = scriptEvaluator
     }
 
-    func push(moduleEvent: ModuleEvent, completed: @escaping (Result<Any?, Error>) -> Void) {
+    func push(moduleEvent: ModuleEvent, completed: @escaping (Result<Any?, any Error>) -> Void) {
         guard let scriptEvaluator = self.scriptEvaluator else {
             $logger.debug("No script evaluator")
             return
@@ -28,7 +28,7 @@ class ScriptDelegate: NSObject, ScriptGateway {
         
         if moduleEvent.event.contains("\"") ||  moduleEvent.event.contains("\'") {
             $logger.debug("Pushed invalid event")
-            completed(Result.failure(PushErrors.InvalidModuleEvent))
+            completed(Result.failure(PushErrors.invalidModuleEvent))
             return
         }
         
@@ -39,7 +39,7 @@ class ScriptDelegate: NSObject, ScriptGateway {
             _ =  try JSONSerialization.jsonObject(with: jsonData)
         } catch {
             $logger.debug("Pushed event with non JSON parameters")
-            completed(Result.failure(PushErrors.InvalidJSON))
+            completed(Result.failure(PushErrors.invalidJSON))
             return
         }
         
@@ -56,7 +56,7 @@ class ScriptDelegate: NSObject, ScriptGateway {
         }
     }
     
-    func evaluate(script: String, completed: @escaping (Result<Any?, Error>) -> Void) {
+    func evaluate(script: String, completed: @escaping (Result<Any?, any Error>) -> Void) {
         guard let scriptEvaluator = self.scriptEvaluator else {
             $logger.debug("No script evaluator")
             return

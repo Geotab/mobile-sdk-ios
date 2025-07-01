@@ -22,13 +22,13 @@ struct OpenBrowserWindowArguments: Codable {
 
 class OpenBrowserWindowFunction: ModuleFunction {
     private static let functionName: String = "openBrowserWindow"
-    private weak var browserOpener: BrowserWindowOpening?
-    init(browserOpener: BrowserWindowOpening) {
+    private weak var browserOpener: (any BrowserWindowOpening)?
+    init(browserOpener: any BrowserWindowOpening) {
         self.browserOpener = browserOpener
         super.init(module: browserOpener, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         DispatchQueue.main.async {
             
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: OpenBrowserWindowArguments.self) else { return }

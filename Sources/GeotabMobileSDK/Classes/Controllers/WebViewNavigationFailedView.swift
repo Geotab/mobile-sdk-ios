@@ -62,6 +62,7 @@ class WebViewNavigationFailedView: UIView {
     
 }
 
+// swift-format-ignore
 extension UIColor {
 
     convenience init?(hexColor: String) {

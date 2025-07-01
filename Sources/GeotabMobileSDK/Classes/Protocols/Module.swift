@@ -1,10 +1,11 @@
-import Foundation
+public import Foundation
 import Mustache
 
 /**
  Geotab Module base class
  */
 open class Module: NSObject {
+    // swift-format-ignore: DontRepeatTypeInStaticProperties
     static let geotabModules = "geotabModules"
     static let geotabNativeCallbacks = "___geotab_native_callbacks"
     static let callbackPrefix = "geotab_native_api_"

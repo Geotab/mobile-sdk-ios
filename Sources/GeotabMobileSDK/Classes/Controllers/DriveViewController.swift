@@ -1,4 +1,4 @@
-import WebKit
+public import WebKit
 import SafariServices
 import Mustache
 

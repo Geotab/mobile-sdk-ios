@@ -9,7 +9,7 @@ class GetAllFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         getAll { result in
             guard let json = toJson(result) else {
                 jsCallback(Result.success("[]"))

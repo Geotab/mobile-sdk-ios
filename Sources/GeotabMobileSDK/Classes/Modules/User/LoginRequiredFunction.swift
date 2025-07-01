@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 protocol LoginRequiredNotifying {
     func loginRequired(arg: LoginRequiredFunctionArgument)
@@ -12,15 +12,15 @@ struct LoginRequiredFunctionArgument: Codable {
 class LoginRequiredFunction: ModuleFunction {
     private static let functionName: String = "loginRequired"
     private weak var module: UserModule?
-    private let loginRequiredNotifier: LoginRequiredNotifying
+    private let loginRequiredNotifier: any LoginRequiredNotifying
     init(module: UserModule,
-         loginRequiredNotifier: LoginRequiredNotifying = DefaulLoginRequiredNotifier()) {
+         loginRequiredNotifier: any LoginRequiredNotifying = DefaulLoginRequiredNotifier()) {
         self.module = module
         self.loginRequiredNotifier = loginRequiredNotifier
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             guard let arg = self.validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: LoginRequiredFunctionArgument.self) else { return }
@@ -32,8 +32,8 @@ class LoginRequiredFunction: ModuleFunction {
     }
 }
 
-public extension Notification.Name {
-    static let loginRequired = Notification.Name("GeotabDriveSDK.loginRequired")
+extension Notification.Name {
+    public static let loginRequired = Notification.Name("GeotabDriveSDK.loginRequired")
 }
 
 private class DefaulLoginRequiredNotifier: LoginRequiredNotifying {

@@ -15,11 +15,11 @@ protocol NetworkReachability: AnyObject {
 class ConnectivityModule: Module {
     private static let moduleName = "connectivity"
 
-    private weak var scriptGateway: ScriptGateway?
-    private let reachability: NetworkReachability?
+    private weak var scriptGateway: (any ScriptGateway)?
+    private let reachability: (any NetworkReachability)?
     var started = false
-    init(scriptGateway: ScriptGateway,
-         reachability: NetworkReachability? = try? Reachability(notificationQueue: .global())) {
+    init(scriptGateway: any ScriptGateway,
+         reachability: (any NetworkReachability)? = try? Reachability(notificationQueue: .global())) {
         self.scriptGateway = scriptGateway
         self.reachability = reachability
         super.init(name: ConnectivityModule.moduleName)
@@ -75,10 +75,14 @@ class ConnectivityModule: Module {
     func getNetworkType() -> ConnectivityType {
         guard let reachability = reachability else { return .UNKNOWN }
         switch reachability.connection {
-        case .none:     return .NONE
-        case .wifi: return .WIFI
-        case .cellular: return getWWANNetworkType()
-        case .unavailable: return .NONE
+        case .wifi:
+            return .WIFI
+        case .cellular:
+            return getWWANNetworkType()
+        case .unavailable:
+            return .NONE
+        @unknown default:
+            return .NONE
         }
     }
     

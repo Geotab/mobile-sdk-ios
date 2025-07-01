@@ -9,12 +9,12 @@ protocol InAppBrowser: AnyObject {
 class BrowserModule: Module {
     static let moduleName = "browser"
 
-    private weak var viewPresenter: ViewPresenter?
-    weak var inAppBrowser: InAppBrowser?
-    private let browserFactory: (URL) -> InAppBrowser
+    private weak var viewPresenter: (any ViewPresenter)?
+    weak var inAppBrowser: (any InAppBrowser)?
+    private let browserFactory: (URL) -> any InAppBrowser
 
-    init(viewPresenter: ViewPresenter,
-         browserFactory: @escaping (URL) -> InAppBrowser = { SFSafariViewController(url: $0) }) {
+    init(viewPresenter: any ViewPresenter,
+         browserFactory: @escaping (URL) -> any InAppBrowser = { SFSafariViewController(url: $0) }) {
         self.viewPresenter = viewPresenter
         self.browserFactory = browserFactory
         super.init(name: BrowserModule.moduleName)
@@ -30,7 +30,7 @@ class BrowserModule: Module {
         return scripts
     }
     
-    func getBrowserWithUrl(url: URL) -> InAppBrowser {
+    func getBrowserWithUrl(url: URL) -> any InAppBrowser {
         return browserFactory(url)
     }
 }

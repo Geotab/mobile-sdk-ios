@@ -3,7 +3,7 @@ import UIKit
 class CameraModule: Module {
     private static let moduleName = "camera"
 
-    init(viewPresenter: ViewPresenter) {
+    init(viewPresenter: any ViewPresenter) {
         super.init(name: CameraModule.moduleName)
         functions.append(CaptureImageFunction(module: self,
                                               filesystem: FilesystemAccessHelper(),

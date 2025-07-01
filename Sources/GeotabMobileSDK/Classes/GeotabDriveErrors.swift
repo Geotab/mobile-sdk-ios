@@ -1,4 +1,6 @@
-import Foundation
+public import Foundation
+
+// swift-format-ignore: AlwaysUseLowerCamelCase
 
 /**
  Geotab SDK Error Types

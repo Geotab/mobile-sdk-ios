@@ -1,15 +1,15 @@
-import Foundation
+public import Foundation
 
 /// :nodoc:
 public protocol Logging {
     func log(level: Logger.Level, tag: String, message: String)
-    func event(level: Logger.Level, tag: String, message: String, error: Error?)
+    func event(level: Logger.Level, tag: String, message: String, error: (any Error)?)
 }
 
 /// :nodoc:
 public enum Logger {
     
-    public static internal(set) var shared: Logging = DefaultLogger()
+    public static internal(set) var shared: any Logging = DefaultLogger()
     
     public enum Level: String {
         case debug = "DEBUG"
@@ -20,14 +20,14 @@ public enum Logger {
 }
 
 /// :nodoc:
-public extension Notification.Name {
-    static let log = Notification.Name("GeotabMobileSDKLog")
+extension Notification.Name {
+    public static let log = Notification.Name("GeotabMobileSDKLog")
 }
 
 /// :nodoc:
 class DefaultLogger: Logging {
     
-    private func toNotificationCenter(level: Logger.Level, tag: String, message: String, error: Error?) {
+    private func toNotificationCenter(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
         var userInfo: [String: Any] = [
             "level": level,
             "tag": tag,
@@ -39,7 +39,7 @@ class DefaultLogger: Logging {
         NotificationCenter.default.post(Notification(name: .log, object: nil, userInfo: userInfo))
     }
 
-    private func toConsole(level: Logger.Level, tag: String, message: String, error: Error?) {
+    private func toConsole(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
         if let error = error {
             NSLog("[\(level.rawValue)] [\(tag)] \(message) \(error.localizedDescription)")
         } else {
@@ -52,7 +52,7 @@ class DefaultLogger: Logging {
         toNotificationCenter(level: level, tag: tag, message: message, error: nil)
     }
     
-    func event(level: Logger.Level, tag: String, message: String, error: Error?) {
+    func event(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
         toConsole(level: level, tag: tag, message: message, error: error)
         toNotificationCenter(level: level, tag: tag, message: message, error: error)
     }
@@ -68,7 +68,7 @@ struct TaggedLogger {
         self.tag = tag
     }
 
-    var wrappedValue: Logging { Logger.shared }
+    var wrappedValue: any Logging { Logger.shared }
     var projectedValue: TaggedLogger { self }
     
     func debug(_ message: String) {
@@ -81,11 +81,11 @@ struct TaggedLogger {
         Logger.shared.log(level: .info, tag: tag, message: message)
     }
 
-    func warn(_ message: String, error: Error? = nil) {
+    func warn(_ message: String, error: (any Error)? = nil) {
         Logger.shared.event(level: .warn, tag: tag, message: message, error: error)
     }
 
-    func error(_ message: String, error: Error? = nil) {
+    func error(_ message: String, error: (any Error)? = nil) {
         Logger.shared.event(level: .error, tag: tag, message: message, error: error)
     }
 }

@@ -13,7 +13,7 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
 
     private var fileDestinationURL: URL?
 
-    private weak var navigationHost: NavigationHost?
+    private weak var navigationHost: (any NavigationHost)?
 
     private lazy var boundDomains: [String] = {
         if navigationHost?.useAppBoundDomains ?? false,
@@ -23,7 +23,7 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
         return ["geotab.com"]
     }()
     
-    init(navigationHost: NavigationHost) {
+    init(navigationHost: any NavigationHost) {
         self.navigationHost = navigationHost
     }
     
@@ -67,7 +67,7 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
         decisionHandler(.allow)
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
 
         if (error as NSError).code == NSURLErrorCancelled {
             return
@@ -76,7 +76,7 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
         navigationHost?.navigationFailed(with: error as NSError)
     }
 
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         if let error = error as? WKError,
            error.code == .navigationAppBoundDomain {
             $logger.warn("Navigating to out of bounds domain: \(error.localizedDescription)")
@@ -99,7 +99,7 @@ extension NavigationDelegate: WKDownloadDelegate {
         completionHandler(url)
     }
 
-    func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+    func download(_ download: WKDownload, didFailWithError error: any Error, resumeData: Data?) {
         $logger.debug("Download failed: \(error)")
     }
 

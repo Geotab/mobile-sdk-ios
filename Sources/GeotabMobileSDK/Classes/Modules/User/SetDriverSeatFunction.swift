@@ -3,15 +3,15 @@ import WebKit
 class SetDriverSeatFunction: ModuleFunction {
     private static let functionName: String = "setDriverSeat"
     
-    private weak var scriptGateway: ScriptGateway?
-    var callbacks: [String: (Result<String, Error>) -> Void] = [:]
+    private weak var scriptGateway: (any ScriptGateway)?
+    var callbacks: [String: (Result<String, any Error>) -> Void] = [:]
     
-    init(module: UserModule, scriptGateway: ScriptGateway) {
+    init(module: UserModule, scriptGateway: any ScriptGateway) {
         self.scriptGateway = scriptGateway
         super.init(module: module, name: Self.functionName)
     }
     
-    override public func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override public func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: DriveApiFunctionArgument.self) else { return }
         
         guard let callback = callbacks[arg.callerId] else {
@@ -35,7 +35,7 @@ class SetDriverSeatFunction: ModuleFunction {
         jsCallback(Result.success("undefined"))
     }
     
-    func call(driverId: String, _ callback: @escaping (Result<String, Error>) -> Void) {
+    func call(driverId: String, _ callback: @escaping (Result<String, any Error>) -> Void) {
         let callerId = UUID().uuidString
         self.callbacks[callerId] = callback
         

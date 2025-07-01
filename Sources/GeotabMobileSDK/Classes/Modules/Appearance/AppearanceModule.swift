@@ -1,4 +1,4 @@
-import UIKit
+public import UIKit
 
 protocol AppearanceSource: AnyObject {
     var appearanceType: AppearanceType { get }
@@ -9,10 +9,10 @@ class AppearanceModule: Module {
     static let eventName = "geotab.appearance"
     static let appearanceProperty = "appearanceType"
 
-    private weak var scriptGateway: ScriptGateway?
-    private weak var appearanceSource: AppearanceSource?
+    private weak var scriptGateway: (any ScriptGateway)?
+    private weak var appearanceSource: (any AppearanceSource)?
 
-    init(scriptGateway: ScriptGateway, appearanceSource: AppearanceSource) {
+    init(scriptGateway: any ScriptGateway, appearanceSource: any AppearanceSource) {
         self.scriptGateway = scriptGateway
         self.appearanceSource = appearanceSource
         super.init(name: AppearanceModule.moduleName)
@@ -27,7 +27,7 @@ class AppearanceModule: Module {
     
     func appearanceType() -> AppearanceType {
         guard let appearance = appearanceSource?.appearanceType else {
-            return .Unknown
+            return .unknown
         }
         return appearance
     }
@@ -57,7 +57,7 @@ class AppearanceModule: Module {
 extension DriveViewController: AppearanceSource {
     
     var appearanceType: AppearanceType {
-        return traitCollection.userInterfaceStyle == .dark ? .Dark : .Light
+        return traitCollection.userInterfaceStyle == .dark ? .dark : .light
     }
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

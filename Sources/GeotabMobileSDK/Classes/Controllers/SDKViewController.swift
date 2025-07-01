@@ -1,4 +1,4 @@
-import WebKit
+public import WebKit
 import SafariServices
 import Mustache
 
@@ -145,7 +145,7 @@ extension SDKViewController: UIHostController {
 
 /// :nodoc:
 extension SDKViewController: ScriptEvaluating {
-    func evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
+    func evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, (any Error)?) -> Void)?) {
         DispatchQueue.main.async { [weak self] in
             self?.webView.evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
         }

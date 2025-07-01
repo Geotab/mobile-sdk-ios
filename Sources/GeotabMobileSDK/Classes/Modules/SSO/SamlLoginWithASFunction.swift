@@ -23,24 +23,24 @@ enum Saml {
 }
 
 protocol SamlAuthenticating {
-    func authenticate(url: URL, ephemeralSession: Bool, completion: @escaping (URL?, Error?) -> Void)
+    func authenticate(url: URL, ephemeralSession: Bool, completion: @escaping (URL?, (any Error)?) -> Void)
 }
 
 class SamlLoginWithASFunction: ModuleFunction {
     
     private static let functionName: String = "samlLoginWithAS"
-    private let jsonArgumentDecoder: JsonArgumentDecoding
-    private let authenticator: SamlAuthenticating
+    private let jsonArgumentDecoder: any JsonArgumentDecoding
+    private let authenticator: any SamlAuthenticating
     
     init(module: Module,
-         authenticator: SamlAuthenticating = DefaultSamlAuthenticator(),
-         jsonArgumentDecoder: JsonArgumentDecoding = JsonArgumentDecoder()) {
+         authenticator: any SamlAuthenticating = DefaultSamlAuthenticator(),
+         jsonArgumentDecoder: any JsonArgumentDecoding = JsonArgumentDecoder()) {
         self.jsonArgumentDecoder = jsonArgumentDecoder
         self.authenticator = authenticator
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         guard let data = jsonArgumentToData(argument),
               let arg = try? jsonArgumentDecoder.decode(Saml.LoginFunctionArgument.self, from: data) else {
@@ -122,7 +122,7 @@ class DefaultSamlAuthenticator: NSObject, SamlAuthenticating, ASWebAuthenticatio
     var session: ASWebAuthenticationSession?
     func authenticate(url: URL,
                       ephemeralSession: Bool,
-                      completion: @escaping (URL?, Error?) -> Void) {
+                      completion: @escaping (URL?, (any Error)?) -> Void) {
         session = ASWebAuthenticationSession(url: url,
                                              callbackURLScheme: Saml.scheme,
                                              completionHandler: { [weak self] url, err in

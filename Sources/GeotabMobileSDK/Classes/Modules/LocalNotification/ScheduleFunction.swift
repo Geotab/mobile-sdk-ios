@@ -10,7 +10,7 @@ class ScheduleFunction: ModuleFunction {
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let nativeNotify = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: NativeNotify.self) else { return }
         
         schedule(notification: nativeNotify) { jsCallback(Result.success("\($0)")) }
@@ -41,7 +41,10 @@ class ScheduleFunction: ModuleFunction {
     }
     
     public func schedule(notification: NativeNotify, jsCallback: @escaping (Bool) -> Void) {
-        guard let notificationAdapter = module?.notificationAdapter else { jsCallback(false); return }
+        guard let notificationAdapter = module?.notificationAdapter else {
+            jsCallback(false)
+            return
+        }
         
         setNotificationCategories(notification: notification) { catId in
             

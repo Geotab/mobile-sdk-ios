@@ -27,9 +27,9 @@ class Device {
     let sdkVersion: String
     let manufacturer: String
     
-    init(bundle: AppBundle = Bundle.main,
-         device: CurrentDevice = UIDevice.current,
-         userDefaults: AppStorage = UserDefaults.standard) {
+    init(bundle: any AppBundle = Bundle.main,
+         device: any CurrentDevice = UIDevice.current,
+         userDefaults: any AppStorage = UserDefaults.standard) {
         
         platform = "iOS"
         manufacturer = "Apple"

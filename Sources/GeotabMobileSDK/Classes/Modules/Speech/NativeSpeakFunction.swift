@@ -8,13 +8,13 @@ struct NativeSpeakArgument: Codable {
 
 class NativeSpeakFunction: ModuleFunction {
     private static let functionName: String = "nativeSpeak"
-    private let speechEngine: SpeechEngine
-    init(module: SpeechModule, speechEngine: SpeechEngine) {
+    private let speechEngine: any SpeechEngine
+    init(module: SpeechModule, speechEngine: any SpeechEngine) {
         self.speechEngine = speechEngine
         super.init(module: module, name: Self.functionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         guard let arg = validateAndDecodeJSONObject(argument: argument, jsCallback: jsCallback, decodeType: NativeSpeakArgument.self) else { return }
         

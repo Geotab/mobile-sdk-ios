@@ -1,6 +1,6 @@
 class SpeechModule: Module {
     static let moduleName = "speech"
-    fileprivate var speechEngine: SpeechEngine
+    fileprivate var speechEngine: any SpeechEngine
     
     init() {
         speechEngine = RealSpeechEngine()
@@ -8,7 +8,7 @@ class SpeechModule: Module {
         functions.append(NativeSpeakFunction(module: self, speechEngine: SpeechEngineAdapter(module: self)))
     }
     
-    func setSpeechEngine(speechEngine: SpeechEngine) {
+    func setSpeechEngine(speechEngine: any SpeechEngine) {
         self.speechEngine = speechEngine
     }
 }

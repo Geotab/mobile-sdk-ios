@@ -2,8 +2,8 @@ import UIKit
 import UserNotifications
 
 protocol UserNotifcationAdapter: AnyObject {
-    func setDelegate(_ delegate: UNUserNotificationCenterDelegate)
-    func addRequest(_ request: UNNotificationRequest, withCompletionHandler completionHandler: @escaping ((Error?) -> Void))
+    func setDelegate(_ delegate: any UNUserNotificationCenterDelegate)
+    func addRequest(_ request: UNNotificationRequest, withCompletionHandler completionHandler: @escaping (((any Error)?) -> Void))
     func requestAuth(options: UNAuthorizationOptions, completionHandler: @escaping (Bool) -> Void)
     func removeDelivered(withIdentifiers identifiers: [String])
     func removePendingRequests(withIdentifiers identifiers: [String])
@@ -17,15 +17,15 @@ protocol UserNotifcationAdapter: AnyObject {
 /// :nodoc:
 class LocalNotificationModule: Module {
     static let moduleName = "localNotification"
-    private static let DEFAULT_OPEN_ACTION_IDENTIFIER = "com.apple.UNNotificationDefaultActionIdentifier"
-    weak var notificationAdapter: UserNotifcationAdapter?
+    private static let defaultOpenActionIdentifier = "com.apple.UNNotificationDefaultActionIdentifier"
+    weak var notificationAdapter: (any UserNotifcationAdapter)?
     let options: MobileSdkOptions
     
     // remember what the client is listening for
     var actionIdentifiers: [String] = []
-    var actionHandler: ((Result<String, Error>) -> Void)?
+    var actionHandler: ((Result<String, any Error>) -> Void)?
     
-    init(options: MobileSdkOptions, adapter: UserNotifcationAdapter = UNUserNotificationCenter.current()) {
+    init(options: MobileSdkOptions, adapter: any UserNotifcationAdapter = UNUserNotificationCenter.current()) {
         self.notificationAdapter = adapter
         self.options = options
         super.init(name: LocalNotificationModule.moduleName)
@@ -52,7 +52,7 @@ extension LocalNotificationModule: UNUserNotificationCenterDelegate {
 
     func fireActionEventHandler(_ center: UNUserNotificationCenter, actionIdentifier: String, notification: UNNotification, completionHandler: @escaping () -> Void) {
         
-        let convertedActionIdentifier = actionIdentifier == LocalNotificationModule.DEFAULT_OPEN_ACTION_IDENTIFIER ? "click" : actionIdentifier
+        let convertedActionIdentifier = actionIdentifier == LocalNotificationModule.defaultOpenActionIdentifier ? "click" : actionIdentifier
         guard actionIdentifiers.firstIndex(of: convertedActionIdentifier) != nil else {
             completionHandler()
             return
@@ -93,11 +93,11 @@ extension LocalNotificationModule: UNUserNotificationCenterDelegate {
 }
 
 extension UNUserNotificationCenter: UserNotifcationAdapter {
-    func setDelegate(_ delegate: UNUserNotificationCenterDelegate) {
+    func setDelegate(_ delegate: any UNUserNotificationCenterDelegate) {
         self.delegate = delegate
     }
     
-    func addRequest(_ request: UNNotificationRequest, withCompletionHandler completionHandler: @escaping ((Error?) -> Void)) {
+    func addRequest(_ request: UNNotificationRequest, withCompletionHandler completionHandler: @escaping (((any Error)?) -> Void)) {
         add(request, withCompletionHandler: completionHandler)
     }
     

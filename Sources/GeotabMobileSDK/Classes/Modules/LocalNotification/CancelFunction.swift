@@ -9,7 +9,7 @@ class CancelFunction: ModuleFunction {
         super.init(module: module, name: Self.cancelFunctionName)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let id = argument as? Int else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
@@ -25,7 +25,7 @@ class CancelFunction: ModuleFunction {
         
     }
     
-    public func cancel(id: Int, jsCallback: @escaping (Result<NativeNotify, Error>) -> Void) {
+    public func cancel(id: Int, jsCallback: @escaping (Result<NativeNotify, any Error>) -> Void) {
         // find the nativeNotification
         guard let module,
               let getAllFunction = module.findFunction(name: "getAll") as? GetAllFunction else {

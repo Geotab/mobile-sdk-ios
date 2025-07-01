@@ -3,16 +3,16 @@ import UIKit
 class ImageAccessHelper: ImageAccessing {
     
     private let sourceType: UIImagePickerController.SourceType
-    private weak var viewPresenter: ViewPresenter?
+    private weak var viewPresenter: (any ViewPresenter)?
 
     private var requests: [ImageFileControllerRequest] = []
 
-    init(viewPresenter: ViewPresenter, sourceType: UIImagePickerController.SourceType) {
+    init(viewPresenter: any ViewPresenter, sourceType: UIImagePickerController.SourceType) {
         self.viewPresenter = viewPresenter
         self.sourceType = sourceType
     }
 
-    func requestImage(resizeTo: CGSize?, completion: ((Result<UIImage?, Error>) -> Void)?) {
+    func requestImage(resizeTo: CGSize?, completion: ((Result<UIImage?, any Error>) -> Void)?) {
         guard let viewPresenter else {
             completion?(.failure(GeotabDriveErrors.InvalidObjectError))
             return

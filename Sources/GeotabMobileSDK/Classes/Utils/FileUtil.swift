@@ -231,7 +231,7 @@ func getFileInfo(fsPrefix: String, drvfsDir: URL, path: String) throws -> FileIn
 func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo] {
     
     var resultStorage: ObjCBool = false
-    var result = [FileInfo]()
+    var result: [FileInfo] = []
     
     let dateFormatter = ISO8601DateFormatter()
     

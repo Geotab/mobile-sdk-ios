@@ -7,10 +7,10 @@ struct SamlLoginFunctionArgument: Codable {
 class SamlLoginFunction: ModuleFunction {
     private static let functionName = "samlLogin"
     private var isMeDismissingAnonymousVC = false
-    private weak var viewPresenter: ViewPresenter?
+    private weak var viewPresenter: (any ViewPresenter)?
     private var samlLoginQueue: [SamlLoginViewController] = []
     
-    init(module: SsoModule, viewPresenter: ViewPresenter) {
+    init(module: SsoModule, viewPresenter: any ViewPresenter) {
         self.viewPresenter = viewPresenter
         super.init(module: module, name: Self.functionName)
     }
@@ -45,7 +45,7 @@ class SamlLoginFunction: ModuleFunction {
         }
     }
     
-    func addToSamlLoginQueue(samlLoginUrl: String, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    func addToSamlLoginQueue(samlLoginUrl: String, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         let vc = UIStoryboard(name: "SamlLogin", bundle: Bundle.module).instantiateViewController(withIdentifier: "samlLogin") as! SamlLoginViewController
         vc.samlLoginUrl = samlLoginUrl
         vc.jsCallback = jsCallback
@@ -56,7 +56,7 @@ class SamlLoginFunction: ModuleFunction {
         samlLoginQueue.append(vc)
     }
     
-    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, Error>) -> Void) {
+    override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }

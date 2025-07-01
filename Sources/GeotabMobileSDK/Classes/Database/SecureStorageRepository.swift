@@ -9,12 +9,12 @@ enum SecureStorageError: Error {
 }
 
 protocol SecureStorage {
-    func getItem(_ key: String, completion: @escaping (Result<String, Error>) -> Void)
-    func setItem(_ key: String, _ value: String, completion: @escaping (Result<String, Error>) -> Void)
-    func removeItem(_ key: String, completion: @escaping (Result<String, Error>) -> Void)
-    func deleteAll(completion: @escaping (Result<Void, Error>) -> Void)
-    func getKeys(completion: @escaping (Result<[String], Error>) -> Void)
-    func getLength(completion: @escaping (Result<Int, Error>) -> Void)
+    func getItem(_ key: String, completion: @escaping (Result<String, any Error>) -> Void)
+    func setItem(_ key: String, _ value: String, completion: @escaping (Result<String, any Error>) -> Void)
+    func removeItem(_ key: String, completion: @escaping (Result<String, any Error>) -> Void)
+    func deleteAll(completion: @escaping (Result<Void, any Error>) -> Void)
+    func getKeys(completion: @escaping (Result<[String], any Error>) -> Void)
+    func getLength(completion: @escaping (Result<Int, any Error>) -> Void)
 }
 
 protocol StorageDatabase {
@@ -39,11 +39,11 @@ class SecureStorageRepository: SecureStorage {
     
     static let shared = SecureStorageRepository()
 
-    let storageDatabase: StorageDatabase
-    let encypter: Encrypting
+    let storageDatabase: any StorageDatabase
+    let encypter: any Encrypting
 
-    init(storageDatabase: StorageDatabase = SqliteStorageDatabase(),
-         encrypter: Encrypting = Encrypter()) {
+    init(storageDatabase: any StorageDatabase = SqliteStorageDatabase(),
+         encrypter: any Encrypting = Encrypter()) {
         self.storageDatabase = storageDatabase
         self.encypter = encrypter
     }
@@ -58,7 +58,7 @@ class SecureStorageRepository: SecureStorage {
         try storageDatabase.initialize()
     }
         
-    func getItem(_ key: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func getItem(_ key: String, completion: @escaping (Result<String, any Error>) -> Void) {
         do {
             try checkDatabase()
             let encryptedValue = try storageDatabase.getItem(key)
@@ -69,7 +69,7 @@ class SecureStorageRepository: SecureStorage {
         }
     }
     
-    func setItem(_ key: String, _ value: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func setItem(_ key: String, _ value: String, completion: @escaping (Result<String, any Error>) -> Void) {
         do {
             try checkDatabase()
             let encryptedValue = try encypter.encrypt(value)
@@ -80,7 +80,7 @@ class SecureStorageRepository: SecureStorage {
         }
     }
     
-    func removeItem(_ key: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func removeItem(_ key: String, completion: @escaping (Result<String, any Error>) -> Void) {
         do {
             try checkDatabase()
             try storageDatabase.removeItem(key)
@@ -90,7 +90,7 @@ class SecureStorageRepository: SecureStorage {
         }
     }
     
-    func deleteAll(completion: @escaping (Result<Void, Error>) -> Void) {
+    func deleteAll(completion: @escaping (Result<Void, any Error>) -> Void) {
         do {
             try checkDatabase()
             try storageDatabase.deleteAll()
@@ -100,7 +100,7 @@ class SecureStorageRepository: SecureStorage {
         }
     }
     
-    func getKeys(completion: @escaping (Result<[String], Error>) -> Void) {
+    func getKeys(completion: @escaping (Result<[String], any Error>) -> Void) {
         do {
             try checkDatabase()
             let keys = try storageDatabase.getKeys()
@@ -110,7 +110,7 @@ class SecureStorageRepository: SecureStorage {
         }
     }
     
-    func getLength(completion: @escaping (Result<Int, Error>) -> Void) {
+    func getLength(completion: @escaping (Result<Int, any Error>) -> Void) {
         do {
             try checkDatabase()
             let length = try storageDatabase.getLength()

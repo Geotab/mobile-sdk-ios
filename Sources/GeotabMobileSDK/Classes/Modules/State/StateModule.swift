@@ -5,7 +5,7 @@ enum StateError: String {
 class StateModule: Module {
     static let moduleName = "state"
     
-    init(scriptGateway: ScriptGateway) {
+    init(scriptGateway: any ScriptGateway) {
         super.init(name: StateModule.moduleName)
         functions.append(DeviceFunction(module: self, scriptGateway: scriptGateway))
     }

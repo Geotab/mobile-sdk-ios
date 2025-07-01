@@ -10,10 +10,10 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
     let contentController = WKUserContentController()
     
     private let modules: Set<Module>
-    private weak var scriptGateway: ScriptGateway?
+    private weak var scriptGateway: (any ScriptGateway)?
     
     init(modules: Set<Module>,
-         scriptGateway: ScriptGateway) {
+         scriptGateway: any ScriptGateway) {
         self.modules = modules
         self.scriptGateway = scriptGateway
         super.init()
@@ -83,7 +83,7 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
         }
     }
     
-    private func scriptFor(_ callback: String, result: String?, error: Error?) -> String {
+    private func scriptFor(_ callback: String, result: String?, error: (any Error)?) -> String {
         var errorString = "null"
         if let error {
             errorString = "new Error(\"\(error.localizedDescription)\")"

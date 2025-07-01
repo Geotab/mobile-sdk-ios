@@ -1,11 +1,11 @@
 /// :nodoc:
 public class MobileSdkConfig {
-    public static let sdkVersion = "6.7.2_16699"
+    public static let sdkVersion = "6.7.2_17048"
 }
 
 /// :nodoc:
-public extension MobileSdkConfig {
-    static func start(logger: Logging) {
+extension MobileSdkConfig {
+    public static func start(logger: any Logging) {
         Logger.shared = logger
     }
 }

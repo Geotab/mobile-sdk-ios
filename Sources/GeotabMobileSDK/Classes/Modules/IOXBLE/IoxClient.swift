@@ -2,11 +2,11 @@ import Foundation
 import CoreBluetooth
 
 protocol IoxClientDelegate: AnyObject {
-    func clientDidStart(_ client: IoxClient, error: GeotabDriveErrors?)
-    func clientDidStopUnexpectedly(_ client: IoxClient, error: GeotabDriveErrors)
-    func clientDidReceiveEvent(_ client: IoxClient, event: DeviceEvent?, error: GeotabDriveErrors?)
-    func clientDidDisconnect(_ client: IoxClient, error: GeotabDriveErrors?)
-    func clientDidUpdateState(_ client: IoxClient, state: IoxClientState)
+    func clientDidStart(_ client: any IoxClient, error: GeotabDriveErrors?)
+    func clientDidStopUnexpectedly(_ client: any IoxClient, error: GeotabDriveErrors)
+    func clientDidReceiveEvent(_ client: any IoxClient, event: DeviceEvent?, error: GeotabDriveErrors?)
+    func clientDidDisconnect(_ client: any IoxClient, error: GeotabDriveErrors?)
+    func clientDidUpdateState(_ client: any IoxClient, state: IoxClientState)
 }
 
 enum IoxClientState {
@@ -19,7 +19,7 @@ enum IoxClientState {
 
 protocol IoxClient {
     var state: IoxClientState { get }
-    var delegate: IoxClientDelegate? { get set }
+    var delegate: (any IoxClientDelegate)? { get set }
     func start(serviceId: String, reconnect: Bool)
     func stop()
 }
@@ -32,7 +32,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     
     private var reconnect = false
     
-    private let executer: AsyncMainExecuterAdapter
+    private let executer: any AsyncMainExecuterAdapter
     private let queue: OperationQueue
     private let transformer: DeviceEventTransformer = DeviceEventTransformer()
     
@@ -66,7 +66,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     private lazy var writeChar = CBMutableCharacteristic(type: writeCharId, properties: [.write], value: nil, permissions: [.writeable])
     private lazy var descriptor = CBMutableDescriptor(type: CBUUID(string: "2902"), value: nil)
     
-    weak var delegate: IoxClientDelegate?
+    weak var delegate: (any IoxClientDelegate)?
     private var uuid: UUID?
     
     override convenience init() {
@@ -74,7 +74,7 @@ class DefaultIoxClient: NSObject, IoxClient {
     }
     
     // init for testing
-    init(executer: AsyncMainExecuterAdapter, queue: OperationQueue) {
+    init(executer: any AsyncMainExecuterAdapter, queue: OperationQueue) {
         self.executer = executer
         self.queue = queue
         self.queue.qualityOfService = .userInitiated
@@ -247,7 +247,7 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
         }
     }
     
-    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: (any Error)?) {
         if let error = error {
             $logger.debug("CBPeripheralManager error adding service \(error.localizedDescription)")
             delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE failed adding the service"))
@@ -255,7 +255,7 @@ extension DefaultIoxClient: CBPeripheralManagerDelegate {
         }
     }
     
-    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: (any Error)?) {
         if let error = error {
             $logger.debug("CBPeripheralManager error starring advertising \(error.localizedDescription)")
             delegate?.clientDidStart(self, error: .IoxBleError(error: "BLE failed advertising the service"))

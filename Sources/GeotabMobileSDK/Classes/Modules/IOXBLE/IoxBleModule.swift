@@ -20,16 +20,16 @@ class IoxBleModule: Module {
     private static let stateEventName = "ioxble.state"
     private static let statePropertyName = "state"
     
-    private weak var scriptGateway: ScriptGateway?
-    private var startListener: ((Result<String, Error>) -> Void)?
-    private var client: IoxClient
-    private let executer: AsyncMainExecuterAdapter
+    private weak var scriptGateway: (any ScriptGateway)?
+    private var startListener: ((Result<String, any Error>) -> Void)?
+    private var client: any IoxClient
+    private let executer: any AsyncMainExecuterAdapter
     
     private let jsonEncoder: JSONEncoder
 
     var ioxDeviceEventCallback: IOXDeviceEventCallbackType?
     
-    convenience init(scriptGateway: ScriptGateway) {
+    convenience init(scriptGateway: any ScriptGateway) {
         let ex = MainExecuter()
         self.init(scriptGateway: scriptGateway,
                   executer: ex,
@@ -37,7 +37,7 @@ class IoxBleModule: Module {
     }
     
     // init for testing
-    init(scriptGateway: ScriptGateway, executer: AsyncMainExecuterAdapter, client: IoxClient) {
+    init(scriptGateway: any ScriptGateway, executer: any AsyncMainExecuterAdapter, client: any IoxClient) {
         self.scriptGateway = scriptGateway
         self.executer = executer
         self.client = client
@@ -57,7 +57,7 @@ class IoxBleModule: Module {
         return scripts
     }
 
-    func callStartListener(result: Result<String, Error>) {
+    func callStartListener(result: Result<String, any Error>) {
         guard startListener != nil else {
             return
         }
@@ -65,7 +65,7 @@ class IoxBleModule: Module {
         startListener = nil
     }
     
-    func start(serviceId: String, reconnect: Bool, _ jsCallback: @escaping (Result<String, Error>) -> Void) {
+    func start(serviceId: String, reconnect: Bool, _ jsCallback: @escaping (Result<String, any Error>) -> Void) {
         guard startListener == nil else {
             jsCallback(Result.failure(GeotabDriveErrors.IoxBleError(error: "One call at a time only")))
             return
@@ -116,7 +116,7 @@ extension IoxBleModule: IoxClientDelegate {
         ioxDeviceEventCallback?(.failure(error))
     }
     
-    func clientDidUpdateState(_ client: IoxClient, state: IoxClientState) {
+    func clientDidUpdateState(_ client: any IoxClient, state: IoxClientState) {
         executer.run { [weak self] in
             guard let self = self else { return }
             self.scriptGateway?.evaluate(script: self.updateStatePropertyScript(state: state)) { _ in }
@@ -124,7 +124,7 @@ extension IoxBleModule: IoxClientDelegate {
         }
     }
     
-    func clientDidStart(_ client: IoxClient, error: GeotabDriveErrors?) {
+    func clientDidStart(_ client: any IoxClient, error: GeotabDriveErrors?) {
         if let error = error {
             fireErrorEvent(error: error)
             callStartListener(result: Result.failure(error))
@@ -133,11 +133,11 @@ extension IoxBleModule: IoxClientDelegate {
         }
     }
     
-    func clientDidStopUnexpectedly(_ client: IoxClient, error: GeotabDriveErrors) {
+    func clientDidStopUnexpectedly(_ client: any IoxClient, error: GeotabDriveErrors) {
         fireErrorEvent(error: error)
     }
     
-    func clientDidReceiveEvent(_ client: IoxClient, event: DeviceEvent?, error: GeotabDriveErrors?) {
+    func clientDidReceiveEvent(_ client: any IoxClient, event: DeviceEvent?, error: GeotabDriveErrors?) {
         if let error = error {
             fireErrorEvent(error: error)
         } else if let event = event,
@@ -151,7 +151,7 @@ extension IoxBleModule: IoxClientDelegate {
         }
     }
     
-    func clientDidDisconnect(_ client: IoxClient, error: GeotabDriveErrors?) {
+    func clientDidDisconnect(_ client: any IoxClient, error: GeotabDriveErrors?) {
     }
 }
 

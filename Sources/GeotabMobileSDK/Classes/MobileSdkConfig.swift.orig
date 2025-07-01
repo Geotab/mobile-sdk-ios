@@ -4,8 +4,8 @@ public class MobileSdkConfig {
 }
 
 /// :nodoc:
-public extension MobileSdkConfig {
-    static func start(logger: Logging) {
+extension MobileSdkConfig {
+    public static func start(logger: any Logging) {
         Logger.shared = logger
     }
 }

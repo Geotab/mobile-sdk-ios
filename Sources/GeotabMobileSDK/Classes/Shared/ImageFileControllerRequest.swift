@@ -4,18 +4,18 @@ import UIKit
 class ImageFileControllerRequest: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     private let imagePicker = UIImagePickerController()
     private let sourceType: UIImagePickerController.SourceType
-    private weak var viewPresenter: ViewPresenter?
-    private var completion: ((Result<UIImage?, Error>) -> Void)?
+    private weak var viewPresenter: (any ViewPresenter)?
+    private var completion: ((Result<UIImage?, any Error>) -> Void)?
     private var resizeTo: CGSize?
 
-    init(viewPresenter: ViewPresenter, sourceType: UIImagePickerController.SourceType) {
+    init(viewPresenter: any ViewPresenter, sourceType: UIImagePickerController.SourceType) {
         self.viewPresenter = viewPresenter
         self.sourceType = sourceType
         super.init()
         
     }
     
-    public func captureImage(resizeTo: CGSize?, completion: ((Result<UIImage?, Error>) -> Void)?) {
+    public func captureImage(resizeTo: CGSize?, completion: ((Result<UIImage?, any Error>) -> Void)?) {
         guard let viewPresenter else {
             completion?(.failure(GeotabDriveErrors.InvalidObjectError))
             return
