@@ -1,11 +1,13 @@
 import Foundation
 import UIKit
 
-protocol AppBundle {
+public protocol AppBundle {
     var bundleIdentifier: String? { get }
     var displayName: String? { get }
     var version: String? { get }
     var buildNumber: String? { get }
+    
+    func object(forInfoDictionaryKey key: String) -> Any?
 }
 
 protocol CurrentDevice {

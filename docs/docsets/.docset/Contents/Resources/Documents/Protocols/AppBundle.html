@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MyGeotabViewController Class Reference</title>
+    <title>AppBundle Protocol Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/MyGeotabViewController" class="dashAnchor"></a>
-    <a title="MyGeotabViewController Class Reference"></a>
+    <a name="//apple_ref/swift/Protocol/AppBundle" class="dashAnchor"></a>
+    <a title="AppBundle Protocol Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html"> Docs</a> (100% documented)</p>
@@ -29,9 +29,9 @@
       <p id="breadcrumbs">
         <a href="../index.html">Index</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        <a href="../Classes.html">Classes</a>
+        <a href="../Protocols.html">Protocols</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        GeotabMobileSDK.MyGeotabViewController Class Reference
+        GeotabMobileSDK.AppBundle Protocol Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -134,17 +134,15 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>MyGeotabViewController</h1>
+            <h1>AppBundle</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MyGeotabViewController</span> <span class="p">:</span> <span class="kt">SDKViewController</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">AppBundle</span></code></pre>
 
                 </div>
               </div>
-            <p>MyGeotab&rsquo;s View Controller and API interface. Everthing you need to launch a MyGeotab. Only one instance should be created.</p>
-
+            
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -152,9 +150,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:15GeotabMobileSDK02MyA14ViewControllerC7modules7optionsACShyAA6ModuleCG_AA0B10SdkOptionsVtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(modules:options:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:15GeotabMobileSDK02MyA14ViewControllerC7modules7optionsACShyAA6ModuleCG_AA0B10SdkOptionsVtcfc">init(modules:<wbr>options:<wbr>)</a>
+                    <a name="/s:15GeotabMobileSDK9AppBundleP16bundleIdentifierSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/bundleIdentifier" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK9AppBundleP16bundleIdentifierSSSgvp">bundleIdentifier</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -162,19 +160,117 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Initializer</p>
-
-<ul>
-<li>modules: User implemented thirdparty modules</li>
-</ul>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="k">override</span> <span class="nf">init</span><span class="p">(</span><span class="nv">modules</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt"><a href="../Classes/Module.html">Module</a></span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[],</span> <span class="nv">options</span><span class="p">:</span> <span class="kt"><a href="../Structs/MobileSdkOptions.html">MobileSdkOptions</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">bundleIdentifier</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK9AppBundleP11displayNameSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/displayName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK9AppBundleP11displayNameSSSgvp">displayName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">displayName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK9AppBundleP7versionSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/version" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK9AppBundleP7versionSSSgvp">version</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">version</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK9AppBundleP11buildNumberSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/buildNumber" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK9AppBundleP11buildNumberSSSgvp">buildNumber</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">buildNumber</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK9AppBundleP6object20forInfoDictionaryKeyypSgSS_tF"></a>
+                    <a name="//apple_ref/swift/Method/object(forInfoDictionaryKey:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK9AppBundleP6object20forInfoDictionaryKeyypSgSS_tF">object(forInfoDictionaryKey:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">object</span><span class="p">(</span><span class="n">forInfoDictionaryKey</span> <span class="nv">key</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Any</span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>

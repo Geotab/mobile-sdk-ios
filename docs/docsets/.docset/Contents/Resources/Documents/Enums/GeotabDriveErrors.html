@@ -72,6 +72,9 @@
             <a href="../Extensions.html">Extensions</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Extensions.html#/c:objc(cs)NSBundle">Bundle</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Extensions/Notification.html">Notification</a>
               </li>
               <li class="nav-group-task">
@@ -84,6 +87,14 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Functions.html#/s:15GeotabMobileSDK6toJsonySSSgxSERzlF">toJson(_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/AppBundle.html">AppBundle</a>
               </li>
             </ul>
           </li>
@@ -127,7 +138,7 @@
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">GeotabDriveErrors</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">GeotabDriveErrors</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">GeotabDriveErrors</span><span class="p">:</span> <span class="kt">LocalizedError</span></code></pre>
 
                 </div>
@@ -240,6 +251,33 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="k">case</span> <span class="kt">ModuleFunctionArgumentError</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK0A11DriveErrorsO38ModuleFunctionArgumentErrorWithMessageyACSS_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/ModuleFunctionArgumentErrorWithMessage(error:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK0A11DriveErrorsO38ModuleFunctionArgumentErrorWithMessageyACSS_tcACmF">ModuleFunctionArgumentErrorWithMessage(error:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The argument passed to a Module Function is incorrect with error message.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="kt">ModuleFunctionArgumentErrorWithMessage</span><span class="p">(</span><span class="nv">error</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -838,6 +876,33 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:15GeotabMobileSDK0A11DriveErrorsO10LoginErroryACSS_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/LoginError(error:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK0A11DriveErrorsO10LoginErroryACSS_tcACmF">LoginError(error:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates  Login Error</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="kt">LoginError</span><span class="p">(</span><span class="nv">error</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:10Foundation14LocalizedErrorP16errorDescriptionSSSgvp"></a>
                     <a name="//apple_ref/swift/Property/errorDescription" class="dashAnchor"></a>
                     <a class="token" href="#/s:10Foundation14LocalizedErrorP16errorDescriptionSSSgvp">errorDescription</a>
@@ -866,7 +931,7 @@
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-07-05)</p>
+          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-07-08)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

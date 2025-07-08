@@ -16,7 +16,7 @@ public class MyGeotabViewController: SDKViewController {
         DeviceModule(),
         PrintModule(viewPresenter: self),
         SsoModule(viewPresenter: self),
-        LocalNotificationModule(options: options)
+        LocalNotificationModule(options: options),
     ]
     
     /**

@@ -1,25 +1,24 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Mustache",
-        "repositoryURL": "https://github.com/groue/GRMustache.swift.git",
-        "state": {
-          "branch": null,
-          "revision": "671e2c5234e829c1f337c9d300bd6d9b21d1c42a",
-          "version": "4.0.1"
-        }
-      },
-      {
-        "package": "Reachability",
-        "repositoryURL": "https://github.com/ashleymills/Reachability.swift.git",
-        "state": {
-          "branch": null,
-          "revision": "c01bbdf2d633cf049ae1ed1a68a2020a8bda32e2",
-          "version": "5.1.0"
-        }
+  "originHash" : "94f65e563d8372a40ebdc83e3e2c92d4b5cf78e93e42cf789feffcb887edec46",
+  "pins" : [
+    {
+      "identity" : "grmustache.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRMustache.swift",
+      "state" : {
+        "revision" : "6e9dcfb807959e19f2915be1928aeccf01babba5",
+        "version" : "4.2.0"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "reachability.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ashleymills/Reachability.swift",
+      "state" : {
+        "revision" : "21d1dc412cfecbe6e34f1f4c4eb88d3f912654a6",
+        "version" : "5.2.4"
+      }
+    }
+  ],
+  "version" : 3
 }

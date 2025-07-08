@@ -5,7 +5,7 @@ public import Foundation
 /**
  Geotab SDK Error Types
  */
-public enum GeotabDriveErrors: Error {
+public enum GeotabDriveErrors: Error, Equatable {
     /**
      A duplicate ModuleFunction has been defined.
      */
@@ -22,6 +22,10 @@ public enum GeotabDriveErrors: Error {
      The argument passed to a Module Function is incorrect.
      */
     case ModuleFunctionArgumentError
+    /**
+     The argument passed to a Module Function is incorrect with error message.
+     */
+    case ModuleFunctionArgumentErrorWithMessage(error: String)
     /**
      There's an issue with the API call. A common issue is that Drive has changed and the previous call request became orphaned.
      */
@@ -100,6 +104,10 @@ public enum GeotabDriveErrors: Error {
     case InvalidObjectError
     
     case PushNotificationModuleError(error: String)
+    /**
+    Indicates  Login Error
+    */
+    case LoginError(error: String)
 }
 
 extension GeotabDriveErrors: LocalizedError {
@@ -113,6 +121,8 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[ModuleEventPushError]"
         case .ModuleFunctionArgumentError:
             return "GeotabDriveErrors[ModuleFunctionArgumentError]"
+        case .ModuleFunctionArgumentErrorWithMessage(let errMsg):
+            return "GeotabDriveErrors[ModuleFunctionArgumentError]: \(errMsg)"
         case .InvalidCallError:
             return "GeotabDriveErrors[InvalidCallError]"
         case .ApiCallTimeoutError:
@@ -157,6 +167,8 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[InvalidObjectError]"
         case .PushNotificationModuleError(let errMsg):
             return "GeotabDriveErrors[PushNotificationModuleError]: \(errMsg)"
+        case .LoginError(error: let errMsg):
+            return "GeotabDriveErrors[LoginError]: \(errMsg)"
         }
     }
 }

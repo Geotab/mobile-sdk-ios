@@ -35,7 +35,7 @@ open class DriveViewController: SDKViewController {
         SsoModule(viewPresenter: self),
         AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),
         SecureStorageModule(),
-        DutyStatusLogModule(scriptGateway: scriptDelegate)
+        DutyStatusLogModule(scriptGateway: scriptDelegate),
     ]
     
     /**
