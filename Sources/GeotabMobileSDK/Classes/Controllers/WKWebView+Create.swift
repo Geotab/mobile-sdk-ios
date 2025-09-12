@@ -6,6 +6,7 @@ extension WKWebView {
                        navigationDelegate: NavigationDelegate,
                        uiDelegate: UIDelegate,
                        useAppBoundDomains: Bool,
+                       makeWebViewInspectable: Bool,
                        userAgentTokens: String? = nil) -> WKWebView {
         
         let webviewConfig = WKWebViewConfiguration()
@@ -36,7 +37,9 @@ extension WKWebView {
         webView.navigationDelegate = navigationDelegate
         webView.uiDelegate = uiDelegate
         
-        webView.safeSetInspectable()
+        if makeWebViewInspectable {
+            webView.safeSetInspectable()
+        }
         
         return webView
     }

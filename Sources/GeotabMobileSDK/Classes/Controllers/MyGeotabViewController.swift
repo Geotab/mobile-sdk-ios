@@ -41,7 +41,7 @@ public class MyGeotabViewController: SDKViewController {
         
         if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
             webViewNavigationFailedView.reloadURL = url
-            $logger.info("Opening URL:\(url.absoluteString)")
+            $logger.debug("Opening URL:\(url.absoluteString)")
             webView.load(URLRequest(url: url))
         }
     }

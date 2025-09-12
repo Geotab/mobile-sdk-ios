@@ -1,6 +1,7 @@
-import Foundation
-import UIKit
+public import Foundation
+public import UIKit
 
+/// :nodoc:
 public protocol AppBundle {
     var bundleIdentifier: String? { get }
     var displayName: String? { get }
@@ -10,26 +11,29 @@ public protocol AppBundle {
     func object(forInfoDictionaryKey key: String) -> Any?
 }
 
-protocol CurrentDevice {
+/// :nodoc:
+public protocol CurrentDevice {
     var modelName: String { get }
 }
 
-protocol AppStorage {
+/// :nodoc:
+public protocol AppStorage {
     func string(forKey defaultName: String) -> String?
     func set(_ value: Any?, forKey defaultName: String)
 }
 
-class Device {
-    let model: String
-    let platform: String
-    let uuid: String
-    let appId: String
-    let appName: String
-    let version: String
-    let sdkVersion: String
-    let manufacturer: String
+/// :nodoc:
+public class Device {
+    public let model: String
+    public let platform: String
+    public let uuid: String
+    public let appId: String
+    public let appName: String
+    public let version: String
+    public let sdkVersion: String
+    public let manufacturer: String
     
-    init(bundle: any AppBundle = Bundle.main,
+    public init(bundle: any AppBundle = Bundle.main,
          device: any CurrentDevice = UIDevice.current,
          userDefaults: any AppStorage = UserDefaults.standard) {
         
@@ -60,13 +64,13 @@ class Device {
 }
 
 extension Bundle: AppBundle {
-    var displayName: String? { object(forInfoDictionaryKey: "CFBundleDisplayName") as? String }
-    var version: String? { return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String }
-    var buildNumber: String? { object(forInfoDictionaryKey: "CFBundleVersion") as? String }
+    public var displayName: String? { object(forInfoDictionaryKey: "CFBundleDisplayName") as? String }
+    public var version: String? { return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String }
+    public var buildNumber: String? { object(forInfoDictionaryKey: "CFBundleVersion") as? String }
 }
 
 extension UIDevice: CurrentDevice {
-    var modelName: String {
+    public var modelName: String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)

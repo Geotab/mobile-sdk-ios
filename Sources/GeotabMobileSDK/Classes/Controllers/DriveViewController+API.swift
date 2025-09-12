@@ -6,7 +6,7 @@ extension DriveViewController {
      */
     public var isCharging: Bool {
         guard let batteryModule = findModule(module: BatteryModule.moduleName) as? BatteryModule else {
-            $logger.info("Could not find battery module")
+            $logger.error("Could not find battery module")
             return false
         }
         return batteryModule.isCharging

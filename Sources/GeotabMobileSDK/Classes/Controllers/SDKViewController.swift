@@ -39,6 +39,7 @@ open class SDKViewController: UIViewController, ViewPresenter {
                          navigationDelegate: navigationDelegate,
                          uiDelegate: uiDelegate,
                          useAppBoundDomains: options.useAppBoundDomains,
+                         makeWebViewInspectable: options.makeWebViewInspectable,
                          userAgentTokens: options.userAgentTokens)
     }()
     

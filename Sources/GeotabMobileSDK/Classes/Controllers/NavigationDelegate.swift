@@ -32,12 +32,12 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
             decisionHandler(.allow)
             return
         }
-
+        
         switch url.scheme {
         case "blob":
             guard url.absoluteString.lowercased().hasPrefix("blob:https") == true else {
                 // the full URL may contain credentials, do not log it
-                $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
+                $logger.info("Navigation cancelled for page with unexpected blob scheme \(url.scheme ?? "nil")")
                 decisionHandler(.cancel)
                 return
             }
@@ -51,8 +51,10 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
             }
             decisionHandler(.cancel)
             return
+        case "about":
+            break
         default:
-            $logger.info("Navigation cancelled for page with scheme \(url.scheme ?? "nil")")
+            $logger.info("Navigation cancelled for page with unexpected scheme \(url.scheme ?? "nil")")
             decisionHandler(.cancel)
             return
         }
@@ -68,15 +70,15 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
-
-        if (error as NSError).code == NSURLErrorCancelled {
-            return
-        }
-        
+        guard (error as NSError).code != NSURLErrorCancelled else { return }
         navigationHost?.navigationFailed(with: error as NSError)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        if !FeatureFlag.ignoreRequestCancellationErrorsKillSwitch.isEnabled {
+            guard (error as NSError).code != NSURLErrorCancelled else { return }
+        }
+        
         if let error = error as? WKError,
            error.code == .navigationAppBoundDomain {
             $logger.warn("Navigating to out of bounds domain: \(error.localizedDescription)")

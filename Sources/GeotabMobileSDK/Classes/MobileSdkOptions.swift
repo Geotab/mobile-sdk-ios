@@ -8,13 +8,17 @@ public struct MobileSdkOptions {
     /// :nodoc:
     public let shouldPromptForPermissions: Bool
     /// :nodoc:
+    public let makeWebViewInspectable: Bool
+    /// :nodoc:
     public let userAgentTokens: String?
     /// :nodoc:
     public init(useAppBoundDomains: Bool = true,
                 shouldPromptForPermissions: Bool = true,
+                makeWebViewInspectable: Bool = false,
                 userAgentTokens: String? = nil) {
         self.useAppBoundDomains = useAppBoundDomains
         self.shouldPromptForPermissions = shouldPromptForPermissions
+        self.makeWebViewInspectable = makeWebViewInspectable
         self.userAgentTokens = userAgentTokens
     }
 }
