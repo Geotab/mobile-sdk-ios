@@ -532,4 +532,32 @@ declare namespace geotabModules {
         // event: "geotab.appearance"
     }
 
+     namespace login {
+         /*******
+         * Start the login function integrated with Chrome Custom Tabs.
+         * @param argument: { clientId: string, discoveryUri: string, loginHint: string, ephemeralSession?: boolean } ephemeralSession - A boolean indicating whether the session should be ephemeral. Defaults to `false`.
+         * @param callback:
+         *      - result: string. A GeotabAuthState object.
+         *  The loginHint parameter is mandatory as we use it to store it as username in the SecureStorage.
+         *  It is also used to pre-fill the username field in the login page.
+         *  On a successful call a GeotabAuthState object turned into JSON will be given as result
+         *  If there's an error while logging in, err will be given.
+         *  GeotabAuthState object contains the following properties:
+         * { accessToken: string }
+         */
+         function start(argument: { clientId: string, discoveryUri: string, loginHint: string , ephemeralSession? : boolean }, callback: (err?: Error, result?: string) => void);
+
+         /*******
+          * Start the login function integrated with Chrome Custom Tabs.
+          * @param argument: { username: string }
+          * @param callback:
+          *      - result: string. A GeotabAuthState object.
+          *  On a successful call a GeotabAuthState object turned into JSON will be given as result
+          *  If there's an error while retrieving the access token, err will be given.
+          *  GeotabAuthState object contains the following properties:
+          * { accessToken: string }
+          */
+          function getAuthToken(argument: { username: string }, callback: (err?: Error, result?: string) => void);
+    }
+
 }

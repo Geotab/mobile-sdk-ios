@@ -108,6 +108,12 @@ public enum GeotabDriveErrors: Error, Equatable {
     Indicates  Login Error
     */
     case LoginError(error: String)
+    /**
+    Indicates  LoginModuleError
+    */
+    case LoginModuleError(error: String)
+    
+    
 }
 
 extension GeotabDriveErrors: LocalizedError {
@@ -169,6 +175,8 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[PushNotificationModuleError]: \(errMsg)"
         case .LoginError(error: let errMsg):
             return "GeotabDriveErrors[LoginError]: \(errMsg)"
+        case .LoginModuleError(error: let errMsg):
+            return "GeotabDriveErrors[LoginModuleError]: \(errMsg)"
         }
     }
 }
