@@ -1,6 +1,6 @@
 /// :nodoc:
 public class MobileSdkConfig {
-    public static let sdkVersion = "6.7.2_18046"
+    public static let sdkVersion = "6.7.2_18049"
 }
 
 /// :nodoc:

@@ -112,8 +112,13 @@ class SamlLoginWithASFunction: ModuleFunction {
             return nil
         }
 
-        let jsonString = "'\( String(decoding: jsonData, as: UTF8.self))'"
-        return jsonString
+        let jsonString = String(decoding: jsonData, as: UTF8.self)
+            
+        if !FeatureFlag.samlLoginJsonEscapingKillSwitch.isEnabled {
+            return toJson(jsonString)
+        }
+        return "'\(jsonString)'"
+
     }
 }
 
