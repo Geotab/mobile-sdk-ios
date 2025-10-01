@@ -16,7 +16,9 @@ protocol AuthUtilityConfigurator {
     func processAuthState(authState: OIDAuthState?, loginCallback: @escaping (Result<String, any Error>) -> Void)
     func buildGeotabAuthResponse(from authState: OIDAuthState) -> GeotabAppAuthResponse?
     func getValidAccessToken(key: String, completion: @escaping (Result<String, any Error>) -> Void)
+    func getValidAccessToken(key: String, forceRefresh: Bool, completion: @escaping (Result<String, any Error>) -> Void)
     func saveAuthState(key: String, authState: OIDAuthState?)
     func loadAuthState(key: String, completion: @escaping (OIDAuthState?, (any Error)?) -> Void)
     func deleteAuthState(key: String)
+    var keys: [String] { get }
 }

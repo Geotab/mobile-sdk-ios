@@ -6,10 +6,17 @@ protocol KeychainServiceProtocol {
     func save(key: String, data: Data) -> OSStatus
     func load(key: String) -> (Data?, OSStatus)
     func delete(key: String) -> OSStatus
+    var keys: [String] { get }
 }
 
 extension AuthUtil {
+    var keys: [String] { keychainServiceConfigure.keys }
+    
     func getValidAccessToken(key: String, completion: @escaping (Result<String, any Error>) -> Void) {
+        getValidAccessToken(key: key, forceRefresh: false, completion: completion)
+    }
+    
+    func getValidAccessToken(key: String, forceRefresh: Bool, completion: @escaping (Result<String, any Error>) -> Void) {
         
         //load auth state from keychain
         loadAuthState(key: key) { [weak self] authState, error in
@@ -26,7 +33,10 @@ extension AuthUtil {
                 return
             }
             
-            // Check if token needs refresh
+            if forceRefresh {
+                authState.setNeedsTokenRefresh()
+            }
+            
             appAuthService.getValidAccessToken(key: key, authState: authState) { result in
                 
                 switch result {
@@ -55,6 +65,8 @@ extension AuthUtil {
     func saveAuthState(key: String, authState: OIDAuthState? = nil) {
         
         guard let authState else { return }
+        
+        notify(user: key, authState: authState)
         
         do {
             let authStateData = try NSKeyedArchiver.archivedData(withRootObject: authState, requiringSecureCoding: true)

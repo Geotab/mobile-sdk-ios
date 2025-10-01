@@ -49,5 +49,23 @@ class DefaultKeychainService: KeychainServiceProtocol {
         
         return SecItemDelete(query as CFDictionary)
     }
+    
+    var keys: [String] {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+            kSecReturnAttributes as String: kCFBooleanTrue as Any
+        ]
+        
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        
+        guard status == errSecSuccess else { return [] }
+        
+        guard let items = item as? [[String: Any]] else { return [] }
+        
+        return items.compactMap( { $0[kSecAttrAccount as String] as? String } )
+    }
 }
 
