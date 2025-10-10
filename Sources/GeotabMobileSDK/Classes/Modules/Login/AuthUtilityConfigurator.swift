@@ -1,5 +1,6 @@
 import UIKit
 import AppAuth
+import Combine
 
 protocol AuthUtilityConfigurator {
     func login(clientId: String, discoveryUri: URL, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void)
@@ -20,5 +21,8 @@ protocol AuthUtilityConfigurator {
     func saveAuthState(key: String, authState: OIDAuthState?)
     func loadAuthState(key: String, completion: @escaping (OIDAuthState?, (any Error)?) -> Void)
     func deleteAuthState(key: String)
+    func logOut(userName: String, presentingViewController: UIViewController?, completion: @escaping (Result<String, any Error>) -> Void)
+    func logoutUserAndDeleteToken(userName: String, authState: OIDAuthState, presentingViewController: UIViewController?) -> Future<String, any Error>
+    func launchLogoutUser(userName: String, authState: OIDAuthState, presenting: UIViewController?) -> Future<String, any Error>
     var keys: [String] { get }
 }

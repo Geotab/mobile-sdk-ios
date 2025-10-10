@@ -1,4 +1,5 @@
 public import Foundation
+import os.log
 
 /// :nodoc:
 public protocol Logging {
@@ -27,6 +28,23 @@ extension Notification.Name {
 /// :nodoc:
 class DefaultLogger: Logging {
     
+    private let osLogger = os.Logger(subsystem: "com.geotab.mobile.sdk", category: "GeotabMobileSDK")
+    
+    private func toOSLogger(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
+        let logMessage = error != nil ? "\(message) \(error!.localizedDescription)" : message
+        
+        switch level {
+        case .debug:
+            osLogger.debug("[\(tag, privacy: .public)] \(logMessage, privacy: .public)")
+        case .info:
+            osLogger.info("[\(tag, privacy: .public)] \(logMessage, privacy: .public)")
+        case .warn:
+            osLogger.warning("[\(tag, privacy: .public)] \(logMessage, privacy: .public)")
+        case .error:
+            osLogger.error("[\(tag, privacy: .public)] \(logMessage, privacy: .public)")
+        }
+    }
+    
     private func toNotificationCenter(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
         var userInfo: [String: Any] = [
             "level": level,
@@ -39,22 +57,18 @@ class DefaultLogger: Logging {
         NotificationCenter.default.post(Notification(name: .log, object: nil, userInfo: userInfo))
     }
 
-    private func toConsole(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
-        if let error = error {
-            NSLog("[\(level.rawValue)] [\(tag)] \(message) \(error.localizedDescription)")
-        } else {
-            NSLog("[\(level.rawValue)] [\(tag)] \(message)")
-        }
-    }
-    
     func log(level: Logger.Level, tag: String, message: String) {
-        toConsole(level: level, tag: tag, message: message, error: nil)
         toNotificationCenter(level: level, tag: tag, message: message, error: nil)
+        #if DEBUG
+        toOSLogger(level: level, tag: tag, message: message, error: nil)
+        #endif
     }
     
     func event(level: Logger.Level, tag: String, message: String, error: (any Error)?) {
-        toConsole(level: level, tag: tag, message: message, error: error)
         toNotificationCenter(level: level, tag: tag, message: message, error: error)
+        #if DEBUG
+        toOSLogger(level: level, tag: tag, message: message, error: error)
+        #endif
     }
 }
 

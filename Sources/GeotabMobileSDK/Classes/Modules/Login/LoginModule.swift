@@ -21,3 +21,9 @@ class LoginModule: Module {
         authStateUpdater.stop()
     }
 }
+
+extension LoginModule: BackgroundUpdating {
+    func registerForBackgroundUpdates() {
+        authStateUpdater.registerForBackgroundUpdates()
+    }
+}

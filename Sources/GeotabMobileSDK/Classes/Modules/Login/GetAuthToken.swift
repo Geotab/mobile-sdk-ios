@@ -30,7 +30,7 @@ class GetAuthTokenFunction: ModuleFunction {
             case .success(let tokenResponse):
                 jsCallback(.success(tokenResponse))
             case .failure(let error):
-                jsCallback(.failure(GeotabDriveErrors.LoginModuleError(error: error.localizedDescription)))
+                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
             }
         }
     }

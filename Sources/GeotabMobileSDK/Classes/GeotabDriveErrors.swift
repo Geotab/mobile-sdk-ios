@@ -105,13 +105,9 @@ public enum GeotabDriveErrors: Error, Equatable {
     
     case PushNotificationModuleError(error: String)
     /**
-    Indicates  Login Error
+     Indicates  AuthFailedError
     */
-    case LoginError(error: String)
-    /**
-    Indicates  LoginModuleError
-    */
-    case LoginModuleError(error: String)
+    case AuthFailedError(error: String)
     
     
 }
@@ -173,10 +169,8 @@ extension GeotabDriveErrors: LocalizedError {
             return "GeotabDriveErrors[InvalidObjectError]"
         case .PushNotificationModuleError(let errMsg):
             return "GeotabDriveErrors[PushNotificationModuleError]: \(errMsg)"
-        case .LoginError(error: let errMsg):
-            return "GeotabDriveErrors[LoginError]: \(errMsg)"
-        case .LoginModuleError(error: let errMsg):
-            return "GeotabDriveErrors[LoginModuleError]: \(errMsg)"
+        case .AuthFailedError(error: let errMsg):
+            return "GeotabDriveErrors[AuthFailedError]: \(errMsg)"
         }
     }
 }

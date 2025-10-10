@@ -28,7 +28,7 @@ class AppAuthService: AppAuthServiceConfigurator {
                 completion(Result.failure(error))
            } else {
                guard let accessToken else {
-                   completion(Result.failure(GetAuthTokenErrror.noAccessTokenFoundError(key)))
+                   completion(Result.failure(GetAuthTokenError.noAccessTokenFoundError(key)))
                    return
                }
             completion(Result.success(accessToken))

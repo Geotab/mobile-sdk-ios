@@ -29,7 +29,7 @@ extension AuthUtil {
             }
             
             guard let authState else {
-                completion(.failure(GetAuthTokenErrror.noAccessTokenFoundError(key)))
+                completion(.failure(GetAuthTokenError.noAccessTokenFoundError(key)))
                 return
             }
             
@@ -50,12 +50,12 @@ extension AuthUtil {
                         completion(.success(jsonString))
                     } catch {
                         self.deleteAuthState(key: key)
-                        Logger.shared.event(level: .error, tag: "AuthUtil.getValidAccessToken" , message: "Token refresh failed for key: \(key)", error: error)
+                        self.$logger.error( "Token refresh failed for key: \(key) \(error)")
                         completion(.failure(error))
                     }
                 case .failure(let error):
                     self.deleteAuthState(key: key)
-                    Logger.shared.event(level: .error, tag: "AuthUtil.getValidAccessToken" , message: "Token refresh failed for key: \(key)", error: error)
+                    self.$logger.error( "Token refresh failed for key: \(key) \(error)")
                     completion(.failure(error))
                 }
             }
@@ -74,11 +74,11 @@ extension AuthUtil {
             let status = keychainServiceConfigure.save(key: key, data: authStateData)
             
             if status != errSecSuccess {
-                Logger.shared.event(level: .error, tag: "AuthUtil.saveAuthState" , message: "Failed to save authState for key: \(key)", error: GetAuthTokenErrror.failedToSaveAuthState)
+                $logger.error( "Failed to save authState for key: \(key) \(GetAuthTokenError.failedToSaveAuthState)")
             }
             
         } catch {
-            Logger.shared.event(level: .error, tag: "AuthUtil.saveAuthState" , message: "Failed to save authState for key: \(key)", error: error)
+            $logger.error( "Failed to save authState for key: \(key) \(error)")
         }
     }
     
@@ -86,12 +86,12 @@ extension AuthUtil {
         let (data, status) = keychainServiceConfigure.load(key: key)
         
         guard status == errSecSuccess else {
-            completion(nil, GetAuthTokenErrror.noAccessTokenFoundError(key))
+            completion(nil, GetAuthTokenError.noAccessTokenFoundError(key))
             return
         }
         
         guard let data else {
-            completion(nil, GetAuthTokenErrror.parseFailedForAuthState)
+            completion(nil, GetAuthTokenError.parseFailedForAuthState)
             return
         }
         
@@ -99,7 +99,7 @@ extension AuthUtil {
             if let authState = try NSKeyedUnarchiver.unarchivedObject(ofClass: OIDAuthState.self, from: data) {
                 completion(authState, nil)
             } else {
-                completion(nil, GetAuthTokenErrror.parseFailedForAuthState)
+                completion(nil, GetAuthTokenError.parseFailedForAuthState)
             }
         } catch {
             completion(nil, error)
@@ -110,7 +110,7 @@ extension AuthUtil {
         let status = keychainServiceConfigure.delete(key: key)
         
         if status != errSecSuccess {
-            Logger.shared.event(level: .error, tag: "AuthUtil.deleteAuthState", message: "Failed to delete key: \(key)", error: GetAuthTokenErrror.failedToDeleteAuthState)
+            $logger.error("Failed to delete key: \(key) \(GetAuthTokenError.failedToDeleteAuthState)")
         }
     }
 }

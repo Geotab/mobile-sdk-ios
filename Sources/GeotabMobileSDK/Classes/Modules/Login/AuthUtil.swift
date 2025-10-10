@@ -1,6 +1,7 @@
 import AppAuth
 import UIKit
 import Foundation
+import Combine
 
 struct GeotabAppAuthResponse: Codable {
     let accessToken: String
@@ -8,9 +9,13 @@ struct GeotabAppAuthResponse: Codable {
 
 class AuthUtil: AuthUtilityConfigurator {
     
-    private var currentAuthorizationFlow: (any OIDExternalUserAgentSession)?
+    var currentAuthorizationFlow: (any OIDExternalUserAgentSession)?
     let appAuthService: any AppAuthServiceConfigurator
     let keychainServiceConfigure: any KeychainServiceProtocol
+    var cancellables = Set<AnyCancellable>()
+    
+    @TaggedLogger("AuthUtil")
+    var logger
     
     init(appAuthService: any AppAuthServiceConfigurator = AppAuthService(), keychainService: any KeychainServiceProtocol = DefaultKeychainService()) {
         self.appAuthService = appAuthService
@@ -46,7 +51,7 @@ class AuthUtil: AuthUtilityConfigurator {
     }
     
     func handleDiscoveryError(error: any Error, loginCallback: @escaping (Result<String, any Error>) -> Void) {
-        loginCallback(.failure(GeotabDriveErrors.LoginError(error: error.localizedDescription)))
+        loginCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
     }
     
     func createAuthorizationRequestAndPresent(configuration: OIDServiceConfiguration, clientId: String, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void) {
@@ -85,7 +90,7 @@ class AuthUtil: AuthUtilityConfigurator {
                 completion( .success(authState))
             } else if let error = error as? NSError {
                 if error.domain == OIDGeneralErrorDomain && error.code == OIDErrorCode.userCanceledAuthorizationFlow.rawValue{
-                    completion(.failure(GeotabDriveErrors.LoginError(error: "User cancelled flow")))
+                    completion(.failure(GeotabDriveErrors.AuthFailedError(error: "User cancelled flow")))
                 } else {
                     completion(.failure(error))
                 }
@@ -107,10 +112,10 @@ class AuthUtil: AuthUtilityConfigurator {
         let finalError: any Error = {
             if let error {
                 return error.localizedDescription.isEmpty ?
-                GeotabDriveErrors.LoginError(error: "Authorization failed") :
+                GeotabDriveErrors.AuthFailedError(error: "Authorization failed") :
                 error
             } else {
-                return GeotabDriveErrors.LoginError(error: AppAuthError.noDataFoundError.rawValue)
+                return GeotabDriveErrors.AuthFailedError(error: AppAuthError.noDataFoundError.rawValue)
             }
         }()
         loginCallback(.failure(finalError))
@@ -118,7 +123,7 @@ class AuthUtil: AuthUtilityConfigurator {
     
     func processAuthState(authState: OIDAuthState?, loginCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let authState else {
-            loginCallback(.failure(GeotabDriveErrors.LoginError(error: AppAuthError.noDataFoundError.rawValue)))
+            loginCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AppAuthError.noDataFoundError.rawValue)))
             return
         }
         createAuthResponseAndCallback(authState: authState, loginCallback: loginCallback)
@@ -126,13 +131,13 @@ class AuthUtil: AuthUtilityConfigurator {
     
     func createAuthResponseAndCallback(authState: OIDAuthState, loginCallback: @escaping (Result<String, any Error>) -> Void) {
         guard let authResponse = buildGeotabAuthResponse(from: authState) else {
-            loginCallback(.failure(GeotabDriveErrors.LoginError(error: AppAuthError.parseFailedError.rawValue)))
+            loginCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AppAuthError.parseFailedError.rawValue)))
             return
         }
         if let jsonString = toJson(authResponse) {
             loginCallback(.success(jsonString))
         } else {
-            loginCallback(.failure(GeotabDriveErrors.LoginError(error: AppAuthError.parseFailedError.rawValue)))
+            loginCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AppAuthError.parseFailedError.rawValue)))
         }
     }
     

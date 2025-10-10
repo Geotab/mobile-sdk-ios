@@ -548,7 +548,7 @@ declare namespace geotabModules {
          function start(argument: { clientId: string, discoveryUri: string, loginHint: string , ephemeralSession? : boolean }, callback: (err?: Error, result?: string) => void);
 
          /*******
-          * Start the login function integrated with Chrome Custom Tabs.
+          * Start the getAuthToken function.
           * @param argument: { username: string }
           * @param callback:
           *      - result: string. A GeotabAuthState object.
@@ -558,6 +558,18 @@ declare namespace geotabModules {
           * { accessToken: string }
           */
           function getAuthToken(argument: { username: string }, callback: (err?: Error, result?: string) => void);
+    }
+
+    namespace auth {
+         /*******
+          * Start the logout function.
+          * @param argument: { username: string }
+          * @param callback:
+          *      - result: string.
+          *  On a successful call a string will be given as result with a success message.
+          *  If there's an error while retrieving the access token, err will be given.
+          */
+          function logout(argument: { username: string }, callback: (err?: Error, result?: string) => void);
     }
 
 }
