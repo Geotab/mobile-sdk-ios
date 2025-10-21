@@ -13,7 +13,7 @@ class LogoutFunction: ModuleFunction {
     private static let functionName = "logout"
     private let authUtil: any AuthUtilityConfigurator
     
-    init(module: AuthModule, authUtil: any AuthUtilityConfigurator = AuthUtil()) {
+    init(module: Module, authUtil: any AuthUtilityConfigurator = AuthUtil()) {
         self.authUtil = authUtil
         super.init(module: module, name: LogoutFunction.functionName)}
     

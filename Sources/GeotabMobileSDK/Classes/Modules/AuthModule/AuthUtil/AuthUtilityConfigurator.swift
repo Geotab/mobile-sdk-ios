@@ -3,12 +3,12 @@ import AppAuth
 import Combine
 
 protocol AuthUtilityConfigurator {
-    func login(clientId: String, discoveryUri: URL, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void)
+    func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void)
     func discoverConfiguration(for discoveryUri: URL, completion: @escaping (Result<OIDServiceConfiguration, any Error>) -> Void)
-    func handleConfigurationResult(clientID: String, loginHint: String, redirectUri: URL, ephemeralSession: Bool, result: Result<OIDServiceConfiguration, any Error>, loginCallback: @escaping (Result<String, any Error>) -> Void)
+    func handleConfigurationResult(clientID: String, username: String, redirectUri: URL, ephemeralSession: Bool, result: Result<OIDServiceConfiguration, any Error>, loginCallback: @escaping (Result<String, any Error>) -> Void)
     func handleDiscoveryError(error: any Error, loginCallback: @escaping (Result<String, any Error>) -> Void)
-    func createAuthorizationRequestAndPresent(configuration: OIDServiceConfiguration, clientId: String, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void)
-    func buildAdditionalParameters(loginHint: String) -> [String: String]?
+    func createAuthorizationRequestAndPresent(configuration: OIDServiceConfiguration, clientId: String, username: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void)
+    func buildAdditionalParameters(username: String) -> [String: String]?
     func buildAuthorizationRequest(configuration: OIDServiceConfiguration, clientId: String, redirectUri: URL, additionalParameters: [String: String]?) -> OIDAuthorizationRequest
     func presentAuthorization(request: OIDAuthorizationRequest,ephemeralSession: Bool, completion: @escaping (Result<OIDAuthState?, any Error>) -> Void)
     func handleAuthorizationResult(result: Result<OIDAuthState?, any Error>, key: String, loginCallback: @escaping (Result<String, any Error>) -> Void)
@@ -25,4 +25,7 @@ protocol AuthUtilityConfigurator {
     func logoutUserAndDeleteToken(userName: String, authState: OIDAuthState, presentingViewController: UIViewController?) -> Future<String, any Error>
     func launchLogoutUser(userName: String, authState: OIDAuthState, presenting: UIViewController?) -> Future<String, any Error>
     var keys: [String] { get }
+    // Temporary
+    var returnAllTokensOnLogin: Bool { get set }
 }
+

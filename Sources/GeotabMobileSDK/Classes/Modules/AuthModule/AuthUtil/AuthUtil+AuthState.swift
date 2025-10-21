@@ -29,7 +29,7 @@ extension AuthUtil {
             }
             
             guard let authState else {
-                completion(.failure(GetAuthTokenError.noAccessTokenFoundError(key)))
+                completion(.failure(GetTokenError.noAccessTokenFoundError(key)))
                 return
             }
             
@@ -44,7 +44,7 @@ extension AuthUtil {
                     do {
                         // Save updated auth state back to Keychain
                         self.saveAuthState(key: key, authState: authState)
-                        let tokenResponse = GeotabAppAuthResponse(accessToken: accessToken)
+                        let tokenResponse = GeotabAppAuthResponse(accessToken: accessToken, idToken: nil, refreshToken: nil)
                         let jsonData = try JSONEncoder().encode(tokenResponse)
                         let jsonString = String(data: jsonData, encoding: .utf8) ?? ""
                         completion(.success(jsonString))
@@ -74,7 +74,7 @@ extension AuthUtil {
             let status = keychainServiceConfigure.save(key: key, data: authStateData)
             
             if status != errSecSuccess {
-                $logger.error( "Failed to save authState for key: \(key) \(GetAuthTokenError.failedToSaveAuthState)")
+                $logger.error( "Failed to save authState for key: \(key) \(GetTokenError.failedToSaveAuthState)")
             }
             
         } catch {
@@ -86,12 +86,12 @@ extension AuthUtil {
         let (data, status) = keychainServiceConfigure.load(key: key)
         
         guard status == errSecSuccess else {
-            completion(nil, GetAuthTokenError.noAccessTokenFoundError(key))
+            completion(nil, GetTokenError.noAccessTokenFoundError(key))
             return
         }
         
         guard let data else {
-            completion(nil, GetAuthTokenError.parseFailedForAuthState)
+            completion(nil, GetTokenError.parseFailedForAuthState)
             return
         }
         
@@ -99,7 +99,7 @@ extension AuthUtil {
             if let authState = try NSKeyedUnarchiver.unarchivedObject(ofClass: OIDAuthState.self, from: data) {
                 completion(authState, nil)
             } else {
-                completion(nil, GetAuthTokenError.parseFailedForAuthState)
+                completion(nil, GetTokenError.parseFailedForAuthState)
             }
         } catch {
             completion(nil, error)
@@ -110,7 +110,7 @@ extension AuthUtil {
         let status = keychainServiceConfigure.delete(key: key)
         
         if status != errSecSuccess {
-            $logger.error("Failed to delete key: \(key) \(GetAuthTokenError.failedToDeleteAuthState)")
+            $logger.error("Failed to delete key: \(key) \(GetTokenError.failedToDeleteAuthState)")
         }
     }
 }

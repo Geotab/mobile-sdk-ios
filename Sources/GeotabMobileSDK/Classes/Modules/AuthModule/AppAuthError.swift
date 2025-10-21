@@ -8,7 +8,8 @@ enum AppAuthError: String {
     case invalidURL = "Insecure Discovery URI. HTTPS is required."
     case invalidRedirectScheme = "Login redirect scheme key [REPLACE] not found in Info.plist."
 }
-enum GetAuthTokenError: LocalizedError {
+
+enum GetTokenError: LocalizedError {
     case noAccessTokenFoundError(String)
     case parseFailedForAuthState
     case failedToSaveAuthState

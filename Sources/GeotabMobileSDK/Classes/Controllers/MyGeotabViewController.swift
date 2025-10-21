@@ -16,9 +16,7 @@ public class MyGeotabViewController: SDKViewController {
         DeviceModule(),
         PrintModule(viewPresenter: self),
         SsoModule(viewPresenter: self),
-        LocalNotificationModule(options: options),
-        LoginModule(),
-        AuthModule()
+        LocalNotificationModule(options: options)
     ]
     
     /**
@@ -30,6 +28,10 @@ public class MyGeotabViewController: SDKViewController {
     public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
+        if options.includeAppAuthModules {
+            self.modules.insert(LoginModule())
+            self.modules.insert(AuthModule())
+        }
     }
     
     /// :nodoc:

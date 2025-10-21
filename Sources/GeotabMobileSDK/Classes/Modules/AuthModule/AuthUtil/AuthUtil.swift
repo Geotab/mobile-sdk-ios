@@ -5,10 +5,12 @@ import Combine
 
 struct GeotabAppAuthResponse: Codable {
     let accessToken: String
+    let idToken: String?
+    let refreshToken: String?
 }
 
 class AuthUtil: AuthUtilityConfigurator {
-    
+    var returnAllTokensOnLogin: Bool = false
     var currentAuthorizationFlow: (any OIDExternalUserAgentSession)?
     let appAuthService: any AppAuthServiceConfigurator
     let keychainServiceConfigure: any KeychainServiceProtocol
@@ -23,10 +25,10 @@ class AuthUtil: AuthUtilityConfigurator {
     }
     
     // MARK: - Login Method
-    func login(clientId: String, discoveryUri: URL, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void) {
+    func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void) {
         discoverConfiguration(for: discoveryUri) { [weak self] configurationResult in
             guard let self else { return }
-            handleConfigurationResult(clientID: clientId, loginHint: loginHint , redirectUri: redirectUri, ephemeralSession: ephemeralSession, result: configurationResult, loginCallback: loginCallback)
+            handleConfigurationResult(clientID: clientId, username: username , redirectUri: redirectUri, ephemeralSession: ephemeralSession, result: configurationResult, loginCallback: loginCallback)
         }
     }
     
@@ -40,11 +42,11 @@ class AuthUtil: AuthUtilityConfigurator {
         }
     }
     
-    func handleConfigurationResult(clientID: String, loginHint: String, redirectUri: URL, ephemeralSession: Bool , result: Result<OIDServiceConfiguration, any Error>, loginCallback: @escaping (Result<String, any Error>) -> Void) {
+    func handleConfigurationResult(clientID: String, username: String, redirectUri: URL, ephemeralSession: Bool , result: Result<OIDServiceConfiguration, any Error>, loginCallback: @escaping (Result<String, any Error>) -> Void) {
         switch result {
             
         case .success(let configuration):
-            createAuthorizationRequestAndPresent(configuration: configuration, clientId: clientID, loginHint: loginHint, redirectUri: redirectUri, ephemeralSession: ephemeralSession , loginCallback: loginCallback)
+            createAuthorizationRequestAndPresent(configuration: configuration, clientId: clientID, username: username, redirectUri: redirectUri, ephemeralSession: ephemeralSession , loginCallback: loginCallback)
         case .failure(let error):
             handleDiscoveryError(error: error, loginCallback: loginCallback)
         }
@@ -54,18 +56,18 @@ class AuthUtil: AuthUtilityConfigurator {
         loginCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
     }
     
-    func createAuthorizationRequestAndPresent(configuration: OIDServiceConfiguration, clientId: String, loginHint: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void) {
-        let additionalParameters = buildAdditionalParameters(loginHint: loginHint)
+    func createAuthorizationRequestAndPresent(configuration: OIDServiceConfiguration, clientId: String, username: String, redirectUri: URL, ephemeralSession: Bool, loginCallback: @escaping (Result<String, any Error>) -> Void) {
+        let additionalParameters = buildAdditionalParameters(username: username)
         let request = buildAuthorizationRequest(configuration: configuration, clientId: clientId, redirectUri: redirectUri, additionalParameters: additionalParameters)
         presentAuthorization(request: request, ephemeralSession: ephemeralSession) { [weak self] authStateResult in
             guard let self else { return }
-            self.handleAuthorizationResult(result: authStateResult, key: loginHint, loginCallback: loginCallback)
+            self.handleAuthorizationResult(result: authStateResult, key: username, loginCallback: loginCallback)
         }
     }
     
-    func buildAdditionalParameters(loginHint: String) -> [String: String]? {
-        guard !loginHint.isEmpty else { return nil }
-        return ["login_hint" : loginHint]
+    func buildAdditionalParameters(username: String) -> [String: String]? {
+        guard !username.isEmpty else { return nil }
+        return ["login_hint" : username]
     }
     
     func buildAuthorizationRequest(configuration: OIDServiceConfiguration, clientId: String, redirectUri: URL, additionalParameters: [String: String]?) -> OIDAuthorizationRequest {
@@ -145,8 +147,18 @@ class AuthUtil: AuthUtilityConfigurator {
         guard let accessToken = authState.lastTokenResponse?.accessToken else {
             return nil
         }
-        return GeotabAppAuthResponse(
-            accessToken: accessToken
-        )
+        
+        if returnAllTokensOnLogin {
+            return GeotabAppAuthResponse(
+                accessToken: accessToken,
+                idToken: authState.lastTokenResponse?.idToken,
+                refreshToken: authState.lastTokenResponse?.refreshToken)
+        } else {
+            return GeotabAppAuthResponse(
+                accessToken: accessToken,
+                idToken: nil,
+                refreshToken: nil)
+        }
+
     }
 }

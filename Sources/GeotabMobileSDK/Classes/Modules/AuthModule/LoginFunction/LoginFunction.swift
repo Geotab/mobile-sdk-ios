@@ -1,33 +1,32 @@
 import Foundation
 
-struct LoginStartArgument: Codable {
+struct LoginArgument: Codable {
     let clientId: String
     let discoveryUri: String
-    let loginHint: String
+    let username: String
     let ephemeralSession: Bool?
 }
 
-class LoginStartFunction: ModuleFunction {
+class LoginFunction: ModuleFunction {
     
-    private static let functionName = "start"
-    private var authUtil: any AuthUtilityConfigurator
+    private static let functionName = "login"
+    private let authUtil: any AuthUtilityConfigurator
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
    
-    init(module: LoginModule, util: any AuthUtilityConfigurator = AuthUtil(),
+    init(module: Module, util: any AuthUtilityConfigurator = AuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
-        authUtil = util
-        authUtil.returnAllTokensOnLogin = true
-        super.init(module: module, name: LoginStartFunction.functionName)}
+        self.authUtil = util
+        super.init(module: module, name: LoginFunction.functionName)}
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
         guard let argument = validateAndDecodeJSONObject(argument: argument,
                                                          jsCallback: jsCallback,
-                                                         decodeType: LoginStartArgument.self) else { return }
+                                                         decodeType: LoginArgument.self) else { return }
         
-        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty, !argument.loginHint.isEmpty else {
+        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty, !argument.username.isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
             return
         }
@@ -38,14 +37,14 @@ class LoginStartFunction: ModuleFunction {
         }
         
         guard let redirectScheme = getRedirectScheme(bundle: bundle), let redirectUriURL = URL(string: redirectScheme)  else {
-            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AppAuthError.invalidRedirectScheme.rawValue.replacingOccurrences(of: "[REPLACE]", with: LoginStartFunction.redirectSchemeKey))))
+            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AppAuthError.invalidRedirectScheme.rawValue.replacingOccurrences(of: "[REPLACE]", with: LoginFunction.redirectSchemeKey))))
             return
         }
         
         authUtil.login(
             clientId: argument.clientId,
             discoveryUri: discoveryURL,
-            username: argument.loginHint,
+            username: argument.username,
             redirectUri: redirectUriURL,
             ephemeralSession: argument.ephemeralSession ?? false,
             loginCallback: jsCallback
@@ -54,7 +53,7 @@ class LoginStartFunction: ModuleFunction {
     
     // MARK: - Get Redirect Scheme
     func getRedirectScheme(bundle: (any AppBundle)?) -> String? {
-        guard let redirectScheme = bundle?.object(forInfoDictionaryKey: LoginStartFunction.redirectSchemeKey) as? String else {  return nil }
+        guard let redirectScheme = bundle?.object(forInfoDictionaryKey: LoginFunction.redirectSchemeKey) as? String else {  return nil }
         return redirectScheme
     }
 }

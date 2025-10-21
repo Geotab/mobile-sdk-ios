@@ -4,14 +4,14 @@ struct GetAuthTokenArgument: Codable {
     let username: String?
 }
 
-class GetAuthTokenFunction: ModuleFunction {
+class GetTokenFunction: ModuleFunction {
     
-    private static let functionName = "getAuthToken"
+    private static let functionName = "getToken"
     private let authUtil: any AuthUtilityConfigurator
     
-    init(module: LoginModule, util: any AuthUtilityConfigurator = AuthUtil()) {
-        self.authUtil = util
-        super.init(module: module, name: GetAuthTokenFunction.functionName)}
+    init(module: Module, util: any AuthUtilityConfigurator = AuthUtil()) {
+        authUtil = util
+        super.init(module: module, name: GetTokenFunction.functionName)}
     
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
