@@ -1,7 +1,20 @@
 import Foundation
 
-class DefaultKeychainService: KeychainServiceProtocol {
+enum KeychainError: Error {
+    case saveFailed(OSStatus)
+    case loadFailed(OSStatus)
+    case deleteFailed(OSStatus)
+    case itemNotFound
+}
 
+protocol KeychainService {
+    func save(key: String, data: Data) throws
+    func load(key: String) throws -> Data
+    func delete(key: String) throws
+    var keys: [String] { get }
+}
+
+final class DefaultKeychainService: KeychainService {
     private lazy var keychainService: String = {
         guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
             fatalError("Bundle.bundleIdentifier not found. Please ensure the bundleIdentifier is properly configured.")
@@ -9,7 +22,7 @@ class DefaultKeychainService: KeychainServiceProtocol {
         return "\(bundleIdentifier).authorization"
     }()
     
-    func save(key: String, data: Data) -> OSStatus {
+    func save(key: String, data: Data) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
@@ -18,14 +31,14 @@ class DefaultKeychainService: KeychainServiceProtocol {
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         ]
         
-        // Delete any existing item first
         SecItemDelete(query as CFDictionary)
-        
-        // Add the new item
-        return SecItemAdd(query as CFDictionary, nil)
+        let status = SecItemAdd(query as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw KeychainError.saveFailed(status)
+        }
     }
     
-    func load(key: String) -> (Data?, OSStatus) {
+    func load(key: String) throws -> Data {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
@@ -37,17 +50,31 @@ class DefaultKeychainService: KeychainServiceProtocol {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         
-        return (item as? Data, status)
+        guard status == errSecSuccess else {
+            if status == errSecItemNotFound {
+                throw KeychainError.itemNotFound
+            }
+            throw KeychainError.loadFailed(status)
+        }
+        
+        guard let data = item as? Data else {
+            throw KeychainError.loadFailed(status)
+        }
+        
+        return data
     }
     
-    func delete(key: String) -> OSStatus {
+    func delete(key: String) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: key
         ]
         
-        return SecItemDelete(query as CFDictionary)
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainError.deleteFailed(status)
+        }
     }
     
     var keys: [String] {
@@ -68,4 +95,3 @@ class DefaultKeychainService: KeychainServiceProtocol {
         return items.compactMap( { $0[kSecAttrAccount as String] as? String } )
     }
 }
-

@@ -11,9 +11,9 @@ class LogoutFunction: ModuleFunction {
     var logger
     
     private static let functionName = "logout"
-    private let authUtil: any AuthUtilityConfigurator
+    private let authUtil: any AuthUtil
     
-    init(module: Module, authUtil: any AuthUtilityConfigurator = AuthUtil()) {
+    init(module: Module, authUtil: any AuthUtil = DefaultAuthUtil()) {
         self.authUtil = authUtil
         super.init(module: module, name: LogoutFunction.functionName)}
     
@@ -31,16 +31,11 @@ class LogoutFunction: ModuleFunction {
         
         let presentingVC = UIApplication.shared.rootViewController
         
-        authUtil.logOut(userName: argument.username, presentingViewController: presentingVC) { result in
-            switch result {
-            case .success(let resultString):
-                guard let jsonString = toJson(resultString) else {
-                    self.$logger.error("Failed to encode result to JSON string \(resultString)")
-                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: "Failed to encode result to JSON string")))
-                    return
-                }
-                jsCallback(Result.success(jsonString))
-            case .failure(let error):
+        Task {
+            do {
+                try await authUtil.logOut(userName: argument.username, presentingViewController: presentingVC)
+                jsCallback(Result.success("undefined"))
+            } catch {
                 jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
             }
         }

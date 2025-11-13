@@ -7,9 +7,9 @@ struct GetAuthTokenArgument: Codable {
 class GetTokenFunction: ModuleFunction {
     
     private static let functionName = "getToken"
-    private let authUtil: any AuthUtilityConfigurator
+    private let authUtil: any AuthUtil
     
-    init(module: Module, util: any AuthUtilityConfigurator = AuthUtil()) {
+    init(module: Module, util: any AuthUtil = DefaultAuthUtil()) {
         authUtil = util
         super.init(module: module, name: GetTokenFunction.functionName)}
     
@@ -23,13 +23,17 @@ class GetTokenFunction: ModuleFunction {
         guard let username = argument.username, !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
             return
-        }
+        } 
         
-        authUtil.getValidAccessToken(key: username) { result in
-            switch result {
-            case .success(let tokenResponse):
-                jsCallback(.success(tokenResponse))
-            case .failure(let error):
+        Task {
+            do {
+                let tokenResponse = try await authUtil.getValidAccessToken(username: username)
+                guard let jsonString = toJson(tokenResponse) else {
+                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: "Error encoding response")))
+                    return
+                }
+               jsCallback(.success(jsonString))
+            } catch {
                 jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
             }
         }

@@ -18,11 +18,12 @@ actor AuthStateUpdater: AuthStateUpdating {
     private static let scheduleToleranceInNanoseconds: UInt64 = 10 * 1_000_000_000
     private static let rescheduleDelayInNanoseconds: UInt64 = 10 * 1_000_000_000
     
-    private let authUtil: any AuthUtilityConfigurator
+    private let authUtil: any AuthUtil
     private let minimumScheduleInterval: TimeInterval
     
     private var updateTask: Task<Void, any Error>?
     private var nextScheduledUpdateInNanoseconds: UInt64?
+    private var lastUpdateCompletedAt: UInt64?
     private var registeredForBackgroundRefresh = false
     
     nonisolated(unsafe) private var newAuthStateListener: AnyCancellable?
@@ -30,7 +31,7 @@ actor AuthStateUpdater: AuthStateUpdating {
     nonisolated(unsafe) private let backgroundScheduler: any BackgroundScheduling
     nonisolated(unsafe) private let logger: any Logging
 
-    init(authUtil: any AuthUtilityConfigurator = AuthUtil(),
+    init(authUtil: any AuthUtil = DefaultAuthUtil(),
          backgroundScheduler: any BackgroundScheduling = BGTaskScheduler.shared,
          logger: any Logging = Logger.shared,
          minimumScheduleInterval: TimeInterval = 120) {
@@ -61,7 +62,7 @@ actor AuthStateUpdater: AuthStateUpdating {
         newAuthStateListener = NotificationCenter.default
             .publisher(for: .newAuthState)
             .compactMap { notification in
-                notification.userInfo?[AuthUtil.authStateKey] as? OIDAuthState
+                notification.userInfo?[DefaultAuthUtil.authStateKey] as? OIDAuthState
             }
             .sink { [weak self] authState in
                 Task { await self?.scheduleUpdate(for: authState) }
@@ -76,12 +77,18 @@ actor AuthStateUpdater: AuthStateUpdating {
     
     func scheduleUpdate(for authState:OIDAuthState) async {
         guard let accessTokenExpirationDate = authState.lastTokenResponse?.accessTokenExpirationDate else { return }
-        
+
         let nanosecondsUntilRefresh = nextUpdateInNanoseconds(for: accessTokenExpirationDate.timeIntervalSinceNow)
-        
+
         // there's already an update scheduled, replace it if we need to refresh sooner
         if let nextScheduledUpdateInNanoseconds,
            (nanosecondsUntilRefresh + Self.scheduleToleranceInNanoseconds) > nextScheduledUpdateInNanoseconds {
+                return
+        }
+
+        // check if an update recently completed within the tolerance window
+        if let lastUpdateCompletedAt,
+           nanosecondsUntilRefresh >= lastUpdateCompletedAt {
                 return
         }
 
@@ -95,13 +102,14 @@ actor AuthStateUpdater: AuthStateUpdating {
             try Task.checkCancellation()
             clearScheduledUpdate()
             await updateAuthStates()
+            lastUpdateCompletedAt = nanosecondsUntilRefresh
         }
     }
     
     func updateAuthStates() async {
         logDebug("updateTokens")
         // Capture the reference before entering task group
-        let accounts = authUtil.keys
+        let accounts = authUtil.activeUsernames
         let authUtilRef = authUtil
         
         guard !accounts.isEmpty else {
@@ -113,17 +121,11 @@ actor AuthStateUpdater: AuthStateUpdating {
             for account in accounts {
                 group.addTask { [weak self] in
                     self?.logDebug("Refreshing access token for \(account)")
-                    
-                    await withCheckedContinuation { continuation in
-                        authUtilRef.getValidAccessToken(key: account, forceRefresh: true) { result in
-                            switch result {
-                            case .success(_):
-                                self?.logDebug("Successfully refreshed token for \(account)")
-                            case .failure(let error):
-                                self?.logError("Failed to refresh token for \(account)", error: error)
-                            }
-                            continuation.resume()
-                        }
+                    do {
+                        let _ = try await authUtilRef.getValidAccessToken(username: account, forceRefresh: true)
+                        self?.logDebug("Successfully refreshed token for \(account)")
+                    } catch {
+                        self?.logError("Failed to refresh token for \(account)", error: error)
                     }
                 }
             }

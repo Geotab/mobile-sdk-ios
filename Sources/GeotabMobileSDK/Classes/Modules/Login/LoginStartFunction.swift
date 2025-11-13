@@ -10,11 +10,11 @@ struct LoginStartArgument: Codable {
 class LoginStartFunction: ModuleFunction {
     
     private static let functionName = "start"
-    private var authUtil: any AuthUtilityConfigurator
+    private var authUtil: any AuthUtil
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
    
-    init(module: LoginModule, util: any AuthUtilityConfigurator = AuthUtil(),
+    init(module: LoginModule, util: any AuthUtil = DefaultAuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
         authUtil = util
@@ -33,23 +33,31 @@ class LoginStartFunction: ModuleFunction {
         }
         
         guard let discoveryURL = URL(string: argument.discoveryUri), discoveryURL.scheme?.lowercased() == "https" else {
-            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AppAuthError.invalidURL.rawValue)))
+            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AuthError.invalidURL.localizedDescription)))
             return
         }
         
         guard let redirectScheme = getRedirectScheme(bundle: bundle), let redirectUriURL = URL(string: redirectScheme)  else {
-            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AppAuthError.invalidRedirectScheme.rawValue.replacingOccurrences(of: "[REPLACE]", with: LoginStartFunction.redirectSchemeKey))))
+            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AuthError.invalidRedirectScheme(Self.redirectSchemeKey).localizedDescription)))
             return
         }
         
-        authUtil.login(
-            clientId: argument.clientId,
-            discoveryUri: discoveryURL,
-            username: argument.loginHint,
-            redirectUri: redirectUriURL,
-            ephemeralSession: argument.ephemeralSession ?? false,
-            loginCallback: jsCallback
-        )
+        Task {
+            do {
+                let tokens = try await authUtil.login(clientId: argument.clientId,
+                                                      discoveryUri: discoveryURL,
+                                                      username: argument.loginHint,
+                                                      redirectUri: redirectUriURL,
+                                                      ephemeralSession: argument.ephemeralSession ?? false)
+                guard let response = toJson(tokens) else {
+                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)))
+                    return
+                }
+                jsCallback(.success(response))
+            } catch {
+                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+            }
+        }
     }
     
     // MARK: - Get Redirect Scheme
