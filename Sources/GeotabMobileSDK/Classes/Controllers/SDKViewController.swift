@@ -96,6 +96,26 @@ open class SDKViewController: UIViewController, ViewPresenter {
         view.addSubview(webViewNavigationFailedView)
         pin(subview: webViewNavigationFailedView)
     }
+    
+    override open func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Only clearing volatile memory (RAM).
+        WKWebsiteDataStore.default().removeData(
+            ofTypes: [WKWebsiteDataTypeMemoryCache],
+            modifiedSince: Date.distantPast
+        ) { [weak self] in
+            self?.$logger.info("Memory warning detected. Purging volatile memory cache.")
+        }
+    }
+
+    deinit {
+        // Clean up WKWebView delegates to ensure proper deallocation
+        if isViewLoaded {
+            webView.navigationDelegate = nil
+            webView.uiDelegate = nil
+            $logger.debug("SDKViewController deinitialized")
+        }
+    }
 }
 
 /// :nodoc:

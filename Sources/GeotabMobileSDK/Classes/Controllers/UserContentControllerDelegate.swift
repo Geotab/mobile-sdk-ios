@@ -2,6 +2,22 @@ import WebKit
 import SafariServices
 import Mustache
 
+/// The wrapper holds only a **weak reference** to the actual handler (UserContentControllerDelegate),
+/// allowing it to be deallocated when no other strong references exist. When the handler is deallocated,
+/// messages are safely ignored via the optional chaining (`handler?.userContentController(...)`).
+private class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var handler: (any WKScriptMessageHandler)?
+
+    init(handler: any WKScriptMessageHandler) {
+        self.handler = handler
+        super.init()
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        handler?.userContentController(userContentController, didReceive: message)
+    }
+}
+
 class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
 
     @TaggedLogger("UserContentControllerDelegate")
@@ -11,6 +27,7 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
     
     private let modules: Set<Module>
     private weak var scriptGateway: (any ScriptGateway)?
+    private var registeredHandlerNames: Set<String> = []
     
     init(modules: Set<Module>,
          scriptGateway: any ScriptGateway) {
@@ -21,11 +38,24 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
     }
 
     private func setup() {
-        modules.forEach { contentController.add(self, name: $0.name) }
+        // Use weak wrapper to prevent retain cycle
+        let handler = WeakScriptMessageHandler(handler: self)
+        modules.forEach { module in
+            contentController.add(handler, name: module.name)
+            registeredHandlerNames.insert(module.name)
+        }
         let injectedScript = WKUserScript(source: injectedScriptSource(),
                                           injectionTime: .atDocumentEnd,
                                           forMainFrameOnly: true)
         contentController.addUserScript(injectedScript)
+    }
+
+    deinit {
+        // Clean up message handlers to prevent memory leaks
+        registeredHandlerNames.forEach { name in
+            contentController.removeScriptMessageHandler(forName: name)
+        }
+        $logger.debug("UserContentControllerDelegate deinitialized")
     }
     
     private func injectedScriptSource() -> String {
