@@ -111,8 +111,10 @@ open class SDKViewController: UIViewController, ViewPresenter {
     deinit {
         // Clean up WKWebView delegates to ensure proper deallocation
         if isViewLoaded {
+            webView.configuration.userContentController.removeAllScriptMessageHandlers()
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
+            webView.stopLoading()
             $logger.debug("SDKViewController deinitialized")
         }
     }
