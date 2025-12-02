@@ -17,15 +17,20 @@ protocol BackgroundScheduling {
 actor AuthStateUpdater: AuthStateUpdating {
     private static let scheduleToleranceInNanoseconds: UInt64 = 10 * 1_000_000_000
     private static let rescheduleDelayInNanoseconds: UInt64 = 10 * 1_000_000_000
-    
+    private static let defaultMaxRetryInterval: TimeInterval = 15 * 60 // 15 minutes
+    private static let defaultBaseRetryInterval: TimeInterval = 2 * 60 // 2 minutes
+
     private let authUtil: any AuthUtil
     private let minimumScheduleInterval: TimeInterval
-    
+    private let maxRetryInterval: TimeInterval
+    private let baseRetryInterval: TimeInterval
+
     private var updateTask: Task<Void, any Error>?
     private var nextScheduledUpdateInNanoseconds: UInt64?
     private var lastUpdateCompletedAt: UInt64?
     private var registeredForBackgroundRefresh = false
-    
+    private var retryAttempts: [String: Int] = [:]
+
     nonisolated(unsafe) private var newAuthStateListener: AnyCancellable?
     nonisolated(unsafe) private var backgroundStateListener: AnyCancellable?
     nonisolated(unsafe) private let backgroundScheduler: any BackgroundScheduling
@@ -34,11 +39,15 @@ actor AuthStateUpdater: AuthStateUpdating {
     init(authUtil: any AuthUtil = DefaultAuthUtil(),
          backgroundScheduler: any BackgroundScheduling = BGTaskScheduler.shared,
          logger: any Logging = Logger.shared,
-         minimumScheduleInterval: TimeInterval = 120) {
+         minimumScheduleInterval: TimeInterval = 120,
+         baseRetryInterval: TimeInterval = defaultBaseRetryInterval,
+         maxRetryInterval: TimeInterval = defaultMaxRetryInterval) {
         self.authUtil = authUtil
         self.backgroundScheduler = backgroundScheduler
         self.logger = logger
         self.minimumScheduleInterval = minimumScheduleInterval
+        self.baseRetryInterval = baseRetryInterval
+        self.maxRetryInterval = maxRetryInterval
     }
 
     nonisolated func start() {
@@ -111,29 +120,88 @@ actor AuthStateUpdater: AuthStateUpdating {
         // Capture the reference before entering task group
         let accounts = authUtil.activeUsernames
         let authUtilRef = authUtil
-        
+
         guard !accounts.isEmpty else {
             logDebug("No accounts to refresh")
             return
         }
-        
+
         await withTaskGroup(of: Void.self) { group in
             for account in accounts {
                 group.addTask { [weak self] in
-                    self?.logDebug("Refreshing access token for \(account)")
+                    guard let self else { return }
+                    self.logDebug("Refreshing access token for \(account)")
                     do {
                         let _ = try await authUtilRef.getValidAccessToken(username: account, forceRefresh: true)
-                        self?.logDebug("Successfully refreshed token for \(account)")
+                        self.logDebug("Successfully refreshed token for \(account)")
+                        await self.resetRetryAttempts(for: account)
+                    } catch let error as AuthError {
+                        if case .tokenRefreshFailed(_, _, let requiresReauth) = error {
+                            if !requiresReauth {
+                                // Recoverable error - schedule retry
+                                self.logError("Recoverable error for \(account), scheduling retry", error: error)
+                                await self.scheduleRetry(for: account)
+                            } else {
+                                // Unrecoverable error - requires reauth, no retry
+                                self.logError("Unrecoverable error for \(account), requires reauth", error: error)
+                                await self.resetRetryAttempts(for: account)
+                            }
+                        } else {
+                            self.logError("Failed to refresh token for \(account)", error: error)
+                        }
                     } catch {
-                        self?.logError("Failed to refresh token for \(account)", error: error)
+                        self.logError("Failed to refresh token for \(account)", error: error)
                     }
                 }
             }
-            
+
             for await _ in group { }
         }
-        
+
         logDebug("All token refresh operations completed")
+    }
+
+    private func calculateBackoff(attempt: Int) -> TimeInterval {
+        let exponentialDelay = baseRetryInterval * pow(2.0, Double(attempt))
+        return min(exponentialDelay, maxRetryInterval)
+    }
+
+    private func scheduleRetry(for username: String) {
+        let currentAttempt = retryAttempts[username] ?? 0
+        retryAttempts[username] = currentAttempt + 1
+
+        let retryDelay = calculateBackoff(attempt: currentAttempt)
+        let retryDelayNanoseconds = UInt64(retryDelay * 1_000_000_000)
+
+        logDebug("Scheduling retry for \(username) in \(retryDelay) seconds (attempt \(currentAttempt + 1))")
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await Task.sleep(nanoseconds: retryDelayNanoseconds)
+                self.logDebug("Retrying token refresh for \(username)")
+                _ = try await self.authUtil.getValidAccessToken(username: username, forceRefresh: true)
+                self.logDebug("Retry successful for \(username)")
+                await self.resetRetryAttempts(for: username)
+            } catch let error as AuthError {
+                if case .tokenRefreshFailed(_, _, let requiresReauth) = error {
+                    if !requiresReauth {
+                        // Still recoverable - schedule another retry
+                        await self.scheduleRetry(for: username)
+                    } else {
+                        // Now unrecoverable - stop retrying
+                        self.logError("Retry failed with unrecoverable error for \(username)", error: error)
+                        await self.resetRetryAttempts(for: username)
+                    }
+                }
+            } catch {
+                self.logError("Retry failed for \(username)", error: error)
+            }
+        }
+    }
+
+    private func resetRetryAttempts(for username: String) {
+        retryAttempts[username] = nil
     }
     
     nonisolated private func logDebug(_ message: String) {

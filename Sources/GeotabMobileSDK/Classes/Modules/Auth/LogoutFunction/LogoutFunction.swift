@@ -35,8 +35,10 @@ class LogoutFunction: ModuleFunction {
             do {
                 try await authUtil.logOut(userName: argument.username, presentingViewController: presentingVC)
                 jsCallback(Result.success("undefined"))
+            } catch let error as AuthError {
+                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+                jsCallback(.failure(AuthError.unexpectedError(description: "Logout failed with unexpected error", underlyingError: error)))
             }
         }
     }

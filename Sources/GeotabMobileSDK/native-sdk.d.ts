@@ -549,6 +549,33 @@ declare namespace geotabModules {
     }
 
     namespace auth {
+        interface AuthError extends Error {
+            code:
+                | 'SESSION_PARSE_FAILED'
+                | 'SESSION_RETRIEVE_FAILED'
+                | 'UNEXPECTED_ERROR'
+                | 'NO_DATA_FOUND'
+                | 'INVALID_URL'
+                | 'INVALID_REDIRECT_SCHEME'
+                | 'FAILED_TO_SAVE_AUTH_STATE'
+                | 'USERNAME_MISMATCH'
+                | 'NO_ACCESS_TOKEN_FOUND'
+                | 'PARSE_FAILED_FOR_AUTH_STATE'
+                | 'TOKEN_REFRESH_FAILED'
+                | 'TOKEN_REFRESH_REAUTH_REQUIRED'
+                | 'MISSING_AUTH_DATA'
+                | 'NO_EXTERNAL_USER_AGENT'
+                | 'REVOKE_TOKEN_FAILED'
+                | 'UNEXPECTED_RESPONSE'
+                | 'NETWORK_ERROR'
+                | 'USER_CANCELLED';
+            message: string;
+            recoverable: boolean;
+            requiresReauthentication?: boolean;
+            username?: string;
+            underlyingError?: string;
+        }
+
         /*******
         * Start the login function integrated with Chrome Custom Tabs.
         * @param argument: { clientId: string, discoveryUri: string, username: string, ephemeralSession?: boolean } ephemeralSession - A boolean indicating whether the session should be ephemeral. Defaults to `false`.
@@ -560,8 +587,43 @@ declare namespace geotabModules {
         *  If there's an error while logging in, err will be given.
         *  GeotabAuthState object contains the following properties:
         * { accessToken: string }
+        *
+        * Error Handling:
+        * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, and metadata
+        * - Parameter validation errors are returned as basic Error objects with just a message
+        *
+        * Check if err.code exists to determine if it's a structured AuthError:
+        *
+        * @example
+        * login(params, (err, result) => {
+        *   if (err) {
+        *     if (err.code) {
+        *       // Structured AuthError with metadata
+        *       if (err.code === 'USER_CANCELLED') {
+        *         // User cancelled, don't show error
+        *       } else if (err.recoverable) {
+        *         showRetryButton();
+        *       } else {
+        *         showError(err.message);
+        *       }
+        *     } else {
+        *       // Basic validation error
+        *       showError(err.message);
+        *     }
+        *   }
+        * });
+        *
+        * Common error codes:
+        * - INVALID_URL: Discovery URI is not HTTPS
+        * - INVALID_REDIRECT_SCHEME: Redirect scheme not configured
+        * - NO_DATA_FOUND: OAuth discovery or authorization failed
+        * - NO_EXTERNAL_USER_AGENT: Cannot create OAuth UI
+        * - USER_CANCELLED: User cancelled login (recoverable)
+        * - USERNAME_MISMATCH: JWT username doesn't match parameter
+        * - FAILED_TO_SAVE_AUTH_STATE: Keychain save failed
+        * - UNEXPECTED_ERROR: Network/AppAuth errors (check recoverable flag)
         */
-        function login(argument: { clientId: string, discoveryUri: string, username: string , ephemeralSession? : boolean }, callback: (err?: Error, result?: string) => void);
+        function login(argument: { clientId: string, discoveryUri: string, username: string , ephemeralSession? : boolean }, callback: (err?: AuthError | Error, result?: string) => void);
 
         /*******
           * Start the logout function.
@@ -569,12 +631,43 @@ declare namespace geotabModules {
           * @param callback:
           *      - result: string.
           *  On a successful call a string will be given as result with a success message.
-          *  If there's an error while retrieving the access token, err will be given.
+          *  If there's an error while logging out, err will be given.
+          *
+          * Note: Token revocation and keychain deletion failures are logged but do not cause logout to fail.
+          *
+          * Error Handling:
+          * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, and metadata
+          * - Parameter validation errors are returned as basic Error objects with just a message
+          *
+          * @example
+          * logout(params, (err, result) => {
+          *   if (err) {
+          *     if (err.code) {
+          *       // Structured AuthError
+          *       if (err.code === 'USER_CANCELLED') {
+          *         // User cancelled, UI already dismissed
+          *       } else {
+          *         showError(err.message);
+          *       }
+          *     } else {
+          *       // Basic validation error
+          *       showError(err.message);
+          *     }
+          *   }
+          * });
+          *
+          * Common error codes:
+          * - NO_ACCESS_TOKEN_FOUND: No saved auth state for user
+          * - PARSE_FAILED_FOR_AUTH_STATE: Keychain data corrupted
+          * - MISSING_AUTH_DATA: No ID token or redirect URI
+          * - NO_EXTERNAL_USER_AGENT: Cannot create logout UI
+          * - USER_CANCELLED: User cancelled logout (recoverable)
+          * - UNEXPECTED_ERROR: End session errors (check recoverable flag)
           */
-          function logout(argument: { username: string }, callback: (err?: Error, result?: string) => void);
+          function logout(argument: { username: string }, callback: (err?: AuthError | Error, result?: string) => void);
 
         /*******
-         * Start the getAuthToken function.
+         * Get a valid access token, refreshing if necessary.
          * @param argument: { username: string }
          * @param callback:
          *      - result: string. A GeotabAuthState object.
@@ -582,8 +675,56 @@ declare namespace geotabModules {
          *  If there's an error while retrieving the access token, err will be given.
          *  GeotabAuthState object contains the following properties:
          * { accessToken: string }
+         *
+         * Background behavior: When app is backgrounded and auth expires, returns error without showing UI.
+         * When app returns to foreground, next getToken() call automatically triggers re-authentication.
+         *
+         * Error Handling:
+         * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, and metadata
+         * - Parameter validation errors are returned as basic Error objects with just a message
+         * - Use err.recoverable to determine if retry is appropriate
+         * - Use err.requiresReauthentication to trigger re-login flow
+         *
+         * @example
+         * getToken(params, (err, result) => {
+         *   if (err) {
+         *     if (err.code) {
+         *       // Structured AuthError with metadata
+         *       if (err.recoverable) {
+         *         // Network error, 5xx - show retry button
+         *         showRetryButton();
+         *       } else if (err.requiresReauthentication) {
+         *         // OAuth error, 4xx - redirect to login
+         *         redirectToLogin();
+         *       } else if (err.code === 'USER_CANCELLED') {
+         *         // User cancelled re-auth, don't show error
+         *       } else {
+         *         showError(err.message);
+         *       }
+         *     } else {
+         *       // Basic validation error (missing username)
+         *       showError(err.message);
+         *     }
+         *   }
+         * });
+         *
+         * Common error codes:
+         * - NO_ACCESS_TOKEN_FOUND: No saved auth state for user
+         * - PARSE_FAILED_FOR_AUTH_STATE: Keychain data corrupted
+         * - TOKEN_REFRESH_FAILED: Network/5xx errors (recoverable=true, retry recommended)
+         * - TOKEN_REFRESH_REAUTH_REQUIRED: OAuth errors like invalid_grant (recoverable=false, requiresReauthentication=true)
+         * - UNEXPECTED_ERROR: JSON serialization failure or other unexpected errors
+         * - Plus any login() error codes when automatic re-authentication is triggered (app in foreground)
+         *
+         * Recoverable errors (err.recoverable === true):
+         * - Network issues (no internet, DNS failure, timeouts)
+         * - HTTP 5xx server errors
+         *
+         * Non-recoverable errors (err.recoverable === false):
+         * - OAuth errors (invalid_grant, invalid_client)
+         * - HTTP 4xx client errors
          */
-         function getToken(argument: { username: string }, callback: (err?: Error, result?: string) => void);
+         function getToken(argument: { username: string }, callback: (err?: AuthError | Error, result?: string) => void);
     }
 
 }

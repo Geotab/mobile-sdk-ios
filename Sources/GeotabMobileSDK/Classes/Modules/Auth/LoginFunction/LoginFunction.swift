@@ -49,13 +49,15 @@ class LoginFunction: ModuleFunction {
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
-                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)))
+                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)))
                     return
                 }
 
                 jsCallback(.success(response))
+            } catch let error as AuthError {
+                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+                jsCallback(.failure(AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)))
             }
         }
     }

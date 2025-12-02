@@ -29,12 +29,14 @@ class GetTokenFunction: ModuleFunction {
             do {
                 let tokenResponse = try await authUtil.getValidAccessToken(username: username)
                 guard let jsonString = toJson(tokenResponse) else {
-                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: "Error encoding response")))
+                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize token response", underlyingError: nil)))
                     return
                 }
                jsCallback(.success(jsonString))
+            } catch let error as AuthError {
+                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+                jsCallback(.failure(AuthError.unexpectedError(description: "Get token failed with unexpected error", underlyingError: error)))
             }
         }
     }
