@@ -218,4 +218,67 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
 
         return false
     }
+
+    static func isExpectedError(_ error: any Error) -> Bool {
+        if let authError = error as? AuthError {
+            switch authError {
+            case .userCancelledFlow:
+                return true
+            case .networkError(let underlyingError):
+                return isExpectedError(underlyingError)
+            case .tokenRefreshFailed(_, let underlyingError, _):
+                return isExpectedError(underlyingError)
+            case .unexpectedError(_, let underlyingError):
+                if let underlyingError {
+                    return isExpectedError(underlyingError)
+                }
+                return false
+            case .unexpectedResponse(let statusCode):
+                return statusCode >= 500 && statusCode < 600
+            default:
+                return false
+            }
+        }
+
+        let nsError = error as NSError
+
+        if nsError.domain == OIDOAuthTokenErrorDomain {
+            return true
+        }
+
+        if nsError.domain == OIDOAuthAuthorizationErrorDomain {
+            return true
+        }
+
+        if nsError.domain == OIDGeneralErrorDomain {
+            switch nsError.code {
+            case OIDErrorCode.userCanceledAuthorizationFlow.rawValue:
+                return true
+            case OIDErrorCodeOAuth.invalidRequest.rawValue,
+                 OIDErrorCodeOAuth.invalidClient.rawValue,
+                 OIDErrorCodeOAuth.invalidGrant.rawValue,
+                 OIDErrorCodeOAuth.unauthorizedClient.rawValue,
+                 OIDErrorCodeOAuth.unsupportedGrantType.rawValue:
+                return true
+            default:
+                return false
+            }
+        }
+
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .notConnectedToInternet,
+                 .networkConnectionLost,
+                 .timedOut,
+                 .cannotConnectToHost,
+                 .cannotFindHost,
+                 .dnsLookupFailed:
+                return true
+            default:
+                return false
+            }
+        }
+
+        return false
+    }
 }

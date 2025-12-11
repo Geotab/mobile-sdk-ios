@@ -2,6 +2,7 @@ import WebKit
 
 protocol NavigationHost: UIDocumentInteractionControllerDelegate {
     func navigationFailed(with error: NSError)
+    func willChangeDomain(to domain: String)
     var useAppBoundDomains: Bool { get }
 }
 
@@ -14,6 +15,9 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
     private var fileDestinationURL: URL?
 
     private weak var navigationHost: (any NavigationHost)?
+
+    /// Track the previous domain to detect changes
+    private var previousDomainHost: String?
 
     private lazy var boundDomains: [String] = {
         if navigationHost?.useAppBoundDomains ?? false,
@@ -59,11 +63,18 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
             return
         }
 
-        if let frame = navigationAction.targetFrame,
-           let domain = url.domain,
-           frame.isMainFrame,
-           !boundDomains.contains(domain) {
-            $logger.warn("Navigating to out of bounds domain \(domain)")
+        // Check if this is a main frame navigation
+        if let frame = navigationAction.targetFrame, frame.isMainFrame {
+            // Warn about out-of-bounds domains
+            if let domain = url.domain, !boundDomains.contains(domain) {
+                $logger.warn("Navigating to out of bounds domain \(domain)")
+            }
+
+            if url.scheme == "https", let currentHost = url.host, currentHost != previousDomainHost {
+                $logger.debug("Domain changed from '\(previousDomainHost ?? "nil")' to '\(currentHost)'")
+                previousDomainHost = currentHost
+                navigationHost?.willChangeDomain(to: currentHost)
+            }
         }
 
         decisionHandler(.allow)

@@ -8,12 +8,15 @@ struct LoginArgument: Codable {
 }
 
 class LoginFunction: ModuleFunction {
-    
+
     private static let functionName = "login"
     private let authUtil: any AuthUtil
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
-   
+
+    @TaggedLogger("LoginFunction")
+    private var logger
+
     init(module: Module, util: any AuthUtil = DefaultAuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
@@ -41,7 +44,9 @@ class LoginFunction: ModuleFunction {
             return
         }
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
+
             do {
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
@@ -54,10 +59,16 @@ class LoginFunction: ModuleFunction {
                 }
 
                 jsCallback(.success(response))
-            } catch let error as AuthError {
-                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)))
+                let authError = (error as? AuthError) ?? AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)
+                if !AuthError.isExpectedError(authError) {
+                    await self.logger.authFailure(
+                        username: argument.username,
+                        flowType: .login,
+                        error: authError
+                    )
+                }
+                jsCallback(.failure(authError))
             }
         }
     }

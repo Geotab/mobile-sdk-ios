@@ -5,10 +5,13 @@ struct GetAuthTokenArgument: Codable {
 }
 
 class GetTokenFunction: ModuleFunction {
-    
+
     private static let functionName = "getToken"
     private let authUtil: any AuthUtil
-    
+
+    @TaggedLogger("GetTokenFunction")
+    private var logger
+
     init(module: Module, util: any AuthUtil = DefaultAuthUtil()) {
         authUtil = util
         super.init(module: module, name: GetTokenFunction.functionName)}
@@ -25,7 +28,9 @@ class GetTokenFunction: ModuleFunction {
             return
         } 
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
+
             do {
                 let tokenResponse = try await authUtil.getValidAccessToken(username: username)
                 guard let jsonString = toJson(tokenResponse) else {
@@ -33,10 +38,18 @@ class GetTokenFunction: ModuleFunction {
                     return
                 }
                jsCallback(.success(jsonString))
-            } catch let error as AuthError {
-                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(AuthError.unexpectedError(description: "Get token failed with unexpected error", underlyingError: error)))
+                let authError = (error as? AuthError) ?? AuthError.unexpectedError(description: "Get token failed with unexpected error", underlyingError: error)
+                if case AuthError.noAccessTokenFoundError = authError  {
+                    // expected
+                } else if !AuthError.isExpectedError(authError) {
+                    await self.logger.authFailure(
+                        username: username,
+                        flowType: .tokenRefresh,
+                        error: authError
+                    )
+                }
+                jsCallback(.failure(authError))
             }
         }
     }

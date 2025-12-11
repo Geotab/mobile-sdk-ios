@@ -31,14 +31,24 @@ class LogoutFunction: ModuleFunction {
         
         let presentingVC = UIApplication.shared.rootViewController
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
+
             do {
                 try await authUtil.logOut(userName: argument.username, presentingViewController: presentingVC)
                 jsCallback(Result.success("undefined"))
-            } catch let error as AuthError {
-                jsCallback(.failure(error))
             } catch {
-                jsCallback(.failure(AuthError.unexpectedError(description: "Logout failed with unexpected error", underlyingError: error)))
+                let authError = (error as? AuthError) ?? AuthError.unexpectedError(description: "Logout failed with unexpected error", underlyingError: error)
+                if case AuthError.noAccessTokenFoundError = authError  {
+                    // expected
+                } else if !AuthError.isExpectedError(authError) {
+                    await self.logger.authFailure(
+                        username: argument.username,
+                        flowType: .logout,
+                        error: authError
+                    )
+                }
+                jsCallback(.failure(authError))
             }
         }
     }

@@ -34,17 +34,14 @@ actor AuthStateUpdater: AuthStateUpdating {
     nonisolated(unsafe) private var newAuthStateListener: AnyCancellable?
     nonisolated(unsafe) private var backgroundStateListener: AnyCancellable?
     nonisolated(unsafe) private let backgroundScheduler: any BackgroundScheduling
-    nonisolated(unsafe) private let logger: any Logging
 
     init(authUtil: any AuthUtil = DefaultAuthUtil(),
          backgroundScheduler: any BackgroundScheduling = BGTaskScheduler.shared,
-         logger: any Logging = Logger.shared,
          minimumScheduleInterval: TimeInterval = 120,
          baseRetryInterval: TimeInterval = defaultBaseRetryInterval,
          maxRetryInterval: TimeInterval = defaultMaxRetryInterval) {
         self.authUtil = authUtil
         self.backgroundScheduler = backgroundScheduler
-        self.logger = logger
         self.minimumScheduleInterval = minimumScheduleInterval
         self.baseRetryInterval = baseRetryInterval
         self.maxRetryInterval = maxRetryInterval
@@ -135,22 +132,30 @@ actor AuthStateUpdater: AuthStateUpdating {
                         let _ = try await authUtilRef.getValidAccessToken(username: account, forceRefresh: true)
                         self.logDebug("Successfully refreshed token for \(account)")
                         await self.resetRetryAttempts(for: account)
-                    } catch let error as AuthError {
-                        if case .tokenRefreshFailed(_, _, let requiresReauth) = error {
+                    } catch {
+                        
+                        if !AuthError.isExpectedError(error) {
+                            await Logger.shared.authFailure(
+                                username: account,
+                                flowType: .backgroundRefresh,
+                                error: error
+                            )
+                        }
+
+                        if let authError = error as? AuthError,
+                            case .tokenRefreshFailed(_, _, let requiresReauth) = authError {
                             if !requiresReauth {
                                 // Recoverable error - schedule retry
-                                self.logError("Recoverable error for \(account), scheduling retry", error: error)
+                                self.logDebug("Recoverable error for \(account), scheduling retry", error: error)
                                 await self.scheduleRetry(for: account)
                             } else {
                                 // Unrecoverable error - requires reauth, no retry
-                                self.logError("Unrecoverable error for \(account), requires reauth", error: error)
+                                self.logDebug("Unrecoverable error for \(account), requires reauth", error: error)
                                 await self.resetRetryAttempts(for: account)
                             }
                         } else {
-                            self.logError("Failed to refresh token for \(account)", error: error)
+                            self.logDebug("Failed to refresh token for \(account)", error: error)
                         }
-                    } catch {
-                        self.logError("Failed to refresh token for \(account)", error: error)
                     }
                 }
             }
@@ -183,19 +188,27 @@ actor AuthStateUpdater: AuthStateUpdating {
                 _ = try await self.authUtil.getValidAccessToken(username: username, forceRefresh: true)
                 self.logDebug("Retry successful for \(username)")
                 await self.resetRetryAttempts(for: username)
-            } catch let error as AuthError {
-                if case .tokenRefreshFailed(_, _, let requiresReauth) = error {
+            } catch {
+                if !AuthError.isExpectedError(error) {
+                    await Logger.shared.authFailure(
+                        username: username,
+                        flowType: .backgroundRefreshRetry,
+                        error: error,
+                        additionalContext: [.retryAttempt: currentAttempt + 1]
+                    )
+                }
+
+                if let authError = error as? AuthError,
+                   case .tokenRefreshFailed(_, _, let requiresReauth) = authError {
                     if !requiresReauth {
-                        // Still recoverable - schedule another retry
                         await self.scheduleRetry(for: username)
                     } else {
-                        // Now unrecoverable - stop retrying
-                        self.logError("Retry failed with unrecoverable error for \(username)", error: error)
+                        self.logDebug("Retry failed with unrecoverable error for \(username)", error: error)
                         await self.resetRetryAttempts(for: username)
                     }
+                } else {
+                    self.logDebug("Retry failed for \(username)", error: error)
                 }
-            } catch {
-                self.logError("Retry failed for \(username)", error: error)
             }
         }
     }
@@ -204,12 +217,12 @@ actor AuthStateUpdater: AuthStateUpdating {
         retryAttempts[username] = nil
     }
     
-    nonisolated private func logDebug(_ message: String) {
-        logger.log(level: .debug, tag: "AuthStateUpdater", message: message)
+    nonisolated private func logDebug(_ message: String, error: (any Error)? = nil) {
+        Logger.shared.log(level: .debug, tag: "AuthStateUpdater", message: message, error: error)
     }
     
     nonisolated private func logError(_ message: String, error: (any Error)? = nil) {
-        logger.event(level: .error, tag: "AuthStateUpdater", message: message, error: error)
+        Logger.shared.event(level: .error, tag: "AuthStateUpdater", message: message, error: error)
     }
 }
 
@@ -276,9 +289,10 @@ extension AuthStateUpdater {
     
     func handleAppRefresh(task: BGAppRefreshTask) async {
         await updateAuthStates()
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             try await Task.sleep(nanoseconds: Self.rescheduleDelayInNanoseconds)
-            scheduleBackgroundUpdate()
+            await scheduleBackgroundUpdate()
             task.setTaskCompleted(success: true)
         }
     }

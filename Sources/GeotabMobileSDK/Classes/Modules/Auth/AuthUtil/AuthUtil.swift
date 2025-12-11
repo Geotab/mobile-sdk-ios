@@ -223,16 +223,20 @@ final class DefaultAuthUtil: AuthUtil {
     private var logger
 
     init(appAuthService: any AppAuthService = DefaultAppAuthService(),
-         authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService()),
-         applicationStateProvider: (any ApplicationStateProviding)? = nil) {
-        self.appAuthService = appAuthService
-        self.authStateKeychainManager = authStateKeychainManager
-        self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
+             authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService()),
+             applicationStateProvider: (any ApplicationStateProviding)? = nil) {
+            self.appAuthService = appAuthService
+            self.authStateKeychainManager = authStateKeychainManager
+            self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
     }
     
     // MARK: - Login Method
     func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool) async throws -> AuthTokens {
-        return try await authCoordinator.performLogin(username: username) {
+        return try await authCoordinator.performLogin(username: username) { [weak self] in
+            guard let self else {
+                throw AuthError.unexpectedError(description: "AuthUtil deallocated during login", underlyingError: nil)
+            }
+
             do {
                 // Discover OAuth configuration
                 let configuration = try await self.appAuthService.discoverConfiguration(forDiscoveryURL: discoveryUri)
@@ -245,17 +249,19 @@ final class DefaultAuthUtil: AuthUtil {
                     username: username,
                     ephemeralSession: ephemeralSession
                 )
-            } catch let error as AuthError {
-                throw error
             } catch {
-                throw AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)
+                throw (error is AuthError) ? error : AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)
             }
         }
     }
 
     // MARK: - Re-authentication Method
     func reauth(username: String) async throws -> AuthTokens {
-        return try await authCoordinator.performReauth(username: username) {
+        return try await authCoordinator.performReauth(username: username) { [weak self] in
+            guard let self else {
+                throw AuthError.unexpectedError(description: "AuthUtil deallocated during reauth", underlyingError: nil)
+            }
+
             do {
                 // Load existing auth state to get configuration and client info
                 guard let existingAuthState = try self.authStateKeychainManager.loadAuthState(username: username) else {
@@ -281,18 +287,20 @@ final class DefaultAuthUtil: AuthUtil {
                     clientId: clientId,
                     redirectUri: redirectUri,
                     username: username,
-                    ephemeralSession: ephemeralSession
+                    ephemeralSession: ephemeralSession,
+                    flowType: .reauth
                 )
             } catch let error as AuthError {
                 // Check if user cancelled the reauth flow
                 if case .userCancelledFlow = error {
-                    // Clear all saved tokens for this user
+                    // Clear all saved tokens for this user (don't log as auth failure)
                     self.$logger.info("User cancelled reauth, clearing tokens for \(username)")
                     do {
                         try self.authStateKeychainManager.deleteAuthState(username: username)
                     } catch {
                         self.$logger.error("Failed to delete auth state after user cancellation: \(error)")
                     }
+                    throw error
                 }
                 throw error
             } catch {
@@ -307,7 +315,8 @@ final class DefaultAuthUtil: AuthUtil {
         clientId: String,
         redirectUri: URL,
         username: String,
-        ephemeralSession: Bool
+        ephemeralSession: Bool,
+        flowType: Auth.FlowType = .login
     ) async throws -> AuthTokens {
         // Build authorization request
         let additionalParameters = username.isEmpty ? nil : ["login_hint": username]
@@ -415,9 +424,13 @@ extension DefaultAuthUtil {
     func getValidAccessToken(username: String) async throws -> AuthTokens {
         return try await getValidAccessToken(username: username, forceRefresh: false)
     }
-    
+
     func getValidAccessToken(username: String, forceRefresh: Bool) async throws -> AuthTokens {
-        return try await authCoordinator.performTokenRefresh(username: username, forceRefresh: forceRefresh) {
+        return try await authCoordinator.performTokenRefresh(username: username, forceRefresh: forceRefresh) { [weak self] in
+            guard let self else {
+                throw AuthError.unexpectedError(description: "AuthUtil deallocated during token refresh", underlyingError: nil)
+            }
+
             guard let authState = try self.authStateKeychainManager.loadAuthState(username: username) else {
                 throw AuthError.noAccessTokenFoundError(username)
             }
@@ -432,7 +445,11 @@ extension DefaultAuthUtil {
                 let accessToken = try await self.appAuthService.getValidAccessToken(key: username, authState: oidAuthState)
                 // Update the wrapper with the refreshed OIDAuthState
                 let updatedAuthState = AuthState(oidAuthState: oidAuthState, ephemeralSession: authState.ephemeralSession)
-                try self.authStateKeychainManager.saveAuthState(username: username, authState: updatedAuthState)
+                do {
+                    try self.authStateKeychainManager.saveAuthState(username: username, authState: updatedAuthState)
+                } catch {
+                    throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
+                }
                 self.notify(user: username, oidAuthState: oidAuthState)
                 return AuthTokens(accessToken: accessToken, idToken: nil, refreshToken: nil)
             } catch {
@@ -442,7 +459,6 @@ extension DefaultAuthUtil {
                     // Network error - keep auth state, user can retry
                     self.$logger.info("Token refresh failed (recoverable): \(error)")
                     throw AuthError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: false)
-
                 } else {
                     // Auth server rejected the refresh token
                     self.$logger.info("Token refresh failed (requires re-auth): \(error)")
@@ -465,10 +481,15 @@ extension DefaultAuthUtil {
 // MARK: - Logout
 extension DefaultAuthUtil {
     func logOut(userName: String, presentingViewController: UIViewController?) async throws {
-        try await authCoordinator.performLogout(username: userName) {
+        try await authCoordinator.performLogout(username: userName) { [weak self] in
+            guard let self else {
+                throw AuthError.unexpectedError(description: "AuthUtil deallocated during logout", underlyingError: nil)
+            }
+
             guard let authState = try self.authStateKeychainManager.loadAuthState(username: userName) else {
-                self.$logger.error("Failed to load auth state: \(AuthError.noAccessTokenFoundError(userName))")
-                throw AuthError.noAccessTokenFoundError(userName)
+                let error = AuthError.noAccessTokenFoundError(userName)
+                self.$logger.error("Failed to load auth state: \(error)")
+                throw error
             }
             
             let oidAuthState = authState.oidAuthState
@@ -480,7 +501,7 @@ extension DefaultAuthUtil {
             } catch {
                 self.$logger.error("Token revocation failed, continuing with logout: \(error)")
             }
-            
+
             // Delete from keychain
             do {
                 try self.authStateKeychainManager.deleteAuthState(username: userName)

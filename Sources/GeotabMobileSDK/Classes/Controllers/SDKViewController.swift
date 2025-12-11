@@ -45,6 +45,8 @@ open class SDKViewController: UIViewController, ViewPresenter {
     
     internal var modules: Set<Module> = []
     
+    public var onDomainChange: ((String) -> Void)?
+    
     private lazy var templateRepo: TemplateRepository? = {
         let repo = TemplateRepository(bundle: Bundle.module, templateExtension: "js")
         repo.configuration.contentType = .text
@@ -106,6 +108,11 @@ open class SDKViewController: UIViewController, ViewPresenter {
         ) { [weak self] in
             self?.$logger.info("Memory warning detected. Purging volatile memory cache.")
         }
+    }
+
+    /// :nodoc:
+    open func willChangeDomain(to domain: String) {
+        self.onDomainChange?(domain)
     }
 
     deinit {
