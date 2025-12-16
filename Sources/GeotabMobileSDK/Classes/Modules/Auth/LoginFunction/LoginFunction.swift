@@ -8,15 +8,12 @@ struct LoginArgument: Codable {
 }
 
 class LoginFunction: ModuleFunction {
-
+    
     private static let functionName = "login"
     private let authUtil: any AuthUtil
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
-
-    @TaggedLogger("LoginFunction")
-    private var logger
-
+   
     init(module: Module, util: any AuthUtil = DefaultAuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
@@ -44,9 +41,7 @@ class LoginFunction: ModuleFunction {
             return
         }
         
-        Task { [weak self] in
-            guard let self else { return }
-
+        Task {
             do {
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
@@ -54,21 +49,13 @@ class LoginFunction: ModuleFunction {
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
-                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)))
+                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)))
                     return
                 }
 
                 jsCallback(.success(response))
             } catch {
-                let authError = (error as? AuthError) ?? AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)
-                if !AuthError.isExpectedError(authError) {
-                    await self.logger.authFailure(
-                        username: argument.username,
-                        flowType: .login,
-                        error: authError
-                    )
-                }
-                jsCallback(.failure(authError))
+                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
             }
         }
     }
