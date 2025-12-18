@@ -15,7 +15,8 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
     private var fileDestinationURL: URL?
 
     private weak var navigationHost: (any NavigationHost)?
-
+    public weak var navigationActionDelegate: (any WVNavigationActionDelegate)?
+    
     /// Track the previous domain to detect changes
     private var previousDomainHost: String?
 
@@ -77,6 +78,8 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
             }
         }
 
+        navigationActionDelegate?.onDecidePolicy(navigationAction: navigationAction)
+        
         decisionHandler(.allow)
     }
 

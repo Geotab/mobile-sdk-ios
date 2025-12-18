@@ -1,6 +1,7 @@
 import WebKit
 
 protocol UIHostController: UIViewController {
+    var isAllowedToPresentAlert: Bool { get }
 }
 
 class UIDelegate: NSObject, WKUIDelegate {
@@ -25,6 +26,11 @@ class UIDelegate: NSObject, WKUIDelegate {
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
+        guard let hostController = hostController, hostController.isAllowedToPresentAlert else {
+            completionHandler()
+            return
+        }
+        
         guard let (languageBundle, hostController) = checkDeps() else {
             // No host controller available - call completion immediately
             completionHandler()
@@ -44,6 +50,11 @@ class UIDelegate: NSObject, WKUIDelegate {
     }
     
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        
+        guard let hostController = hostController, hostController.isAllowedToPresentAlert else {
+            completionHandler(false)
+            return
+        }
         
         guard let (languageBundle, hostController) = checkDeps() else {
             // No host controller available - call completion with false

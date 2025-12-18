@@ -24,10 +24,11 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
     private var logger
 
     let contentController = WKUserContentController()
-    
+    private var scriptInjectables: [String: any ScriptInjectable] = [:]
     private let modules: Set<Module>
     private weak var scriptGateway: (any ScriptGateway)?
     private var registeredHandlerNames: Set<String> = []
+    public weak var didRecieveScriptDelegate: (any WVDidRecieveScriptDelegate)?
     
     init(modules: Set<Module>,
          scriptGateway: any ScriptGateway) {
@@ -86,6 +87,8 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
             $logger.debug("Received message with empty body")
             return
         }
+        
+        didRecieveScriptDelegate?.didReceive(scriptMessage: message)
         
         let module = message.name
         let data = Data(msg.utf8)
@@ -160,5 +163,35 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
                 self.$logger.debug("Could not create script to evaluate for callback")
             }
         }
+    }
+}
+
+extension UserContentControllerDelegate {
+    /**
+     Registers a given ScriptInjectable object with the content controller, allowing it to be executed within the web view.
+     
+     The ScriptInjectable object encapsulates the source code, injection time, and message handler name for the custom script. By registering it, the custom script will be injected into the web view at the specified injection time and be able to communicate with native code using the provided message handler name.
+     
+     - Parameter scriptInjectable: The script injectable object containing the properties and logic needed to define and control the custom script.
+     */
+    func registerScriptInjectable(_ scriptInjectable: any ScriptInjectable) {
+        let userScript = WKUserScript(source: scriptInjectable.source,
+                                      injectionTime: scriptInjectable.injectionTime,
+                                      forMainFrameOnly: true)
+        contentController.addUserScript(userScript)
+        contentController.add(self, name: scriptInjectable.messageHandlerName)
+        scriptInjectables[scriptInjectable.messageHandlerName] = scriptInjectable
+    }
+    /**
+     Unregisters a given script injectable object from the content controller, removing it from execution within the web view.
+     
+     If the provided script injectable object is not found in the registered scripts, the method returns early without making any changes.
+     
+     - Parameter handlerName: The script injectable object's message handler name to be unregistered.
+     */
+    func unregisterScriptInjectable(_ handlerName: String) {
+        guard let _ = scriptInjectables[handlerName] else { return }
+        contentController.removeScriptMessageHandler(forName: handlerName)
+        scriptInjectables.removeValue(forKey: handlerName)
     }
 }

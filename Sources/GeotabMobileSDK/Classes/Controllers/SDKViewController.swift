@@ -171,6 +171,9 @@ extension SDKViewController: NavigationHost {
 
 /// :nodoc:
 extension SDKViewController: UIHostController {
+    var isAllowedToPresentAlert: Bool {
+        isViewLoaded && view.window != nil
+    }
 }
 
 /// :nodoc:

@@ -1,5 +1,5 @@
 {
-  "originHash" : "a4f2b5da907f6c1968f1e2960d0e01295754ca136c4907159a30191fd5cca4eb",
+  "originHash" : "af75b5a98409e3cdf0540bd8d62e30e71518556fb49ffe673163e9734fbd20a9",
   "pins" : [
     {
       "identity" : "appauth-ios",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "6e9dcfb807959e19f2915be1928aeccf01babba5",
         "version" : "4.2.0"
+      }
+    },
+    {
+      "identity" : "mobile-swift-rison",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Geotab/mobile-swift-rison",
+      "state" : {
+        "revision" : "b88c3392dfb5e5d94cb9f38d3eed87d3d19dc260",
+        "version" : "1.1.18181"
       }
     },
     {
