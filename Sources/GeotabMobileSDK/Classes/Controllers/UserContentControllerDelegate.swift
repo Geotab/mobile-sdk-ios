@@ -116,14 +116,9 @@ class UserContentControllerDelegate: NSObject, WKScriptMessageHandler {
     private func scriptFor(_ callback: String, result: String?, error: (any Error)?) -> String {
         var errorString = "null"
         if let error {
-            if let jsonError = error as? (any JsonSerializableError),
-               let json = jsonError.asJson {
-                errorString = "(() => { const errObj = \(json); return Object.assign(new Error(errObj.message), errObj); })()"
-            } else {
-                errorString = "new Error(\"\(error.localizedDescription)\")"
-            }
+            errorString = "new Error(\"\(error.localizedDescription)\")"
         }
-
+        
         let resultString = result ?? "null"
 
         return """

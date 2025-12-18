@@ -2,17 +2,6 @@ import AppAuth
 import UIKit
 import Foundation
 
-// MARK: - Application State Provider
-protocol ApplicationStateProviding {
-    @MainActor var applicationState: UIApplication.State { get }
-}
-
-class DefaultApplicationStateProvider: ApplicationStateProviding {
-    @MainActor var applicationState: UIApplication.State {
-        return UIApplication.shared.applicationState
-    }
-}
-
 // MARK: - Protocol
 protocol AuthUtil {
     func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool) async throws -> AuthTokens
@@ -65,7 +54,7 @@ struct AuthState: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let authStateData = try container.decode(Data.self, forKey: .oidAuthStateData)
         guard let oidAuthState = try NSKeyedUnarchiver.unarchivedObject(ofClass: OIDAuthState.self, from: authStateData) else {
-            throw AuthError.parseFailedForAuthState
+            throw GetTokenError.parseFailedForAuthState
         }
         self.oidAuthState = oidAuthState
         self.ephemeralSession = try container.decode(Bool.self, forKey: .ephemeralSession)
@@ -217,26 +206,19 @@ final class DefaultAuthUtil: AuthUtil {
     private let appAuthService: any AppAuthService
     private let authStateKeychainManager: any AuthKeychainManaging
     private let authCoordinator = AuthorizationCoordinator()
-    private let applicationStateProvider: (any ApplicationStateProviding)
 
     @TaggedLogger("AuthUtil")
     private var logger
 
-    init(appAuthService: any AppAuthService = DefaultAppAuthService(),
-             authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService()),
-             applicationStateProvider: (any ApplicationStateProviding)? = nil) {
-            self.appAuthService = appAuthService
-            self.authStateKeychainManager = authStateKeychainManager
-            self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
+    init(appAuthService: any AppAuthService = DefaultAppAuthService(), 
+         authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService())) {
+        self.appAuthService = appAuthService
+        self.authStateKeychainManager = authStateKeychainManager
     }
     
     // MARK: - Login Method
     func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool) async throws -> AuthTokens {
-        return try await authCoordinator.performLogin(username: username) { [weak self] in
-            guard let self else {
-                throw AuthError.unexpectedError(description: "AuthUtil deallocated during login", underlyingError: nil)
-            }
-
+        return try await authCoordinator.performLogin(username: username) {
             do {
                 // Discover OAuth configuration
                 let configuration = try await self.appAuthService.discoverConfiguration(forDiscoveryURL: discoveryUri)
@@ -250,61 +232,43 @@ final class DefaultAuthUtil: AuthUtil {
                     ephemeralSession: ephemeralSession
                 )
             } catch {
-                throw (error is AuthError) ? error : AuthError.unexpectedError(description: "Login failed with unexpected error", underlyingError: error)
+                throw GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)
             }
         }
     }
-
+    
     // MARK: - Re-authentication Method
     func reauth(username: String) async throws -> AuthTokens {
-        return try await authCoordinator.performReauth(username: username) { [weak self] in
-            guard let self else {
-                throw AuthError.unexpectedError(description: "AuthUtil deallocated during reauth", underlyingError: nil)
-            }
-
+        return try await authCoordinator.performReauth(username: username) {
             do {
                 // Load existing auth state to get configuration and client info
                 guard let existingAuthState = try self.authStateKeychainManager.loadAuthState(username: username) else {
-                    throw AuthError.noAccessTokenFoundError(username)
+                    throw GetTokenError.noAccessTokenFoundError(username)
                 }
-
+                
                 let oidAuthState = existingAuthState.oidAuthState
-
+                
                 // Extract configuration from stored auth state
                 let configuration = oidAuthState.lastAuthorizationResponse.request.configuration
                 let clientId = oidAuthState.lastAuthorizationResponse.request.clientID
-
+                
                 guard let redirectUri = oidAuthState.lastAuthorizationResponse.request.redirectURL else {
-                    throw AuthError.noAccessTokenFoundError(username)
+                    throw GetTokenError.noAccessTokenFoundError(username)
                 }
-
+                
                 // Use the stored ephemeralSession value
                 let ephemeralSession = existingAuthState.ephemeralSession
-
+                
                 // Perform authorization flow
                 return try await self.performAuthorizationFlow(
                     configuration: configuration,
                     clientId: clientId,
                     redirectUri: redirectUri,
                     username: username,
-                    ephemeralSession: ephemeralSession,
-                    flowType: .reauth
+                    ephemeralSession: ephemeralSession
                 )
-            } catch let error as AuthError {
-                // Check if user cancelled the reauth flow
-                if case .userCancelledFlow = error {
-                    // Clear all saved tokens for this user (don't log as auth failure)
-                    self.$logger.info("User cancelled reauth, clearing tokens for \(username)")
-                    do {
-                        try self.authStateKeychainManager.deleteAuthState(username: username)
-                    } catch {
-                        self.$logger.error("Failed to delete auth state after user cancellation: \(error)")
-                    }
-                    throw error
-                }
-                throw error
             } catch {
-                throw AuthError.unexpectedError(description: "Re-authentication failed with unexpected error", underlyingError: error)
+                throw GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)
             }
         }
     }
@@ -315,8 +279,7 @@ final class DefaultAuthUtil: AuthUtil {
         clientId: String,
         redirectUri: URL,
         username: String,
-        ephemeralSession: Bool,
-        flowType: Auth.FlowType = .login
+        ephemeralSession: Bool
     ) async throws -> AuthTokens {
         // Build authorization request
         let additionalParameters = username.isEmpty ? nil : ["login_hint": username]
@@ -326,28 +289,19 @@ final class DefaultAuthUtil: AuthUtil {
             redirectUri: redirectUri,
             additionalParameters: additionalParameters
         )
-
+        
         // Present authorization flow
         let (oidAuthState, session) = try await presentAuthorization(request: request, ephemeralSession: ephemeralSession)
         currentAuthorizationFlow = session
-
+        
         // Handle result
         guard let oidAuthState else {
-            throw AuthError.noDataFoundError
+            throw GeotabDriveErrors.AuthFailedError(error: AuthError.noDataFoundError.localizedDescription)
         }
-
-        // Validate username matches the one in the access token
-        // Note: Username validation is conditional because empty username is valid in certain flows
-        // (e.g., LoginModule where username comes from login_hint parameter in the auth flow itself)
-        if !username.isEmpty {
-            try await validateUsername(expected: username, in: oidAuthState)
-        } else {
-            $logger.debug("Skipping username validation - empty username provided")
-        }
-
+        
         // Wrap OIDAuthState with ephemeralSession flag
         let authState = AuthState(oidAuthState: oidAuthState, ephemeralSession: ephemeralSession)
-
+        
         do {
             try authStateKeychainManager.saveAuthState(username: username, authState: authState)
         } catch {
@@ -374,15 +328,15 @@ final class DefaultAuthUtil: AuthUtil {
         guard let externalUserAgent = OIDExternalUserAgentIOS(
             presenting: viewPresenter,
             prefersEphemeralSession: ephemeralSession
-        ) else {
-            throw AuthError.noExternalUserAgent
+        ) else { 
+            throw GeotabDriveErrors.AuthFailedError(error: "Could not create external user agent")
         }
         
         do {
             return try await appAuthService.authState(byPresenting: request, session: externalUserAgent)
         } catch let error as NSError {
             if error.domain == OIDGeneralErrorDomain && error.code == OIDErrorCode.userCanceledAuthorizationFlow.rawValue {
-                throw AuthError.userCancelledFlow
+                throw GeotabDriveErrors.AuthFailedError(error: "User cancelled flow")
             } else {
                 throw error
             }
@@ -391,7 +345,7 @@ final class DefaultAuthUtil: AuthUtil {
     
     private func createAuthResponse(from authState: OIDAuthState) throws -> AuthTokens {
         guard let authResponse = buildGeotabAuthResponse(from: authState) else {
-            throw AuthError.unexpectedError(description: "Failed to build auth response from auth state", underlyingError: nil)
+            throw GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)
         }
         return authResponse
     }
@@ -424,15 +378,11 @@ extension DefaultAuthUtil {
     func getValidAccessToken(username: String) async throws -> AuthTokens {
         return try await getValidAccessToken(username: username, forceRefresh: false)
     }
-
+    
     func getValidAccessToken(username: String, forceRefresh: Bool) async throws -> AuthTokens {
-        return try await authCoordinator.performTokenRefresh(username: username, forceRefresh: forceRefresh) { [weak self] in
-            guard let self else {
-                throw AuthError.unexpectedError(description: "AuthUtil deallocated during token refresh", underlyingError: nil)
-            }
-
+        return try await authCoordinator.performTokenRefresh(username: username, forceRefresh: forceRefresh) {
             guard let authState = try self.authStateKeychainManager.loadAuthState(username: username) else {
-                throw AuthError.noAccessTokenFoundError(username)
+                throw GetTokenError.noAccessTokenFoundError(username)
             }
             
             let oidAuthState = authState.oidAuthState
@@ -445,32 +395,20 @@ extension DefaultAuthUtil {
                 let accessToken = try await self.appAuthService.getValidAccessToken(key: username, authState: oidAuthState)
                 // Update the wrapper with the refreshed OIDAuthState
                 let updatedAuthState = AuthState(oidAuthState: oidAuthState, ephemeralSession: authState.ephemeralSession)
-                do {
-                    try self.authStateKeychainManager.saveAuthState(username: username, authState: updatedAuthState)
-                } catch {
-                    throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
-                }
+                try self.authStateKeychainManager.saveAuthState(username: username, authState: updatedAuthState)
                 self.notify(user: username, oidAuthState: oidAuthState)
                 return AuthTokens(accessToken: accessToken, idToken: nil, refreshToken: nil)
             } catch {
-                let isRecoverable = AuthError.isRecoverableError(error)
+                let isRecoverable = GetTokenError.isRecoverableError(error)
 
                 if isRecoverable {
                     // Network error - keep auth state, user can retry
                     self.$logger.info("Token refresh failed (recoverable): \(error)")
-                    throw AuthError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: false)
+                    throw GetTokenError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: false)
+
                 } else {
-                    // Auth server rejected the refresh token
+                    // Auth server rejected the refresh token - trigger re-auth
                     self.$logger.info("Token refresh failed (requires re-auth): \(error)")
-
-                    // Check if app is in background - cannot show UI for reauth
-                    let appState = await self.applicationStateProvider.applicationState
-                    if appState == .background {
-                        self.$logger.info("App is in background, deferring reauth until foreground")
-                        throw AuthError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: true)
-                    }
-
-                    // App is in foreground, trigger re-auth
                     return try await self.reauth(username: username)
                 }
             }
@@ -481,15 +419,10 @@ extension DefaultAuthUtil {
 // MARK: - Logout
 extension DefaultAuthUtil {
     func logOut(userName: String, presentingViewController: UIViewController?) async throws {
-        try await authCoordinator.performLogout(username: userName) { [weak self] in
-            guard let self else {
-                throw AuthError.unexpectedError(description: "AuthUtil deallocated during logout", underlyingError: nil)
-            }
-
+        try await authCoordinator.performLogout(username: userName) {
             guard let authState = try self.authStateKeychainManager.loadAuthState(username: userName) else {
-                let error = AuthError.noAccessTokenFoundError(userName)
-                self.$logger.error("Failed to load auth state: \(error)")
-                throw error
+                self.$logger.error("Failed to load auth state: \(LogoutError.noAccessTokenFoundError(userName))")
+                throw LogoutError.noAccessTokenFoundError(userName)
             }
             
             let oidAuthState = authState.oidAuthState
@@ -501,7 +434,7 @@ extension DefaultAuthUtil {
             } catch {
                 self.$logger.error("Token revocation failed, continuing with logout: \(error)")
             }
-
+            
             // Delete from keychain
             do {
                 try self.authStateKeychainManager.deleteAuthState(username: userName)
@@ -528,8 +461,8 @@ extension DefaultAuthUtil {
     private func presentEndSession(userName: String, oidAuthState: OIDAuthState, presenting: UIViewController) async throws -> (any OIDExternalUserAgentSession)? {
         guard let idToken = oidAuthState.lastTokenResponse?.idToken,
               let postLogoutRedirectURL = oidAuthState.lastAuthorizationResponse.request.redirectURL else {
-            $logger.error("No valid redirect URI, or ID token found in logout flow: \(AuthError.missingAuthData)")
-            throw AuthError.missingAuthData
+            $logger.error("No valid redirect URI, or ID token found in logout flow: \(LogoutError.noAuthorizationServiceInitialized)")
+            throw LogoutError.noAuthorizationServiceInitialized
         }
         
         let serviceConfiguration = oidAuthState.lastAuthorizationResponse.request.configuration
@@ -542,62 +475,6 @@ extension DefaultAuthUtil {
         )
         
         return try await appAuthService.presentEndSession(request: endSessionRequest, presenting: presenting)
-    }
-}
-
-// MARK: - Username Validation
-extension DefaultAuthUtil {
-    private func validateUsername(expected: String, in authState: OIDAuthState) async throws {
-        guard let accessToken = authState.lastTokenResponse?.accessToken else {
-            throw AuthError.unexpectedError(description: "No access token found in auth state", underlyingError: nil)
-        }
-
-        guard let actualUsername = extractUsername(from: accessToken) else {
-            throw AuthError.unexpectedError(description: "Failed to extract username from access token", underlyingError: nil)
-        }
-
-        if actualUsername != expected {
-            do {
-                try authStateKeychainManager.deleteAuthState(username: expected)
-            } catch {
-                $logger.error("Failed to delete auth state after username mismatch: \(error)")
-            }
-
-            try? await appAuthService.revokeToken(authState: authState)
-
-            throw AuthError.usernameMismatch(expected: expected, actual: actualUsername)
-        }
-    }
-
-    private func extractUsername(from jwt: String) -> String? {
-        let parts = jwt.split(separator: ".")
-        guard parts.count >= 2 else {
-            return nil
-        }
-
-        let payloadPart = String(parts[1])
-        guard let payloadData = base64UrlDecode(payloadPart) else {
-            return nil
-        }
-
-        guard let json = try? JSONSerialization.jsonObject(with: payloadData) as? [String: Any] else {
-            return nil
-        }
-
-        return json["preferred_username"] as? String
-            ?? json["email"] as? String
-            ?? json["sub"] as? String
-    }
-
-    private func base64UrlDecode(_ base64Url: String) -> Data? {
-        var base64 = base64Url
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-
-        let paddingLength = (4 - base64.count % 4) % 4
-        base64 += String(repeating: "=", count: paddingLength)
-
-        return Data(base64Encoded: base64)
     }
 }
 
