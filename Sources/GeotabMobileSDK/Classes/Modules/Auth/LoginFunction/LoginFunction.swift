@@ -8,12 +8,15 @@ struct LoginArgument: Codable {
 }
 
 class LoginFunction: ModuleFunction {
-    
+
     private static let functionName = "login"
     private let authUtil: any AuthUtil
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
-   
+
+    @TaggedLogger("LoginFunction")
+    private var logger
+
     init(module: Module, util: any AuthUtil = DefaultAuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
@@ -41,7 +44,9 @@ class LoginFunction: ModuleFunction {
             return
         }
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
+
             do {
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
@@ -49,13 +54,26 @@ class LoginFunction: ModuleFunction {
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
-                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)))
+                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)))
                     return
                 }
 
                 jsCallback(.success(response))
             } catch {
-                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+                let authError = AuthError.from(error, description: "Login failed with unexpected error")
+
+                // Always log the error for debugging
+                self.$logger.error("Login failed for user \(argument.username): \(authError)")
+
+                // Capture unexpected errors in Sentry
+                if AuthError.shouldBeCaptured(authError) {
+                    await self.logger.authFailure(
+                        username: argument.username,
+                        flowType: .login,
+                        error: authError
+                    )
+                }
+                jsCallback(.failure(authError))
             }
         }
     }

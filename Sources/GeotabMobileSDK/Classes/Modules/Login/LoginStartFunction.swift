@@ -13,7 +13,10 @@ class LoginStartFunction: ModuleFunction {
     private var authUtil: any AuthUtil
     private let bundle: any AppBundle
     private static let redirectSchemeKey = "geotab_login_redirect_scheme"
-   
+
+    @TaggedLogger("LoginStartFunction")
+    private var logger
+
     init(module: LoginModule, util: any AuthUtil = DefaultAuthUtil(),
          bundle: any AppBundle = Bundle.main) {
         self.bundle = bundle
@@ -50,12 +53,25 @@ class LoginStartFunction: ModuleFunction {
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
-                    jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: AuthError.parseFailedError.localizedDescription)))
+                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)))
                     return
                 }
                 jsCallback(.success(response))
             } catch {
-                jsCallback(.failure(GeotabDriveErrors.AuthFailedError(error: error.localizedDescription)))
+                let authError = AuthError.from(error, description: "Login failed with unexpected error")
+
+                // Always log the error for debugging
+                await self.$logger.error("Login failed for user \(argument.loginHint): \(authError)")
+
+                // Capture unexpected errors in Sentry
+                if AuthError.shouldBeCaptured(authError) {
+                    await self.logger.authFailure(
+                        username: argument.loginHint,
+                        flowType: .login,
+                        error: authError
+                    )
+                }
+                jsCallback(.failure(authError))
             }
         }
     }
