@@ -1,7 +1,7 @@
 import Foundation
 
 struct GetAuthTokenArgument: Codable {
-    let username: String?
+    let username: String
 }
 
 class GetTokenFunction: ModuleFunction {
@@ -23,7 +23,8 @@ class GetTokenFunction: ModuleFunction {
                                                          jsCallback: jsCallback,
                                                          decodeType: GetAuthTokenArgument.self) else { return }
         
-        guard let username = argument.username, !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !username.isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
             return
         } 

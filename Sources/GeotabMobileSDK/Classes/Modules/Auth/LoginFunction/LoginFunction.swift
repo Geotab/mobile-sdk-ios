@@ -29,8 +29,14 @@ class LoginFunction: ModuleFunction {
                                                          jsCallback: jsCallback,
                                                          decodeType: LoginArgument.self) else { return }
         
-        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty, !argument.username.isEmpty else {
+        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
+            return
+        }
+        
+        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !username.isEmpty else {
+            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
             return
         }
         
@@ -50,7 +56,7 @@ class LoginFunction: ModuleFunction {
             do {
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
-                                                      username: argument.username,
+                                                      username: username,
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
@@ -63,12 +69,12 @@ class LoginFunction: ModuleFunction {
                 let authError = AuthError.from(error, description: "Login failed with unexpected error")
 
                 // Always log the error for debugging
-                self.$logger.error("Login failed for user \(argument.username): \(authError)")
+                self.$logger.error("Login failed for user \(username): \(authError)")
 
                 // Capture unexpected errors in Sentry
                 if AuthError.shouldBeCaptured(authError) {
                     await self.logger.authFailure(
-                        username: argument.username,
+                        username: username,
                         flowType: .login,
                         error: authError
                     )

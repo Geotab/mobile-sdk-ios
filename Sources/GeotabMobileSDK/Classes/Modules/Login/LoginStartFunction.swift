@@ -30,8 +30,14 @@ class LoginStartFunction: ModuleFunction {
                                                          jsCallback: jsCallback,
                                                          decodeType: LoginStartArgument.self) else { return }
         
-        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty, !argument.loginHint.isEmpty else {
+        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
+            return
+        }
+        
+        let loginHint = argument.loginHint.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !loginHint.isEmpty else {
+            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "LoginHint is required")))
             return
         }
         
@@ -49,7 +55,7 @@ class LoginStartFunction: ModuleFunction {
             do {
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
-                                                      username: argument.loginHint,
+                                                      username: loginHint,
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
@@ -61,12 +67,12 @@ class LoginStartFunction: ModuleFunction {
                 let authError = AuthError.from(error, description: "Login failed with unexpected error")
 
                 // Always log the error for debugging
-                await self.$logger.error("Login failed for user \(argument.loginHint): \(authError)")
+                await self.$logger.error("Login failed for user \(loginHint): \(authError)")
 
                 // Capture unexpected errors in Sentry
                 if AuthError.shouldBeCaptured(authError) {
                     await self.logger.authFailure(
-                        username: argument.loginHint,
+                        username: loginHint,
                         flowType: .login,
                         error: authError
                     )

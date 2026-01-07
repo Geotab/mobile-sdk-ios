@@ -24,7 +24,8 @@ class LogoutFunction: ModuleFunction {
                                                          jsCallback: jsCallback,
                                                          decodeType: LogoutArgument.self) else { return }
         
-        guard !argument.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !username.isEmpty else {
             jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
             return
         }
@@ -35,22 +36,22 @@ class LogoutFunction: ModuleFunction {
             guard let self else { return }
 
             do {
-                try await authUtil.logOut(userName: argument.username, presentingViewController: presentingVC)
+                try await authUtil.logOut(userName: username, presentingViewController: presentingVC)
                 jsCallback(Result.success("undefined"))
             } catch {
                 let authError = AuthError.from(error, description: "Logout failed with unexpected error")
 
                 // Always log the error for debugging (unless it's noAccessTokenFoundError which is common)
                 if case AuthError.noAccessTokenFoundError = authError {
-                    self.$logger.warn("No access token found during logout for user \(argument.username)")
+                    self.$logger.warn("No access token found during logout for user \(username)")
                 } else {
-                    self.$logger.error("Logout failed for user \(argument.username): \(authError)")
+                    self.$logger.error("Logout failed for user \(username): \(authError)")
                 }
 
                 // Capture unexpected errors in Sentry
                 if AuthError.shouldBeCaptured(authError) {
                     await self.logger.authFailure(
-                        username: argument.username,
+                        username: username,
                         flowType: .logout,
                         error: authError
                     )
