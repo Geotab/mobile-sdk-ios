@@ -22,6 +22,7 @@ class LoginStartFunction: ModuleFunction {
         self.bundle = bundle
         authUtil = util
         authUtil.returnAllTokensOnLogin = true
+        authUtil.skipTokenPersistence = true
         super.init(module: module, name: LoginStartFunction.functionName)}
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {

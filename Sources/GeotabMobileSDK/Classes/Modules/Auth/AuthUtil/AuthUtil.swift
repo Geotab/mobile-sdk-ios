@@ -24,6 +24,7 @@ protocol AuthUtil {
 
     // temporary for LoginModule
     var returnAllTokensOnLogin: Bool { get set }
+    var skipTokenPersistence: Bool { get set }
 }
 
 // MARK: - Static Keys
@@ -213,6 +214,7 @@ actor AuthorizationCoordinator {
 
 final class DefaultAuthUtil: AuthUtil {
     var returnAllTokensOnLogin: Bool = false
+    var skipTokenPersistence: Bool = false
     var currentAuthorizationFlow: (any OIDExternalUserAgentSession)?
     private let appAuthService: any AppAuthService
     private let authStateKeychainManager: any AuthKeychainManaging
@@ -348,13 +350,14 @@ final class DefaultAuthUtil: AuthUtil {
         // Wrap OIDAuthState with ephemeralSession flag
         let authState = AuthState(oidAuthState: oidAuthState, ephemeralSession: ephemeralSession)
 
-        do {
-            try authStateKeychainManager.saveAuthState(username: username, authState: authState)
-        } catch {
-            throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
+        if !skipTokenPersistence {
+            do {
+                try authStateKeychainManager.saveAuthState(username: username, authState: authState)
+            } catch {
+                throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
+            }
+            notify(user: username, oidAuthState: oidAuthState)
         }
-
-        notify(user: username, oidAuthState: oidAuthState)
 
         return try createAuthResponse(from: oidAuthState)
     }
@@ -533,7 +536,6 @@ extension DefaultAuthUtil {
             configuration: serviceConfiguration,
             idTokenHint: idToken,
             postLogoutRedirectURL: postLogoutRedirectURL,
-            state: userName,
             additionalParameters: nil
         )
         
