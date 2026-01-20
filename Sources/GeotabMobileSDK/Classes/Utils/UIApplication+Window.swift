@@ -3,10 +3,10 @@ import UIKit
 extension UIApplication {
     
     var window: UIWindow? {
-        return UIApplication.shared.connectedScenes
+        let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive })
-            .flatMap { $0 as? UIWindowScene }?
-            .windows.first
+            ?? UIApplication.shared.connectedScenes.first
+        return (scene as? UIWindowScene)?.windows.first
     }
     
     var rootViewController : UIViewController {

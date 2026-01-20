@@ -13,6 +13,21 @@ class DefaultApplicationStateProvider: ApplicationStateProviding {
     }
 }
 
+// MARK: - View Presenter Provider
+protocol ViewPresenterProviding {
+    @MainActor func viewPresenter() throws -> UIViewController
+}
+
+class DefaultViewPresenterProvider: ViewPresenterProviding {
+    @MainActor func viewPresenter() throws -> UIViewController {
+        let presenter = UIApplication.shared.rootViewController
+        guard presenter.view.window != nil else {
+            throw AuthError.noExternalUserAgent
+        }
+        return presenter
+    }
+}
+
 // MARK: - Protocol
 protocol AuthUtil {
     func login(clientId: String, discoveryUri: URL, username: String, redirectUri: URL, ephemeralSession: Bool) async throws -> AuthTokens
@@ -220,16 +235,19 @@ final class DefaultAuthUtil: AuthUtil {
     private let authStateKeychainManager: any AuthKeychainManaging
     private let authCoordinator = AuthorizationCoordinator()
     private let applicationStateProvider: (any ApplicationStateProviding)
+    private let viewPresenterProvider: (any ViewPresenterProviding)
 
     @TaggedLogger("AuthUtil")
     private var logger
 
     init(appAuthService: any AppAuthService = DefaultAppAuthService(),
              authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService()),
-             applicationStateProvider: (any ApplicationStateProviding)? = nil) {
+             applicationStateProvider: (any ApplicationStateProviding)? = nil,
+             viewPresenterProvider: (any ViewPresenterProviding)? = nil) {
             self.appAuthService = appAuthService
             self.authStateKeychainManager = authStateKeychainManager
             self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
+            self.viewPresenterProvider = viewPresenterProvider ?? DefaultViewPresenterProvider()
     }
     
     // MARK: - Login Method
@@ -373,7 +391,7 @@ final class DefaultAuthUtil: AuthUtil {
     }
     
     private func presentAuthorization(request: OIDAuthorizationRequest, ephemeralSession: Bool) async throws -> (authState: OIDAuthState?, session: (any OIDExternalUserAgentSession)?) {
-        let viewPresenter = await UIApplication.shared.rootViewController
+        let viewPresenter = try await viewPresenterProvider.viewPresenter()
         guard let externalUserAgent = OIDExternalUserAgentIOS(
             presenting: viewPresenter,
             prefersEphemeralSession: ephemeralSession

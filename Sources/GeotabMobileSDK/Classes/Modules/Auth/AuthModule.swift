@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 class AuthModule: Module {
 
@@ -18,12 +19,19 @@ class AuthModule: Module {
         functions.append(GetTokenFunction(module: self, util: authUtil))
 
         authStateUpdater.start()
-        
-        Task { [weak self] in
-            await self?.authStateUpdater.updateAuthStates()
+
+        Task { @MainActor [weak self] in
+            if UIApplication.shared.applicationState == .active {
+                await self?.authStateUpdater.updateAuthStates()
+            } else {
+                for await _ in NotificationCenter.default.notifications(named: UIApplication.didBecomeActiveNotification) {
+                    await self?.authStateUpdater.updateAuthStates()
+                    break
+                }
+            }
         }
     }
-    
+
     deinit {
         authStateUpdater.stop()
     }
