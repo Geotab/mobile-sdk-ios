@@ -20,3 +20,9 @@ func isValidDomainName(_ name: String) -> Bool {
     let regex = try! NSRegularExpression(pattern: "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$")
     return regex.firstMatch(in: name, options: [], range: range) != nil
 }
+
+extension String {
+    var trimmedLowercase: String {
+        self.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+}

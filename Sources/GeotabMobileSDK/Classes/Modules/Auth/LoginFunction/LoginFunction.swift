@@ -25,45 +25,44 @@ class LoginFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         
-        guard let argument = validateAndDecodeJSONObject(argument: argument,
-                                                         jsCallback: jsCallback,
-                                                         decodeType: LoginArgument.self) else { return }
-        
-        guard !argument.clientId.isEmpty, !argument.discoveryUri.isEmpty else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentError))
-            return
-        }
-        
-        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !username.isEmpty else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
-            return
-        }
-        
-        guard let discoveryURL = URL(string: argument.discoveryUri), discoveryURL.scheme?.lowercased() == "https" else {
-            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AuthError.invalidURL.localizedDescription)))
-            return
-        }
-        
-        guard let redirectScheme = getRedirectScheme(bundle: bundle), let redirectUriURL = URL(string: redirectScheme)  else {
-            jsCallback(.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: AuthError.invalidRedirectScheme(LoginFunction.redirectSchemeKey).localizedDescription)))
-            return
-        }
+        var username = ""
         
         Task { [weak self] in
             guard let self else { return }
 
             do {
+                let argument: LoginArgument = try validateAndDecodeAuthArgument(argument: argument)
+                username = argument.username.trimmedLowercase
+                
+                guard !argument.clientId.isEmpty else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.clientIdRequired.localizedDescription)
+                }
+                
+                guard !argument.discoveryUri.isEmpty else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.discoveryUriRequired.localizedDescription)
+                }
+                
+                guard !username.isEmpty else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.userNameRequired.localizedDescription)
+                }
+                
+                guard let discoveryURL = URL(string: argument.discoveryUri), discoveryURL.scheme?.lowercased() == "https" else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.invalidDiscoveryUri.localizedDescription)
+                }
+                
+                guard let redirectScheme = getRedirectScheme(bundle: bundle), let redirectUriURL = URL(string: redirectScheme)  else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.invalidRedirectScheme(key: LoginFunction.redirectSchemeKey).localizedDescription)
+                }
+                
                 let tokens = try await authUtil.login(clientId: argument.clientId,
                                                       discoveryUri: discoveryURL,
                                                       username: username,
                                                       redirectUri: redirectUriURL,
                                                       ephemeralSession: argument.ephemeralSession ?? false)
                 guard let response = toJson(tokens) else {
-                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)))
-                    return
+                    throw AuthError.unexpectedError(description: "Failed to serialize login response", underlyingError: nil)
                 }
-
+                
                 jsCallback(.success(response))
             } catch {
                 let authError = AuthError.from(error, description: "Login failed with unexpected error")

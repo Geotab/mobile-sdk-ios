@@ -4,8 +4,6 @@ import AppAuth
 enum AuthError: LocalizedError, JsonSerializableError, Equatable {
     case unexpectedError(description: String, underlyingError: (any Error)?)
     case noDataFoundError
-    case invalidURL
-    case invalidRedirectScheme(String)
     case failedToSaveAuthState(username: String, underlyingError: any Error)
     case usernameMismatch(expected: String, actual: String)
     case noAccessTokenFoundError(String)
@@ -17,6 +15,7 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
     case unexpectedResponse(Int)
     case networkError(any Error)
     case userCancelledFlow
+    case moduleFunctionArgumentError(String)
 
     // OID error domain cases (from AppAuth-iOS)
     case oidGeneralError(code: Int, underlyingError: any Error)
@@ -29,10 +28,6 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return lhsDesc == rhsDesc
         case (.noDataFoundError, .noDataFoundError):
             return true
-        case (.invalidURL, .invalidURL):
-            return true
-        case (.invalidRedirectScheme(let lhsScheme), .invalidRedirectScheme(let rhsScheme)):
-            return lhsScheme == rhsScheme
         case (.failedToSaveAuthState(let lhsUsername, _), .failedToSaveAuthState(let rhsUsername, _)):
             return lhsUsername == rhsUsername
         case (.usernameMismatch(let lhsExpected, let lhsActual), .usernameMismatch(let rhsExpected, let rhsActual)):
@@ -62,6 +57,8 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return lhsCode == rhsCode
         case (.oauthTokenError(let lhsCode, _), .oauthTokenError(let rhsCode, _)):
             return lhsCode == rhsCode
+        case (.moduleFunctionArgumentError(let lhsStr), .moduleFunctionArgumentError(let rhsStr)):
+            return lhsStr == rhsStr
         default:
             return false
         }
@@ -85,10 +82,6 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             }
         case .noDataFoundError:
             return "No data returned from authorization flow."
-        case .invalidURL:
-            return "Insecure Discovery URI. HTTPS is required."
-        case .invalidRedirectScheme(let schemeKey):
-            return "Login redirect scheme key \(schemeKey) not found in Info.plist."
         case .failedToSaveAuthState(let username, let underlyingError):
             return "Failed to save auth state for user \(username): \(underlyingError.localizedDescription)"
         case .usernameMismatch(let expected, let actual):
@@ -122,9 +115,10 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return "OAuth authorization error (code \(code)): \(description)"
         case .oauthTokenError(let code, let description):
             return "OAuth token error (code \(code)): \(description)"
+        case .moduleFunctionArgumentError(let error):
+            return "ModuleFunctionArgumentError: \(error)"
         }
     }
-
     // Helper to get human-readable OID error names
     private func oidGeneralErrorName(code: Int) -> String {
         switch code {
@@ -167,10 +161,6 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return "UNEXPECTED_ERROR"
         case .noDataFoundError:
             return "NO_DATA_FOUND"
-        case .invalidURL:
-            return "INVALID_URL"
-        case .invalidRedirectScheme:
-            return "INVALID_REDIRECT_SCHEME"
         case .failedToSaveAuthState:
             return "FAILED_TO_SAVE_AUTH_STATE"
         case .usernameMismatch:
@@ -199,6 +189,8 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return "OAUTH_AUTHORIZATION_ERROR"
         case .oauthTokenError:
             return "OAUTH_TOKEN_ERROR"
+        case .moduleFunctionArgumentError:
+            return "MODULE_FUNCTION_ARGUMENT_ERROR"
         }
     }
 
@@ -319,6 +311,10 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
 
         case .oauthTokenError(let code, _):
             return shouldCaptureOAuthTokenError(code: code)
+            
+        // Missing Values - don't capture
+        case .moduleFunctionArgumentError:
+            return false
 
         // All other errors are unexpected and should be captured
         default:
@@ -434,3 +430,32 @@ extension AuthError {
         return .unexpectedError(description: description, underlyingError: error)
     }
 }
+
+enum ModuleFunctionArgumentTypeError: Equatable, LocalizedError{
+      case invalidArgument
+      case userNameRequired
+      case clientIdRequired
+      case discoveryUriRequired
+      case invalidDiscoveryUri
+      case loginHintRequired
+      case invalidRedirectScheme(key: String)
+
+      var localizedDescription: String {
+          switch self {
+          case .userNameRequired:
+              return "Username is required"
+          case .clientIdRequired:
+              return "Client ID is required"
+          case .discoveryUriRequired:
+              return "Discovery URI is required"
+          case .invalidDiscoveryUri:
+              return "Insecure Discovery URI. HTTPS is required"
+          case .loginHintRequired:
+              return "LoginHint is required"
+          case .invalidRedirectScheme(let key):
+              return "Login redirect scheme key \(key) not found in Info.plist"
+          case .invalidArgument:
+              return "Invalid argument"
+          }
+      }
+  }

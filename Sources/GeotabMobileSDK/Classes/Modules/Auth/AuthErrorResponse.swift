@@ -34,11 +34,6 @@ struct AuthErrorResponse: Codable {
             self.requiresReauthentication = nil
             self.underlyingError = nil
 
-        case .invalidRedirectScheme(let schemeKey):
-            self.username = nil
-            self.requiresReauthentication = nil
-            self.underlyingError = "Missing key: \(schemeKey)"
-
         case .unexpectedError(let description, let error):
             self.username = nil
             self.requiresReauthentication = nil

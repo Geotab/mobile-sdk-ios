@@ -18,25 +18,23 @@ class GetTokenFunction: ModuleFunction {
     
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
-        
-        guard let argument = validateAndDecodeJSONObject(argument: argument,
-                                                         jsCallback: jsCallback,
-                                                         decodeType: GetAuthTokenArgument.self) else { return }
-        
-        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !username.isEmpty else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
-            return
-        } 
+
+        var username = ""
         
         Task { [weak self] in
             guard let self else { return }
 
             do {
+                let argument: GetAuthTokenArgument = try validateAndDecodeAuthArgument(argument: argument)
+                username = argument.username.trimmedLowercase
+
+                guard !username.isEmpty else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.userNameRequired.localizedDescription)
+                }
+
                 let tokenResponse = try await authUtil.getValidAccessToken(username: username)
                 guard let jsonString = toJson(tokenResponse) else {
-                    jsCallback(.failure(AuthError.unexpectedError(description: "Failed to serialize token response", underlyingError: nil)))
-                    return
+                    throw AuthError.unexpectedError(description: "Failed to serialize token response", underlyingError: nil)
                 }
                jsCallback(.success(jsonString))
             } catch {

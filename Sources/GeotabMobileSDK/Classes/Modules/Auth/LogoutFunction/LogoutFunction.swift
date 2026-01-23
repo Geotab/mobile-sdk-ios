@@ -20,24 +20,22 @@ class LogoutFunction: ModuleFunction {
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String,  any Error>) -> Void) {
         
-        guard let argument = validateAndDecodeJSONObject(argument: argument,
-                                                         jsCallback: jsCallback,
-                                                         decodeType: LogoutArgument.self) else { return }
-        
-        let username = argument.username.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !username.isEmpty else {
-            jsCallback(Result.failure(GeotabDriveErrors.ModuleFunctionArgumentErrorWithMessage(error: "Username is required")))
-            return
-        }
-        
+        var username = ""
         let presentingVC = UIApplication.shared.rootViewController
         
         Task { [weak self] in
             guard let self else { return }
 
             do {
+                let argument: LogoutArgument = try validateAndDecodeAuthArgument(argument: argument)
+                username = argument.username.trimmedLowercase
+
+                guard !username.isEmpty else {
+                    throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.userNameRequired.localizedDescription)
+                }
+
                 try await authUtil.logOut(userName: username, presentingViewController: presentingVC)
-                jsCallback(Result.success("undefined"))
+                jsCallback(.success("undefined"))
             } catch {
                 let authError = AuthError.from(error, description: "Logout failed with unexpected error")
 

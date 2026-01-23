@@ -572,7 +572,7 @@ extension DefaultAuthUtil {
             throw AuthError.unexpectedError(description: "Failed to extract username from access token", underlyingError: nil)
         }
 
-        if actualUsername != expected {
+        if actualUsername.trimmedLowercase != expected {
             do {
                 try authStateKeychainManager.deleteAuthState(username: expected)
             } catch {
