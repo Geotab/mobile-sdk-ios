@@ -81,3 +81,21 @@ open class DriveViewController: SDKViewController {
         }
     }
 }
+
+public extension DriveViewController {
+    func registerScriptInjectable(_ scriptInjectable: any ScriptInjectable) {
+        userContentControllerDelegate.registerScriptInjectable(scriptInjectable)
+    }
+   
+    func unregisterScriptInjectable(_ handlerName: String) {
+        userContentControllerDelegate.unregisterScriptInjectable(handlerName)
+    }
+    
+    func setWVNavigationActionDelegate(_ delegate: any WVNavigationActionDelegate) {
+        navigationDelegate.navigationActionDelegate = delegate
+    }
+    
+    func setWVDidRecieveScriptDelegate(_ delegate: any WVDidRecieveScriptDelegate) {
+        userContentControllerDelegate.didRecieveScriptDelegate = delegate
+    }
+}
