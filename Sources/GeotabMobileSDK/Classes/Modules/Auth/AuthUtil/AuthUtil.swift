@@ -15,16 +15,12 @@ class DefaultApplicationStateProvider: ApplicationStateProviding {
 
 // MARK: - View Presenter Provider
 protocol ViewPresenterProviding {
-    @MainActor func viewPresenter() throws -> UIViewController
+    @MainActor func viewPresenter() async throws -> UIViewController
 }
 
 class DefaultViewPresenterProvider: ViewPresenterProviding {
-    @MainActor func viewPresenter() throws -> UIViewController {
-        let presenter = UIApplication.shared.rootViewController
-        guard presenter.view.window != nil else {
-            throw AuthError.noExternalUserAgent
-        }
-        return presenter
+    @MainActor func viewPresenter() async throws -> UIViewController {
+        try await UIApplication.shared.waitForValidPresenter()
     }
 }
 
@@ -234,20 +230,20 @@ final class DefaultAuthUtil: AuthUtil {
     private let appAuthService: any AppAuthService
     private let authStateKeychainManager: any AuthKeychainManaging
     private let authCoordinator = AuthorizationCoordinator()
-    private let applicationStateProvider: (any ApplicationStateProviding)
-    private let viewPresenterProvider: (any ViewPresenterProviding)
+    private let applicationStateProvider: any ApplicationStateProviding
+    private let viewPresenterProvider: any ViewPresenterProviding
 
     @TaggedLogger("AuthUtil")
     private var logger
 
     init(appAuthService: any AppAuthService = DefaultAppAuthService(),
-             authStateKeychainManager: (any AuthKeychainManaging) = AuthKeychainManager(keychainService: DefaultKeychainService()),
-             applicationStateProvider: (any ApplicationStateProviding)? = nil,
-             viewPresenterProvider: (any ViewPresenterProviding)? = nil) {
-            self.appAuthService = appAuthService
-            self.authStateKeychainManager = authStateKeychainManager
-            self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
-            self.viewPresenterProvider = viewPresenterProvider ?? DefaultViewPresenterProvider()
+         authStateKeychainManager: any AuthKeychainManaging = AuthKeychainManager(keychainService: DefaultKeychainService()),
+         applicationStateProvider: (any ApplicationStateProviding)? = nil,
+         viewPresenterProvider: (any ViewPresenterProviding)? = nil) {
+        self.appAuthService = appAuthService
+        self.authStateKeychainManager = authStateKeychainManager
+        self.applicationStateProvider = applicationStateProvider ?? DefaultApplicationStateProvider()
+        self.viewPresenterProvider = viewPresenterProvider ?? DefaultViewPresenterProvider()
     }
     
     // MARK: - Login Method
@@ -573,15 +569,69 @@ extension DefaultAuthUtil {
         }
 
         if actualUsername.trimmedLowercase != expected {
+            let mismatchError = AuthError.usernameMismatch(expected: expected, actual: actualUsername)
+            await Logger.shared.authFailure(
+                username: expected,
+                flowType: .login,
+                error: mismatchError,
+                additionalContext: [.stage: "username_validation"]
+            )
+
             do {
                 try authStateKeychainManager.deleteAuthState(username: expected)
             } catch {
                 $logger.error("Failed to delete auth state after username mismatch: \(error)")
             }
 
-            try? await appAuthService.revokeToken(authState: authState)
+            do {
+                try await appAuthService.revokeToken(authState: authState)
+            } catch {
+                await Logger.shared.authFailure(
+                    username: expected,
+                    flowType: .login,
+                    error: error,
+                    additionalContext: [.stage: Auth.LogoutStage.tokenRevocation]
+                )
+            }
 
-            throw AuthError.usernameMismatch(expected: expected, actual: actualUsername)
+            await presentEndSessionForMismatch(authState: authState, username: expected)
+
+            throw mismatchError
+        }
+    }
+
+    private func presentEndSessionForMismatch(authState: OIDAuthState, username: String) async {
+        guard let idToken = authState.lastTokenResponse?.idToken, !idToken.isEmpty,
+              let postLogoutRedirectURL = authState.lastAuthorizationResponse.request.redirectURL else {
+            $logger.warn("Cannot present end session during username mismatch: missing ID token or redirect URL")
+            return
+        }
+
+        guard let presenting = try? await viewPresenterProvider.viewPresenter() else {
+            $logger.warn("Cannot present end session during username mismatch: no valid window")
+            return
+        }
+        let serviceConfiguration = authState.lastAuthorizationResponse.request.configuration
+        let endSessionRequest = OIDEndSessionRequest(
+            configuration: serviceConfiguration,
+            idTokenHint: idToken,
+            postLogoutRedirectURL: postLogoutRedirectURL,
+            additionalParameters: nil
+        )
+
+        do {
+            _ = try await appAuthService.presentEndSession(request: endSessionRequest, presenting: presenting)
+            $logger.debug("End session completed successfully during username mismatch cleanup")
+        } catch AuthError.userCancelledFlow {
+            $logger.warn("User cancelled end session during username mismatch cleanup")
+        } catch {
+            $logger.warn("End session failed during username mismatch cleanup: \(error)")
+            await Logger.shared.authFailure(
+                username: username,
+                flowType: .login,
+                error: error,
+                additionalContext: [.stage: Auth.LogoutStage.endSession]
+            )
         }
     }
 

@@ -6,26 +6,29 @@ struct LogoutArgument: Codable {
 }
 
 class LogoutFunction: ModuleFunction {
-    
+
     @TaggedLogger("LogoutFunction")
     var logger
-    
+
     private static let functionName = "logout"
     private let authUtil: any AuthUtil
-    
-    init(module: Module, authUtil: any AuthUtil = DefaultAuthUtil()) {
+    private let viewPresenterProvider: any ViewPresenterProviding
+
+    init(module: Module, authUtil: any AuthUtil = DefaultAuthUtil(), viewPresenterProvider: any ViewPresenterProviding = DefaultViewPresenterProvider()) {
         self.authUtil = authUtil
-        super.init(module: module, name: LogoutFunction.functionName)}
+        self.viewPresenterProvider = viewPresenterProvider
+        super.init(module: module, name: LogoutFunction.functionName)
+    }
     
     
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String,  any Error>) -> Void) {
         
         var username = ""
-        let presentingVC = UIApplication.shared.rootViewController
-        
+
         Task { [weak self] in
             guard let self else { return }
 
+            
             do {
                 let argument: LogoutArgument = try validateAndDecodeAuthArgument(argument: argument)
                 username = argument.username.trimmedLowercase
@@ -34,6 +37,7 @@ class LogoutFunction: ModuleFunction {
                     throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.userNameRequired.localizedDescription)
                 }
 
+                let presentingVC = try await viewPresenterProvider.viewPresenter()
                 try await authUtil.logOut(userName: username, presentingViewController: presentingVC)
                 jsCallback(.success("undefined"))
             } catch {
