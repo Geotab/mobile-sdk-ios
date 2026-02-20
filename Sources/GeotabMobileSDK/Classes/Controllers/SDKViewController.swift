@@ -101,13 +101,7 @@ open class SDKViewController: UIViewController, ViewPresenter {
     
     override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Only clearing volatile memory (RAM).
-        WKWebsiteDataStore.default().removeData(
-            ofTypes: [WKWebsiteDataTypeMemoryCache],
-            modifiedSince: Date.distantPast
-        ) { [weak self] in
-            self?.$logger.info("Memory warning detected. Purging volatile memory cache.")
-        }
+        $logger.info("Memory warning detected.")
     }
 
     /// :nodoc:
