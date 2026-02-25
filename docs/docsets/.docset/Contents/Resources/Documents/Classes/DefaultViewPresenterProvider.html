@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DriveSdkConfig Class Reference</title>
+    <title>DefaultViewPresenterProvider Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DriveSdkConfig" class="dashAnchor"></a>
-    <a title="DriveSdkConfig Class Reference"></a>
+    <a name="//apple_ref/swift/Class/DefaultViewPresenterProvider" class="dashAnchor"></a>
+    <a title="DefaultViewPresenterProvider Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html"> Docs</a> (100% documented)</p>
@@ -31,7 +31,7 @@
         <img id="carat" src="../img/carat.png" alt=""/>
         <a href="../Classes.html">Classes</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        GeotabMobileSDK.DriveSdkConfig Class Reference
+        GeotabMobileSDK.DefaultViewPresenterProvider Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -149,16 +149,15 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DriveSdkConfig</h1>
+            <h1>DefaultViewPresenterProvider</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DriveSdkConfig</span> <span class="p">:</span> <span class="kt">MobileSdkConfig</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultViewPresenterProvider</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/ViewPresenterProviding.html">ViewPresenterProviding</a></span></code></pre>
 
                 </div>
               </div>
-            <p>Configuration options for DriveViewController</p>
-
+            
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -166,9 +165,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ"></a>
-                    <a name="//apple_ref/swift/Variable/serverAddress" class="dashAnchor"></a>
-                    <a class="token" href="#/s:15GeotabMobileSDK14DriveSdkConfigC13serverAddressSSvpZ">serverAddress</a>
+                    <a name="/s:15GeotabMobileSDK28DefaultViewPresenterProviderCACycfc"></a>
+                    <a name="//apple_ref/swift/Method/init()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK28DefaultViewPresenterProviderCACycfc">init()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -176,14 +175,43 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The server address to launch Geotab Drive from.</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">serverAddress</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15GeotabMobileSDK28DefaultViewPresenterProviderC04viewF0So16UIViewControllerCyYaKF"></a>
+                    <a name="//apple_ref/swift/Method/viewPresenter()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15GeotabMobileSDK28DefaultViewPresenterProviderC04viewF0So16UIViewControllerCyYaKF">viewPresenter()</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@MainActor</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">viewPresenter</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">UIViewController</span></code></pre>
 
                         </div>
                       </div>

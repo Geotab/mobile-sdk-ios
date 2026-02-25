@@ -5,7 +5,7 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
     case unexpectedError(description: String, underlyingError: (any Error)?)
     case noDataFoundError
     case failedToSaveAuthState(username: String, underlyingError: any Error)
-    case usernameMismatch(expected: String, actual: String)
+    case usernameMismatch(expected: String, actual: String, ephemeralSession: Bool)
     case noAccessTokenFoundError(String)
     case parseFailedForAuthState
     case tokenRefreshFailed(username: String, underlyingError: any Error, requiresReauthentication: Bool)
@@ -30,8 +30,8 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return true
         case (.failedToSaveAuthState(let lhsUsername, _), .failedToSaveAuthState(let rhsUsername, _)):
             return lhsUsername == rhsUsername
-        case (.usernameMismatch(let lhsExpected, let lhsActual), .usernameMismatch(let rhsExpected, let rhsActual)):
-            return lhsExpected == rhsExpected && lhsActual == rhsActual
+        case (.usernameMismatch(let lhsExpected, let lhsActual, let lhsEphemeral), .usernameMismatch(let rhsExpected, let rhsActual, let rhsEphemeral)):
+            return lhsExpected == rhsExpected && lhsActual == rhsActual && lhsEphemeral == rhsEphemeral
         case (.noAccessTokenFoundError(let lhsUser), .noAccessTokenFoundError(let rhsUser)):
             return lhsUser == rhsUser
         case (.parseFailedForAuthState, .parseFailedForAuthState):
@@ -84,8 +84,12 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             return "No data returned from authorization flow."
         case .failedToSaveAuthState(let username, let underlyingError):
             return "Failed to save auth state for user \(username): \(underlyingError.localizedDescription)"
-        case .usernameMismatch(let expected, let actual):
-            return "Username mismatch: expected '\(expected)' but access token contains '\(actual)'"
+        case .usernameMismatch(_, _, let ephemeralSession):
+            if ephemeralSession {
+                return "Username mismatch in ephemeral session - potential security issue"
+            } else {
+                return "Username mismatch in non-ephemeral session - Stale browser cookies from previous user"
+            }
         case .noAccessTokenFoundError(let user):
             return "No auth token found for user \(user)"
         case .parseFailedForAuthState:

@@ -1,5 +1,12 @@
 import Foundation
 
+private var fileProtectionAttributes: [FileAttributeKey: Any]? {
+    if FeatureFlag.fileProtectionKillSwitch.isEnabled {
+        return nil
+    }
+    return [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+}
+
 private enum FileUtilError: String {
     case invalidFilePath = "Invalid file path: "
     case invalidSourcePath = "Invalid source path: "
@@ -46,20 +53,20 @@ func writeFile(fsPrefix: String, drvfsDir: URL, path: String, data: Data, offset
     
     if !fm.fileExists(atPath: folderUrl.path) {
         do {
-            try fm.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: nil)
+            try fm.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: fileProtectionAttributes)
         } catch {
             throw GeotabDriveErrors.FileException(error: "Failed creating directory \(relativeFolderPath)")
         }
     }
-    
+
     let url = URL(fileURLWithPath: String(relativeFilePath), relativeTo: drvfsDir)
     
     if !fm.fileExists(atPath: url.path) {
-        if fm.createFile(atPath: url.path, contents: nil, attributes: nil) != true {
+        if fm.createFile(atPath: url.path, contents: nil, attributes: fileProtectionAttributes) != true {
             throw GeotabDriveErrors.FileException(error: "Failed creating file \(fileName)")
         }
     }
-    
+
     guard let fileHandle = try? FileHandle(forWritingTo: url) else {
         throw GeotabDriveErrors.FileException(error: "Failed opening file for writing")
     }
@@ -245,7 +252,7 @@ func listFile(fsPrefix: String, drvfsDir: URL, path: String) throws -> [FileInfo
     
     if !fm.fileExists(atPath: drvfsDir.path) {
         do {
-            try fm.createDirectory(at: drvfsDir, withIntermediateDirectories: true, attributes: nil)
+            try fm.createDirectory(at: drvfsDir, withIntermediateDirectories: true, attributes: fileProtectionAttributes)
         } catch {
             throw GeotabDriveErrors.FileException(error: "Failed initializing drvfs:/// directory")
         }
@@ -379,12 +386,12 @@ func moveFile(fsPrefix: String, drvfsDir: URL, srcPath: String, dstPath: String,
     let folderUrl = URL(fileURLWithPath: relativeFolderPath, relativeTo: drvfsDir)
     if !fm.fileExists(atPath: folderUrl.path) {
         do {
-            try fm.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: nil)
+            try fm.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: fileProtectionAttributes)
         } catch {
             throw GeotabDriveErrors.FileException(error: "Failed creating directory \(relativeFolderPath)")
         }
     }
-    
+
     do {
         if overwrite {
             try fm.replaceItem(at: destUrl, withItemAt: srcUrl, backupItemName: nil, resultingItemURL: nil)

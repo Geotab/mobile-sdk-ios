@@ -24,7 +24,7 @@ struct AuthErrorResponse: Codable {
             self.requiresReauthentication = nil
             self.underlyingError = error.localizedDescription
 
-        case .usernameMismatch(let expected, let actual):
+        case .usernameMismatch(let expected, let actual, _):
             self.username = expected
             self.requiresReauthentication = nil
             self.underlyingError = "Actual username: \(actual)"

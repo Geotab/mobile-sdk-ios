@@ -4,6 +4,7 @@ import UIKit
 class AuthModule: Module {
 
     static let moduleName = "auth"
+    private static let windowReadyDelayInNanoseconds: UInt64 = 1_000_000_000
 
     let authStateUpdater: any AuthStateUpdating
     let authUtil: any AuthUtil
@@ -21,10 +22,13 @@ class AuthModule: Module {
         authStateUpdater.start()
 
         Task { @MainActor [weak self] in
+            // Allow window to become ready before auth refresh (MOB-3995)
             if UIApplication.shared.applicationState == .active {
+                try? await Task.sleep(nanoseconds: Self.windowReadyDelayInNanoseconds)
                 await self?.authStateUpdater.updateAuthStates()
             } else {
                 for await _ in NotificationCenter.default.notifications(named: UIApplication.didBecomeActiveNotification) {
+                    try? await Task.sleep(nanoseconds: Self.windowReadyDelayInNanoseconds)
                     await self?.authStateUpdater.updateAuthStates()
                     break
                 }

@@ -1,8 +1,8 @@
-import UIKit
+public import UIKit
 
 extension UIApplication {
 
-    var window: UIWindow? {
+    public var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive })
             ?? UIApplication.shared.connectedScenes.first
@@ -22,7 +22,7 @@ extension UIApplication {
     ///   - timeout: Maximum time to wait in seconds (default: 0.5s)
     ///   - pollInterval: Time between checks in nanoseconds (default: 250ms)
     @MainActor
-    func waitForValidPresenter(timeout: TimeInterval = 0.5, pollInterval: UInt64 = 250_000_000) async throws -> UIViewController {
+    public func waitForValidPresenter(timeout: TimeInterval = 0.5, pollInterval: UInt64 = 250_000_000) async throws -> UIViewController {
         let start = Date()
         while Date().timeIntervalSince(start) < timeout {
             try? await Task.sleep(nanoseconds: pollInterval)
