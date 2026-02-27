@@ -20,7 +20,6 @@ class SamlLoginViewController: UIViewController {
     override func viewDidLoad() {
         let device = DeviceModule.device
         let url = URL(string: samlLoginUrl)!
-        webview.configuration.processPool = WKProcessPool()
         webview.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         webview.configuration.allowsInlineMediaPlayback = false
         webview.configuration.allowsAirPlayForMediaPlayback = false
