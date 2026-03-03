@@ -15,7 +15,7 @@ protocol BackgroundScheduling {
 }
 
 actor AuthStateUpdater: AuthStateUpdating {
-    private static let scheduleToleranceInNanoseconds: UInt64 = 10 * 1_000_000_000
+    private static let scheduleToleranceInSeconds: TimeInterval = 10
     private static let rescheduleDelayInNanoseconds: UInt64 = 10 * 1_000_000_000
     private static let defaultMaxRetryInterval: TimeInterval = 15 * 60 // 15 minutes
     private static let defaultBaseRetryInterval: TimeInterval = 2 * 60 // 2 minutes
@@ -26,8 +26,8 @@ actor AuthStateUpdater: AuthStateUpdating {
     private let baseRetryInterval: TimeInterval
 
     private var updateTask: Task<Void, any Error>?
-    private var nextScheduledUpdateInNanoseconds: UInt64?
-    private var lastUpdateCompletedAt: UInt64?
+    private var nextScheduledUpdateFireDate: Date?
+    private var lastUpdateCompletedAt: Date?
     private var registeredForBackgroundRefresh = false
     private var retryAttempts: [String: Int] = [:]
 
@@ -78,28 +78,30 @@ actor AuthStateUpdater: AuthStateUpdating {
     func clearScheduledUpdate() {
         updateTask?.cancel()
         updateTask = nil
-        nextScheduledUpdateInNanoseconds = nil
+        nextScheduledUpdateFireDate = nil
     }
     
     func scheduleUpdate(for authState:OIDAuthState) async {
         guard let accessTokenExpirationDate = authState.lastTokenResponse?.accessTokenExpirationDate else { return }
 
         let nanosecondsUntilRefresh = nextUpdateInNanoseconds(for: accessTokenExpirationDate.timeIntervalSinceNow)
+        let secondsUntilRefresh = Double(nanosecondsUntilRefresh) / 1_000_000_000
+        let fireDate = Date(timeIntervalSinceNow: secondsUntilRefresh)
 
-        // there's already an update scheduled, replace it if we need to refresh sooner
-        if let nextScheduledUpdateInNanoseconds,
-           (nanosecondsUntilRefresh + Self.scheduleToleranceInNanoseconds) > nextScheduledUpdateInNanoseconds {
+        // Skip if the new fire date isn't meaningfully sooner than the existing one.
+        // (new - old) > -tolerance  ⟹  new is at most `tolerance` seconds earlier, so keep old.
+        if let nextScheduledUpdateFireDate,
+           fireDate.timeIntervalSince(nextScheduledUpdateFireDate) > -Self.scheduleToleranceInSeconds {
                 return
         }
 
-        // check if an update recently completed within the tolerance window
         if let lastUpdateCompletedAt,
-           nanosecondsUntilRefresh >= lastUpdateCompletedAt {
+           Date().timeIntervalSince(lastUpdateCompletedAt) < Self.scheduleToleranceInSeconds {
                 return
         }
 
-        nextScheduledUpdateInNanoseconds = nanosecondsUntilRefresh
-        
+        nextScheduledUpdateFireDate = fireDate
+
         updateTask?.cancel()
         updateTask = Task {
             logDebug("Scheduled auth state update in \(nanosecondsUntilRefresh / 1_000_000_000) seconds")
@@ -108,7 +110,7 @@ actor AuthStateUpdater: AuthStateUpdating {
             try Task.checkCancellation()
             clearScheduledUpdate()
             await updateAuthStates()
-            lastUpdateCompletedAt = nanosecondsUntilRefresh
+            lastUpdateCompletedAt = Date()
         }
     }
     
@@ -275,16 +277,15 @@ extension AuthStateUpdater {
     }
     
     func scheduleBackgroundUpdate() {
-        guard let nextScheduledUpdateInNanoseconds else { return }
-        
+        guard let nextScheduledUpdateFireDate else { return }
+
         guard registeredForBackgroundRefresh else {
             logError("Schedule background update before registration")
             return
         }
-        
-        let nextScheduledUpdateInSeconds = Double(nextScheduledUpdateInNanoseconds) / 1_000_000_000
+
         let request = BGAppRefreshTaskRequest(identifier: Self.taskId)
-        request.earliestBeginDate = Date(timeIntervalSinceNow: nextScheduledUpdateInSeconds)
+        request.earliestBeginDate = nextScheduledUpdateFireDate
 
         do {
             try backgroundScheduler.submit(request)
