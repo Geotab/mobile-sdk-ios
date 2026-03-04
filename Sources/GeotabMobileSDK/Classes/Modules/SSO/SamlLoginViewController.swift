@@ -20,6 +20,7 @@ class SamlLoginViewController: UIViewController {
     override func viewDidLoad() {
         let device = DeviceModule.device
         let url = URL(string: samlLoginUrl)!
+        webview.configuration.processPool = WKProcessPool()
         webview.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         webview.configuration.allowsInlineMediaPlayback = false
         webview.configuration.allowsAirPlayForMediaPlayback = false
@@ -30,8 +31,7 @@ class SamlLoginViewController: UIViewController {
         
         webview.navigationDelegate = self
         
-        webview.evaluateJavaScript("navigator.userAgent") { [weak self] ua, _  in
-            guard let self else { return }
+        webview.evaluateJavaScript("navigator.userAgent") { ua, _  in
             let defaultUA = ua ?? ""
             self.webview.customUserAgent = "\(defaultUA) MobileSDK/\(MobileSdkConfig.sdkVersion) \(device.appName)/\(device.version)"
             self.webview.load(URLRequest(url: url))
@@ -46,11 +46,6 @@ class SamlLoginViewController: UIViewController {
             onDimissal?(Result.failure(GeotabDriveErrors.SamlLoginCancelled))
             onDimissal = nil
         }
-    }
-    
-    deinit {
-        webview?.navigationDelegate = nil
-        webview?.stopLoading()
     }
     
     @IBAction func cancel() {

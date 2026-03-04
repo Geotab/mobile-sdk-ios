@@ -10,7 +10,9 @@ extension WKWebView {
                        userAgentTokens: String? = nil) -> WKWebView {
         
         let webviewConfig = WKWebViewConfiguration()
-
+        
+        webviewConfig.processPool = WKProcessPool()
+        
         webviewConfig.limitsNavigationsToAppBoundDomains = useAppBoundDomains
         
         webviewConfig.mediaTypesRequiringUserActionForPlayback = []

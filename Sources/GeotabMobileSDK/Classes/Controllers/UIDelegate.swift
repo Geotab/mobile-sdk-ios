@@ -17,7 +17,8 @@ class UIDelegate: NSObject, WKUIDelegate {
     
     private func checkDeps() -> (Bundle, UIViewController)? {
         guard let languageBundle,
-              let hostController else {
+              let hostController,
+              hostController.view.window != nil else {
             return nil
         }
         return (languageBundle, hostController)
@@ -26,7 +27,6 @@ class UIDelegate: NSObject, WKUIDelegate {
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
         guard let (languageBundle, hostController) = checkDeps() else {
-            // No host controller available - call completion immediately
             completionHandler()
             return
         }
@@ -38,15 +38,12 @@ class UIDelegate: NSObject, WKUIDelegate {
             completionHandler()
         }))
 
-        // Present on topmost VC to avoid "already presenting" failure
-        let presenter = hostController.presentedViewController ?? hostController
-        presenter.present(alertController, animated: true, completion: nil)
+        hostController.present(alertController, animated: true, completion: nil)
     }
     
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         
         guard let (languageBundle, hostController) = checkDeps() else {
-            // No host controller available - call completion with false
             completionHandler(false)
             return
         }
@@ -63,14 +60,11 @@ class UIDelegate: NSObject, WKUIDelegate {
             completionHandler(false)
         }))
 
-        // Present on topmost VC to avoid "already presenting" failure
-        let presenter = hostController.presentedViewController ?? hostController
-        presenter.present(alertController, animated: true, completion: nil)
+        hostController.present(alertController, animated: true, completion: nil)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         guard let (languageBundle, hostController) = checkDeps() else {
-            // No host controller available - call completion with nil
             completionHandler(nil)
             return
         }
@@ -92,8 +86,6 @@ class UIDelegate: NSObject, WKUIDelegate {
             completionHandler(nil)
         }))
 
-        // Present on topmost VC to avoid "already presenting" failure
-        let presenter = hostController.presentedViewController ?? hostController
-        presenter.present(alertController, animated: true, completion: nil)
+        hostController.present(alertController, animated: true, completion: nil)
     }
 }
