@@ -11,6 +11,7 @@ protocol KeychainService {
     func save(key: String, data: Data) throws
     func load(key: String) throws -> Data
     func delete(key: String) throws
+    func deleteAll()
     var keys: [String] { get }
 }
 
@@ -70,13 +71,22 @@ final class DefaultKeychainService: KeychainService {
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: key
         ]
-        
+
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)
         }
     }
-    
+
+    func deleteAll() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService
+        ]
+
+        SecItemDelete(query as CFDictionary)
+    }
+
     var keys: [String] {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

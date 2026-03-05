@@ -45,6 +45,8 @@ open class SDKViewController: UIViewController, ViewPresenter {
     
     internal var modules: Set<Module> = []
     
+    public var onDomainChange: ((String) -> Void)?
+    
     private lazy var templateRepo: TemplateRepository? = {
         let repo = TemplateRepository(bundle: Bundle.module, templateExtension: "js")
         repo.configuration.contentType = .text
@@ -99,20 +101,21 @@ open class SDKViewController: UIViewController, ViewPresenter {
     
     override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Only clearing volatile memory (RAM).
-        WKWebsiteDataStore.default().removeData(
-            ofTypes: [WKWebsiteDataTypeMemoryCache],
-            modifiedSince: Date.distantPast
-        ) { [weak self] in
-            self?.$logger.info("Memory warning detected. Purging volatile memory cache.")
-        }
+        $logger.info("Memory warning detected.")
+    }
+
+    /// :nodoc:
+    open func willChangeDomain(to domain: String) {
+        self.onDomainChange?(domain)
     }
 
     deinit {
         // Clean up WKWebView delegates to ensure proper deallocation
         if isViewLoaded {
+            webView.configuration.userContentController.removeAllScriptMessageHandlers()
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
+            webView.stopLoading()
             $logger.debug("SDKViewController deinitialized")
         }
     }

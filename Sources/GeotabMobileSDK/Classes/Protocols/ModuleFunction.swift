@@ -47,7 +47,23 @@ open class ModuleFunction {
         }
         return arg
     }
-    
+
+    /// Validates and decodes JSON argument for Auth module functions.
+    /// Throws AuthError.moduleFunctionArgumentError on validation or decoding failure.
+    public func validateAndDecodeAuthArgument<T: Decodable>(argument: Any?) throws -> T {
+        guard let arg = argument,
+              JSONSerialization.isValidJSONObject(arg),
+              let data = try? JSONSerialization.data(withJSONObject: arg) else {
+            throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.invalidArgument.localizedDescription)
+        }
+
+        guard let decoded = try? JSONDecoder().decode(T.self, from: data) else {
+            throw AuthError.moduleFunctionArgumentError(ModuleFunctionArgumentTypeError.invalidArgument.localizedDescription)
+        }
+
+        return decoded
+    }
+
     open func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
         fatalError("Must Override")
     }

@@ -18,7 +18,7 @@ final class DefaultAppAuthService: AppAuthService {
                 } else if let error {
                     continuation.resume(throwing: error)
                 } else {
-                    continuation.resume(throwing: GeotabDriveErrors.AuthFailedError(error: AuthError.noDataFoundError.localizedDescription))
+                    continuation.resume(throwing: AuthError.noDataFoundError)
                 }
             }
         }
@@ -46,7 +46,7 @@ final class DefaultAppAuthService: AppAuthService {
                 } else if let accessToken, !accessToken.isEmpty {
                     continuation.resume(returning: accessToken)
                 } else {
-                    continuation.resume(throwing: GetTokenError.noAccessTokenFoundError(key))
+                    continuation.resume(throwing: AuthError.noAccessTokenFoundError(key))
                 }
             })
         }
@@ -54,13 +54,13 @@ final class DefaultAppAuthService: AppAuthService {
     
     func revokeToken(authState: OIDAuthState) async throws {
         guard let tokenToRevoke = authState.refreshToken else {
-            throw LogoutError.noAuthorizationServiceInitialized
+            throw AuthError.missingAuthData
         }
-        
+
         guard let discoveryDictionary = authState.lastAuthorizationResponse.request.configuration.discoveryDocument?.discoveryDictionary,
               let revocationEndpointString = discoveryDictionary["revocation_endpoint"] as? String,
               let revocationEndpoint = URL(string: revocationEndpointString) else {
-            throw LogoutError.noAuthorizationServiceInitialized
+            throw AuthError.missingAuthData
         }
         
         let clientID = authState.lastAuthorizationResponse.request.clientID
@@ -80,26 +80,26 @@ final class DefaultAppAuthService: AppAuthService {
         let (_, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw LogoutError.revokeTokenFailed
+            throw AuthError.revokeTokenFailed
         }
-        
+
         guard httpResponse.statusCode == 200 else {
-            throw LogoutError.unexpectedResponse(httpResponse.statusCode)
+            throw AuthError.unexpectedResponse(httpResponse.statusCode)
         }
     }
     
     @MainActor
     func presentEndSession(request: OIDEndSessionRequest, presenting: UIViewController) async throws -> (any OIDExternalUserAgentSession)? {
         guard let agent = OIDExternalUserAgentIOS(presenting: presenting) else {
-            throw LogoutError.noExternalUserAgent
+            throw AuthError.noExternalUserAgent
         }
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             var session: (any OIDExternalUserAgentSession)?
             session = OIDAuthorizationService.present(request, externalUserAgent: agent) { _, error in
                 if let error = error as? NSError {
                     if error.domain == OIDGeneralErrorDomain && error.code == OIDErrorCode.userCanceledAuthorizationFlow.rawValue {
-                        continuation.resume(throwing: LogoutError.userCancelledLogoutFlow)
+                        continuation.resume(throwing: AuthError.userCancelledFlow)
                     } else {
                         continuation.resume(throwing: error)
                     }
