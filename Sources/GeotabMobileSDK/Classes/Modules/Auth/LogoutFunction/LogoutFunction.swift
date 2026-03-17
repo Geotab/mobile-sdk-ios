@@ -50,8 +50,15 @@ class LogoutFunction: ModuleFunction {
                     self.$logger.error("Logout failed for user \(username): \(authError)")
                 }
 
-                // Capture unexpected errors in Sentry
-                if AuthError.shouldBeCaptured(authError) {
+                // Log when user cancels the Sign-In popup during logout
+                if case AuthError.userCancelledFlow = authError {
+                    await self.logger.authFailure(
+                        username: username,
+                        flowType: .logout,
+                        error: authError,
+                        additionalContext: [.stage: Auth.LogoutStage.endSession, .reason: "user_cancelled"]
+                    )
+                } else if AuthError.shouldBeCaptured(authError) {
                     await self.logger.authFailure(
                         username: username,
                         flowType: .logout,
