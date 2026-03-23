@@ -11,6 +11,15 @@ class DefaultApplicationStateProvider: ApplicationStateProviding {
     @MainActor var applicationState: UIApplication.State {
         return UIApplication.shared.applicationState
     }
+    
+    static var isInBackground: Bool {
+        if Thread.isMainThread {
+            return UIApplication.shared.applicationState == .background
+        }
+        return DispatchQueue.main.sync {
+            UIApplication.shared.applicationState == .background
+        }
+    }
 }
 
 // MARK: - View Presenter Provider

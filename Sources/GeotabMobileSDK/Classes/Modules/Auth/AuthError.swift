@@ -65,7 +65,7 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
     }
 
     var asJson: String? {
-        toJson(AuthErrorResponse(from: self))
+        return toJson(AuthErrorResponse(from: self, isAppInBackground: AppStateHelper.isAppInBackground))
     }
 
     var errorDescription: String? {
@@ -462,4 +462,8 @@ enum ModuleFunctionArgumentTypeError: Equatable, LocalizedError{
               return "Invalid argument"
           }
       }
+  }
+
+enum AppStateHelper {
+    static var isAppInBackground: Bool { DefaultApplicationStateProvider.isInBackground }
   }

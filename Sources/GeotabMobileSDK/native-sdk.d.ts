@@ -574,6 +574,8 @@ declare namespace geotabModules {
             requiresReauthentication?: boolean;
             username?: string;
             underlyingError?: string;
+            /** Whether the app was in the background when the error occurred. */
+            isAppInBackground: boolean;
         }
 
         /*******
@@ -679,10 +681,10 @@ declare namespace geotabModules {
          * When app returns to foreground, next getToken() call automatically triggers re-authentication.
          *
          * Error Handling:
-         * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, and metadata
+         * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, isAppInBackground, and metadata
          * - Parameter validation errors are returned as basic Error objects with just a message
          * - Use err.recoverable to determine if retry is appropriate
-         * - Use err.requiresReauthentication to trigger re-login flow
+         * - Use err.isAppInBackground to determine if a non-recoverable error occurred while the app was backgrounded
          *
          * @example
          * getToken(params, (err, result) => {
@@ -690,15 +692,18 @@ declare namespace geotabModules {
          *     if (err.code) {
          *       // Structured AuthError with metadata
          *       if (err.recoverable) {
-         *         // Network error, 5xx - show retry button
-         *         showRetryButton();
-         *       } else if (err.requiresReauthentication) {
-         *         // OAuth error, 4xx - redirect to login
-         *         redirectToLogin();
+         *         // Network error, will auto-retry in background
+         *         showOfflineMode();
          *       } else if (err.code === 'USER_CANCELLED') {
          *         // User cancelled re-auth, don't show error
+         *       } else if (!err.recoverable && err.isAppInBackground) {
+         *         // Non-recoverable error while app was backgrounded
+         *         // Don't log the user out - re-auth UI can't be shown
+         *         return;
          *       } else {
-         *         showError(err.message);
+         *         // Non-recoverable error while app is in foreground
+         *         // Safe to redirect to login
+         *         redirectToLogin();
          *       }
          *     } else {
          *       // Basic validation error (missing username)

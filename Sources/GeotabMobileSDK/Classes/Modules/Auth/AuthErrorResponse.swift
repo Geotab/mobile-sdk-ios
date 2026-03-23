@@ -7,11 +7,13 @@ struct AuthErrorResponse: Codable {
     let requiresReauthentication: Bool?
     let username: String?
     let underlyingError: String?
+    let isAppInBackground: Bool
 
-    init(from authError: AuthError) {
+    init(from authError: AuthError, isAppInBackground: Bool = false) {
         self.code = authError.errorCode
         self.message = authError.fallbackErrorMessage
         self.recoverable = authError.isRecoverable
+        self.isAppInBackground = isAppInBackground
 
         switch authError {
         case .tokenRefreshFailed(let username, let error, let requiresReauth):
