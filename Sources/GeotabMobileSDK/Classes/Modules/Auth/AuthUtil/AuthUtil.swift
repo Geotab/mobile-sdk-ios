@@ -97,8 +97,9 @@ struct AuthState: Codable {
 
 // MARK: - Authorization Coordinator
 actor AuthorizationCoordinator {
-    private var inFlightLogins: [String: Task<AuthTokens, any Error>] = [:]
-    private var inFlightReauths: [String: Task<AuthTokens, any Error>] = [:]
+    // Unified map for login + reauth to prevent cross-operation race
+    // (both produce AuthTokens for the same user — second call joins the first)
+    private var inFlightAuth: [String: Task<AuthTokens, any Error>] = [:]
     private var inFlightTokenRefresh: [String: Task<AuthTokens, any Error>] = [:]
     private var inFlightLogouts: [String: Task<Void, any Error>] = [:]
     
@@ -112,54 +113,51 @@ actor AuthorizationCoordinator {
         username: String,
         operation: @escaping () async throws -> AuthTokens
     ) async throws -> AuthTokens {
-        // Check for existing login first, before waiting for UI operations
-        if let existingTask = inFlightLogins[username] {
-            $logger.debug("Login already in progress, sharing result")
-            return try await existingTask.value
-        }
-        
-        // Wait for any existing UI operation to complete
-        await waitForUIOperation()
-        
-        $logger.debug("Starting new login")
-        let task = Task<AuthTokens, any Error> {
-            try await operation()
-        }
-
-        inFlightLogins[username] = task
-        currentUIOperation = Task { try await task.value }
-
-        defer { clearLogin(username: username) }
-        let result = try await task.value
-        currentUIOperation = nil
-        return result
+        try await performAuth(username: username, flowType: "login", operation: operation)
     }
-    
+
     func performReauth(
         username: String,
         operation: @escaping () async throws -> AuthTokens
     ) async throws -> AuthTokens {
-        // Check for existing reauth first, before waiting for UI operations
-        if let existingTask = inFlightReauths[username] {
-            $logger.debug("Re-authentication already in progress, sharing result")
+        try await performAuth(username: username, flowType: "reauth", operation: operation)
+    }
+
+    private func performAuth(
+        username: String,
+        flowType: String,
+        operation: @escaping () async throws -> AuthTokens
+    ) async throws -> AuthTokens {
+        $logger.debug("performAuth(\(flowType)) entered for \(username), inFlightAuth: \(Array(inFlightAuth.keys)), currentUIOperation: \(currentUIOperation != nil)")
+
+        // First check — join existing auth if one is already running
+        if let existingTask = inFlightAuth[username] {
+            $logger.debug("Auth already in progress for \(username), sharing result")
             return try await existingTask.value
         }
-        
-        // Wait for any existing UI operation to complete
+
         await waitForUIOperation()
-        
-        $logger.debug("Starting new re-authentication")
+
+        // Re-check after await — another caller may have registered
+        // while we were waiting. Actor serialization guarantees no race here.
+        if let existingTask = inFlightAuth[username] {
+            $logger.debug("Auth registered during UI wait for \(username), sharing result")
+            return try await existingTask.value
+        }
+
+        $logger.debug("Starting new auth(\(flowType)) for \(username)")
         let task = Task<AuthTokens, any Error> {
             try await operation()
         }
 
-        inFlightReauths[username] = task
+        inFlightAuth[username] = task
         currentUIOperation = Task { try await task.value }
 
-        defer { clearReauth(username: username) }
-        let result = try await task.value
-        currentUIOperation = nil
-        return result
+        defer {
+            clearAuth(username: username)
+            currentUIOperation = nil
+        }
+        return try await task.value
     }
     
     func performTokenRefresh(
@@ -188,15 +186,19 @@ actor AuthorizationCoordinator {
         username: String,
         operation: @escaping () async throws -> Void
     ) async throws {
-        // Check for existing logout first, before waiting for UI operations
         if let existingTask = inFlightLogouts[username] {
             $logger.debug("Logout already in progress, waiting for completion")
             return try await existingTask.value
         }
-        
-        // Wait for any existing UI operation to complete
+
         await waitForUIOperation()
-        
+
+        // Re-check after await
+        if let existingTask = inFlightLogouts[username] {
+            $logger.debug("Logout registered during UI wait for \(username), sharing result")
+            return try await existingTask.value
+        }
+
         $logger.debug("Starting new logout")
         let task = Task<Void, any Error> {
             try await operation()
@@ -205,9 +207,11 @@ actor AuthorizationCoordinator {
         inFlightLogouts[username] = task
         currentUIOperation = Task { try await task.value }
 
-        defer { clearLogout(username: username) }
+        defer {
+            clearLogout(username: username)
+            currentUIOperation = nil
+        }
         try await task.value
-        currentUIOperation = nil
     }
     
     private func waitForUIOperation() async {
@@ -216,13 +220,9 @@ actor AuthorizationCoordinator {
             _ = try? await existingUIOperation.value
         }
     }
-    
-    private func clearLogin(username: String) {
-        inFlightLogins[username] = nil
-    }
-    
-    private func clearReauth(username: String) {
-        inFlightReauths[username] = nil
+
+    private func clearAuth(username: String) {
+        inFlightAuth[username] = nil
     }
     
     private func clearTokenRefresh(key: String) {
@@ -430,12 +430,12 @@ final class DefaultAuthUtil: AuthUtil {
 
     // MARK: - Re-authentication Method
     func reauth(username: String) async throws -> AuthTokens {
-        return try await authCoordinator.performReauth(username: username) { [weak self] in
-            guard let self else {
-                throw AuthError.unexpectedError(description: "AuthUtil deallocated during reauth", underlyingError: nil)
-            }
+        do {
+            return try await authCoordinator.performReauth(username: username) { [weak self] in
+                guard let self else {
+                    throw AuthError.unexpectedError(description: "AuthUtil deallocated during reauth", underlyingError: nil)
+                }
 
-            do {
                 // Load existing auth state to get configuration and client info
                 guard let existingAuthState = try self.authStateKeychainManager.loadAuthState(username: username) else {
                     throw AuthError.noAccessTokenFoundError(username)
@@ -463,22 +463,22 @@ final class DefaultAuthUtil: AuthUtil {
                     ephemeralSession: ephemeralSession,
                     flowType: .reauth
                 )
-            } catch let error as AuthError {
-                // Check if user cancelled the reauth flow
-                if case .userCancelledFlow = error {
-                    // Clear all saved tokens for this user (don't log as auth failure)
-                    self.$logger.debug("User cancelled reauth, clearing tokens for \(username)")
-                    do {
-                        try self.authStateKeychainManager.deleteAuthState(username: username)
-                    } catch {
-                        self.$logger.error("Failed to delete auth state after user cancellation: \(error)")
-                    }
-                    throw error
+            }
+        } catch let error as AuthError {
+            // Catch placed outside the closure so userCancelledFlow cleanup (deleting
+            // auth state) runs even when reauth joins an in-flight login via inFlightAuth
+            if case .userCancelledFlow = error {
+                $logger.debug("User cancelled reauth, clearing tokens for \(username)")
+                do {
+                    try authStateKeychainManager.deleteAuthState(username: username)
+                } catch {
+                    $logger.error("Failed to delete auth state after user cancellation: \(error)")
                 }
                 throw error
-            } catch {
-                throw AuthError.from(error, description: "Re-authentication failed with unexpected error")
             }
+            throw error
+        } catch {
+            throw AuthError.from(error, description: "Re-authentication failed with unexpected error")
         }
     }
     
