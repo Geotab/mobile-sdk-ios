@@ -8,8 +8,11 @@ public enum FeatureFlag: String, CaseIterable {
     
     case sentryKillSwitch = "MOBILE.DISABLE_SENTRY.IOS.KILLSWITCH"
     case fileProtectionKillSwitch = "MOBILE.DISABLE_FILE_PROTECTION.IOS.KILLSWITCH"
+    case pushNativeVerboseLogging = "MYG.PUSH_NATIVE_VERBOSE_LOGGING"
 
-    public var isEnabled: Bool { UserDefaults.standard.bool(forKey: self.rawValue) }
+    public var isEnabled: Bool {
+        return UserDefaults.standard.bool(forKey: self.rawValue)
+    }
     
     public static func set(flag: FeatureFlag, value: Bool) {
         UserDefaults.standard.setValue(value, forKey: flag.rawValue)
