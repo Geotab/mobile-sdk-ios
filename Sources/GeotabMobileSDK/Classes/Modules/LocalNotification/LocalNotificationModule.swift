@@ -1,3 +1,4 @@
+public import Foundation
 import UIKit
 import UserNotifications
 
@@ -46,6 +47,12 @@ extension LocalNotificationModule: UNUserNotificationCenterDelegate {
         completionHandler([.banner, .list, .sound])
     }
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        if userInfo["nativeNotify"] == nil, let action = userInfo["deep_link"] as? String, !action.isEmpty {
+            NotificationCenter.default.post(name: .pushNotificationActionTapped, object: nil, userInfo: ["deepLink": action])
+            completionHandler()
+            return
+        }
         // default actionIdentifier: com.apple.UNNotificationDefaultActionIdentifier
         fireActionEventHandler(center, actionIdentifier: response.actionIdentifier, notification: response.notification, completionHandler: completionHandler)
     }
@@ -151,3 +158,8 @@ extension UNUserNotificationCenter: UserNotifcationAdapter {
         return nativeNotify
     }
 }
+
+extension Notification.Name {
+    public static let pushNotificationActionTapped = Notification.Name("GeotabMobileSDK.pushNotificationActionTapped")
+}
+
