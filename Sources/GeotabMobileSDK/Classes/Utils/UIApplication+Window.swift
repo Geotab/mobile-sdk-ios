@@ -31,7 +31,7 @@ extension UIApplication {
                 return presenter
             }
         }
-        throw AuthError.noExternalUserAgent
+        throw AuthError.noExternalUserAgent()
     }
 }
 

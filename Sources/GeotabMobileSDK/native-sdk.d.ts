@@ -574,8 +574,8 @@ declare namespace geotabModules {
             requiresReauthentication?: boolean;
             username?: string;
             underlyingError?: string;
-            /** Whether the app was in the background when the error occurred. */
-            isAppInBackground: boolean;
+            /** Whether the user should be redirected to the login screen. */
+            shouldRedirectToLogin: boolean;
         }
 
         /*******
@@ -681,11 +681,10 @@ declare namespace geotabModules {
          * When app returns to foreground, next getToken() call automatically triggers re-authentication.
          *
          * Error Handling:
-         * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, isAppInBackground, and metadata
+         * - Authentication errors (AuthError) are returned as structured JSON objects with code, message, recoverable flag, shouldRedirectToLogin, and metadata
          * - Parameter validation errors are returned as basic Error objects with just a message
          * - Use err.recoverable to determine if retry is appropriate
-         * - Use err.isAppInBackground to determine if a non-recoverable error occurred while the app was backgrounded
-         *
+         * - Use err.shouldRedirectToLogin to detemine Whether the user should be redirected to the login screen
          * @example
          * getToken(params, (err, result) => {
          *   if (err) {
@@ -694,16 +693,15 @@ declare namespace geotabModules {
          *       if (err.recoverable) {
          *         // Network error, will auto-retry in background
          *         showOfflineMode();
-         *       } else if (err.code === 'USER_CANCELLED') {
-         *         // User cancelled re-auth, don't show error
-         *       } else if (!err.recoverable && err.isAppInBackground) {
-         *         // Non-recoverable error while app was backgrounded
-         *         // Don't log the user out - re-auth UI can't be shown
-         *         return;
-         *       } else {
-         *         // Non-recoverable error while app is in foreground
-         *         // Safe to redirect to login
+         *       } else if (err.shouldRedirectToLogin) {
+         *         // Reauth failed — redirect to login screen
          *         redirectToLogin();
+         *       } else if (err.code === 'USER_CANCELLED') {
+         *         // User cancelled , don't show error or redirect
+         *       } else {
+         *         // Non-recoverable error but no redirect needed
+         *         // (e.g., background token refresh — native handles reauth on foreground)
+         *         showError(err.message);
          *       }
          *     } else {
          *       // Basic validation error (missing username)

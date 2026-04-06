@@ -88,7 +88,7 @@ struct AuthState: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let authStateData = try container.decode(Data.self, forKey: .oidAuthStateData)
         guard let oidAuthState = try NSKeyedUnarchiver.unarchivedObject(ofClass: OIDAuthState.self, from: authStateData) else {
-            throw AuthError.parseFailedForAuthState
+            throw AuthError.parseFailedForAuthState()
         }
         self.oidAuthState = oidAuthState
         self.ephemeralSession = try container.decode(Bool.self, forKey: .ephemeralSession)
@@ -291,8 +291,9 @@ final class DefaultAuthUtil: AuthUtil {
 
                 return tokens
             } catch {
+                let error = AuthError.from(error, description: "Login failed with unexpected error" , shouldRedirectToLogin: true)
                 self.$logger.debug("Login failed: \(error)")
-                throw AuthError.from(error, description: "Login failed with unexpected error")
+                throw error
             }
         }
     }
@@ -343,7 +344,7 @@ final class DefaultAuthUtil: AuthUtil {
 
         // Remove all non-ephemeral users sequentially
         // Try to clean up all users even if one fails, then block login if any failed
-        var cleanupFailures: [String: Error] = [:]
+        var cleanupFailures: [String: any Error] = [:]
 
         for username in nonEphemeralUsersToRemove {
             $logger.debug("Pre-login cleanup: removing \(username) (non-ephemeral)")
@@ -381,7 +382,7 @@ final class DefaultAuthUtil: AuthUtil {
     /// - Throws: AuthError on logout failure
     private func performLogout(username: String, shouldPresentEndSession: Bool) async throws {
         guard let authState = try authStateKeychainManager.loadAuthState(username: username) else {
-            let error = AuthError.noAccessTokenFoundError(username)
+            let error = AuthError.noAccessTokenFoundError(username: username, shouldRedirectToLogin: true)
             $logger.error("Failed to load auth state: \(error)")
             throw error
         }
@@ -435,25 +436,25 @@ final class DefaultAuthUtil: AuthUtil {
                 guard let self else {
                     throw AuthError.unexpectedError(description: "AuthUtil deallocated during reauth", underlyingError: nil)
                 }
-
+                
                 // Load existing auth state to get configuration and client info
                 guard let existingAuthState = try self.authStateKeychainManager.loadAuthState(username: username) else {
-                    throw AuthError.noAccessTokenFoundError(username)
+                    throw AuthError.noAccessTokenFoundError(username: username, shouldRedirectToLogin: true)
                 }
-
+                
                 let oidAuthState = existingAuthState.oidAuthState
-
+                
                 // Extract configuration from stored auth state
                 let configuration = oidAuthState.lastAuthorizationResponse.request.configuration
                 let clientId = oidAuthState.lastAuthorizationResponse.request.clientID
-
+                
                 guard let redirectUri = oidAuthState.lastAuthorizationResponse.request.redirectURL else {
-                    throw AuthError.noAccessTokenFoundError(username)
+                    throw AuthError.noAccessTokenFoundError(username: username, shouldRedirectToLogin: true)
                 }
-
+                
                 // Use the stored ephemeralSession value
                 let ephemeralSession = existingAuthState.ephemeralSession
-
+                
                 // Perform authorization flow
                 return try await self.performAuthorizationFlow(
                     configuration: configuration,
@@ -474,11 +475,11 @@ final class DefaultAuthUtil: AuthUtil {
                 } catch {
                     $logger.error("Failed to delete auth state after user cancellation: \(error)")
                 }
-                throw error
+                throw AuthError.userCancelledFlow(shouldRedirectToLogin: true)
             }
-            throw error
+            throw AuthError.from(error, shouldRedirectToLogin: true)
         } catch {
-            throw AuthError.from(error, description: "Re-authentication failed with unexpected error")
+            throw AuthError.from(error, description: "Re-authentication failed with unexpected error", shouldRedirectToLogin: true)
         }
     }
     
@@ -506,7 +507,7 @@ final class DefaultAuthUtil: AuthUtil {
 
         // Handle result
         guard let oidAuthState else {
-            throw AuthError.noDataFoundError
+            throw AuthError.noDataFoundError()
         }
 
         // Validate username matches the one in the access token
@@ -550,7 +551,7 @@ final class DefaultAuthUtil: AuthUtil {
             presenting: viewPresenter,
             prefersEphemeralSession: ephemeralSession
         ) else {
-            throw AuthError.noExternalUserAgent
+            throw AuthError.noExternalUserAgent()
         }
 
         do {
@@ -603,7 +604,7 @@ extension DefaultAuthUtil {
             }
 
             guard let authState = try self.authStateKeychainManager.loadAuthState(username: username) else {
-                throw AuthError.noAccessTokenFoundError(username)
+                throw AuthError.noAccessTokenFoundError(username: username, shouldRedirectToLogin: true)
             }
             
             let oidAuthState = authState.oidAuthState
@@ -665,8 +666,9 @@ extension DefaultAuthUtil {
     private func presentEndSession(userName: String, oidAuthState: OIDAuthState, presenting: UIViewController) async throws -> (any OIDExternalUserAgentSession)? {
         guard let idToken = oidAuthState.lastTokenResponse?.idToken,
               let postLogoutRedirectURL = oidAuthState.lastAuthorizationResponse.request.redirectURL else {
-            $logger.error("No valid redirect URI, or ID token found in logout flow: \(AuthError.missingAuthData)")
-            throw AuthError.missingAuthData
+            let error = AuthError.missingAuthData(shouldRedirectToLogin: true)
+            $logger.error("No valid redirect URI, or ID token found in logout flow: \(error.localizedDescription)")
+            throw error
         }
         
         let serviceConfiguration = oidAuthState.lastAuthorizationResponse.request.configuration

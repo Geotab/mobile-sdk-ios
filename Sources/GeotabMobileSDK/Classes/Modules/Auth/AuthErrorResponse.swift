@@ -7,36 +7,39 @@ struct AuthErrorResponse: Codable {
     let requiresReauthentication: Bool?
     let username: String?
     let underlyingError: String?
-    let isAppInBackground: Bool
+    let shouldRedirectToLogin: Bool
 
-    init(from authError: AuthError, isAppInBackground: Bool = false) {
+    init(from authError: AuthError) {
         self.code = authError.errorCode
         self.message = authError.fallbackErrorMessage
         self.recoverable = authError.isRecoverable
-        self.isAppInBackground = isAppInBackground
 
         switch authError {
-        case .tokenRefreshFailed(let username, let error, let requiresReauth):
+        case .tokenRefreshFailed(let username, let error, let requiresReauth, let shouldRedirectToLogin):
             self.username = username
             self.requiresReauthentication = requiresReauth
             self.underlyingError = error.localizedDescription
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .failedToSaveAuthState(let username, let error):
+        case .failedToSaveAuthState(let username, let error, let shouldRedirectToLogin):
             self.username = username
             self.requiresReauthentication = nil
             self.underlyingError = error.localizedDescription
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .usernameMismatch(let expected, let actual, _):
+        case .usernameMismatch(let expected, let actual, _, let shouldRedirectToLogin):
             self.username = expected
             self.requiresReauthentication = nil
             self.underlyingError = "Actual username: \(actual)"
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .noAccessTokenFoundError(let username):
+        case .noAccessTokenFoundError(let username, let shouldRedirectToLogin):
             self.username = username
             self.requiresReauthentication = nil
             self.underlyingError = nil
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .unexpectedError(let description, let error):
+        case .unexpectedError(let description, let error, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             if let error {
@@ -44,36 +47,49 @@ struct AuthErrorResponse: Codable {
             } else {
                 self.underlyingError = description
             }
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .networkError(let error):
+        case .networkError(let error, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             self.underlyingError = error.localizedDescription
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .unexpectedResponse(let statusCode):
+        case .unexpectedResponse(let statusCode, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             self.underlyingError = "HTTP \(statusCode)"
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .oidGeneralError(_, let error):
+        case .oidGeneralError(_, let error, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             self.underlyingError = error.localizedDescription
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .oauthAuthorizationError(let code, let description):
+        case .oauthAuthorizationError(let code, let description, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             self.underlyingError = "Code \(code): \(description)"
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        case .oauthTokenError(let code, let description):
+        case .oauthTokenError(let code, let description, let shouldRedirectToLogin):
             self.username = nil
             self.requiresReauthentication = nil
             self.underlyingError = "Code \(code): \(description)"
+            self.shouldRedirectToLogin = shouldRedirectToLogin
 
-        default:
-            self.username = nil
-            self.requiresReauthentication = nil
-            self.underlyingError = nil
+        case .revokeTokenFailed(let shouldRedirect),
+              .userCancelledFlow(let shouldRedirect),
+              .noDataFoundError(let shouldRedirect),
+              .parseFailedForAuthState(let shouldRedirect),
+              .missingAuthData(let shouldRedirect),
+              .noExternalUserAgent(let shouldRedirect),
+              .moduleFunctionArgumentError(_, let shouldRedirect):
+             self.username = nil
+             self.requiresReauthentication = nil
+             self.underlyingError = nil
+             self.shouldRedirectToLogin = shouldRedirect
         }
     }
 }

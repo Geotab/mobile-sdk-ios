@@ -148,7 +148,7 @@ actor AuthStateUpdater: AuthStateUpdating {
                         }
 
                         if let authError = error as? AuthError,
-                            case .tokenRefreshFailed(_, _, let requiresReauth) = authError {
+                            case .tokenRefreshFailed(_, _, let requiresReauth, _) = authError {
                             if !requiresReauth {
                                 // Recoverable error - schedule retry
                                 self.logDebug("Recoverable error for \(account), scheduling retry", error: error)
@@ -208,7 +208,7 @@ actor AuthStateUpdater: AuthStateUpdating {
                 }
 
                 if let authError = error as? AuthError,
-                   case .tokenRefreshFailed(_, _, let requiresReauth) = authError {
+                   case .tokenRefreshFailed(_, _, let requiresReauth, _) = authError {
                     if !requiresReauth {
                         await self.scheduleRetry(for: username)
                     } else {
