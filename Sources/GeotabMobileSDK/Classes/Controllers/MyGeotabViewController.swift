@@ -25,6 +25,8 @@ public class MyGeotabViewController: SDKViewController {
      - Parameters:
      - modules: User implemented thirdparty modules
      */
+    var pendingCustomPath: String?
+
     public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
@@ -43,7 +45,9 @@ public class MyGeotabViewController: SDKViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/") {
+        let path = pendingCustomPath.map { "#\($0)" } ?? ""
+        pendingCustomPath = nil
+        if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/\(path)") {
             webViewNavigationFailedView.reloadURL = url
             $logger.debug("Opening URL:\(url.absoluteString)")
             webView.load(URLRequest(url: url))
