@@ -35,7 +35,8 @@ open class DriveViewController: SDKViewController {
         SsoModule(viewPresenter: self),
         AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),
         SecureStorageModule(),
-        DutyStatusLogModule(scriptGateway: scriptDelegate)
+        DutyStatusLogModule(scriptGateway: scriptDelegate),
+        AuthModule()
     ]
     
     /**
@@ -48,10 +49,6 @@ open class DriveViewController: SDKViewController {
     public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
-        if options.includeAppAuthModules {
-            self.modules.insert(LoginModule())
-            self.modules.insert(AuthModule())
-        }
     }
     
     /// :nodoc:

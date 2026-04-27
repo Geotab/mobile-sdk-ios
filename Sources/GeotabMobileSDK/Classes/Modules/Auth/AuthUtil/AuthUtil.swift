@@ -43,10 +43,6 @@ protocol AuthUtil {
     func getValidAccessToken(username: String, forceRefresh: Bool) async throws -> AuthTokens
     func logOut(userName: String, presentingViewController: UIViewController?) async throws
     var activeUsernames: [String] { get }
-
-    // temporary for LoginModule
-    var returnAllTokensOnLogin: Bool { get set }
-    var skipTokenPersistence: Bool { get set }
 }
 
 // MARK: - Static Keys
@@ -235,8 +231,6 @@ actor AuthorizationCoordinator {
 }
 
 final class DefaultAuthUtil: AuthUtil {
-    var returnAllTokensOnLogin: Bool = false
-    var skipTokenPersistence: Bool = false
     var currentAuthorizationFlow: (any OIDExternalUserAgentSession)?
     private let appAuthService: any AppAuthService
     private let authStateKeychainManager: any AuthKeychainManaging
@@ -269,10 +263,10 @@ final class DefaultAuthUtil: AuthUtil {
             // Note: Cleanup happens before login completes. If user cancels,
             // old session is already destroyed. This is acceptable as the user
             // initiated a login for a different non-ephemeral user.
-            if !ephemeralSession && !skipTokenPersistence {
+            if !ephemeralSession {
                 self.$logger.debug("Pre-login cleanup - checking for existing non-ephemeral users to remove")
                 try await self.logoutExistingNonEphemeralSessions(excludingUsername: username)
-            } else if ephemeralSession {
+            } else {
                 self.$logger.debug("Skipping pre-login cleanup - ephemeral login can coexist")
             }
 
@@ -512,7 +506,7 @@ final class DefaultAuthUtil: AuthUtil {
 
         // Validate username matches the one in the access token
         // Note: Username validation is conditional because empty username is valid in certain flows
-        // (e.g., LoginModule where username comes from login_hint parameter in the auth flow itself)
+        // (e.g., reauth flows where username is derived from the auth state itself)
         if !username.isEmpty {
             try await validateUsername(expected: username, in: oidAuthState, ephemeralSession: ephemeralSession, flowType: flowType)
         } else {
@@ -522,15 +516,13 @@ final class DefaultAuthUtil: AuthUtil {
         // Wrap OIDAuthState with ephemeralSession flag
         let authState = AuthState(oidAuthState: oidAuthState, ephemeralSession: ephemeralSession)
 
-        if !skipTokenPersistence {
-            do {
-                try authStateKeychainManager.saveAuthState(username: username, authState: authState)
-                $logger.debug("Auth state saved - username: \(username), ephemeralSession: \(ephemeralSession)")
-            } catch {
-                throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
-            }
-            notify(user: username, oidAuthState: oidAuthState)
+        do {
+            try authStateKeychainManager.saveAuthState(username: username, authState: authState)
+            $logger.debug("Auth state saved - username: \(username), ephemeralSession: \(ephemeralSession)")
+        } catch {
+            throw AuthError.failedToSaveAuthState(username: username, underlyingError: error)
         }
+        notify(user: username, oidAuthState: oidAuthState)
 
         return try createAuthResponse(from: oidAuthState)
     }
@@ -573,19 +565,11 @@ final class DefaultAuthUtil: AuthUtil {
               !accessToken.isEmpty else {
             return nil
         }
-        
-        if returnAllTokensOnLogin {
-            return AuthTokens(
-                accessToken: accessToken,
-                idToken: authState.lastTokenResponse?.idToken,
-                refreshToken: authState.lastTokenResponse?.refreshToken)
-        } else {
-            return AuthTokens(
-                accessToken: accessToken,
-                idToken: nil,
-                refreshToken: nil)
-        }
 
+        return AuthTokens(
+            accessToken: accessToken,
+            idToken: nil,
+            refreshToken: nil)
     }
 }
 
