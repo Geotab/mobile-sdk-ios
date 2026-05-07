@@ -79,8 +79,7 @@ extension Logging {
             context[Auth.ContextKey.totalBytes] = systemAttributes[.systemSize] as? Int64
         }
 
-        if let keychainError = error as? KeychainError,
-           case .saveFailed(let osStatus) = keychainError {
+        if let osStatus = extractKeychainSaveStatus(from: error) {
             context[Auth.ContextKey.osStatus] = Int(osStatus)
         }
 
@@ -96,6 +95,25 @@ extension Logging {
             tags: tags,
             context: context
         )
+    }
+
+    private func extractKeychainSaveStatus(from error: (any Error)?) -> OSStatus? {
+        guard let error else { return nil }
+        if let keychainError = error as? KeychainError,
+           case .saveFailed(let osStatus) = keychainError {
+            return osStatus
+        }
+        if let authError = error as? AuthError {
+            switch authError {
+            case .tokenRefreshFailed(_, let underlying, _, _):
+                return extractKeychainSaveStatus(from: underlying)
+            case .failedToSaveAuthState(_, let underlying, _):
+                return extractKeychainSaveStatus(from: underlying)
+            default:
+                return nil
+            }
+        }
+        return nil
     }
 }
 
