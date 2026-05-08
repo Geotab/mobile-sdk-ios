@@ -24,38 +24,18 @@ final class DefaultKeychainService: KeychainService {
     }()
     
     func save(key: String, data: Data) throws {
-        let searchQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: keychainService,
-            kSecAttrAccount as String: key
-        ]
-
-        // Try updating existing item first — avoids delete+add race condition and
-        // works in iOS 26 BGTask contexts where SecItemAdd with kSecAttrAccessible fails (-25308)
-        let updateStatus = SecItemUpdate(
-            searchQuery as CFDictionary,
-            [kSecValueData as String: data] as CFDictionary
-        )
-
-        if updateStatus == errSecSuccess {
-            return
-        }
-
-        guard updateStatus == errSecItemNotFound else {
-            throw KeychainError.saveFailed(updateStatus)
-        }
-
-        // Item doesn't exist — add it with the required accessibility
-        let addQuery: [String: Any] = [
+        let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         ]
-        let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
-        guard addStatus == errSecSuccess else {
-            throw KeychainError.saveFailed(addStatus)
+        
+        SecItemDelete(query as CFDictionary)
+        let status = SecItemAdd(query as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw KeychainError.saveFailed(status)
         }
     }
     
