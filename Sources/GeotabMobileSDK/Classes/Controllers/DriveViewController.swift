@@ -7,41 +7,52 @@ import Mustache
  */
 
 open class DriveViewController: SDKViewController {
-
+    
     @TaggedLogger("DriveViewController")
     internal var logger
     
     internal var loginCredentials: CredentialResult?
     
     internal var customUrl: URL?
-
-    // Add internal Addons here
-    private lazy var modulesInternal: Set<Module> = [
-        AppModule(scriptGateway: scriptDelegate, options: options),
-        ScreenModule(),
-        UserModule(scriptGateway: scriptDelegate),
-        DeviceModule(),
-        StateModule(scriptGateway: scriptDelegate),
-        LocalNotificationModule(options: options),
-        SpeechModule(),
-        BrowserModule(viewPresenter: self),
-        ConnectivityModule(scriptGateway: scriptDelegate),
-        BatteryModule(scriptGateway: scriptDelegate),
-        FileSystemModule(),
-        CameraModule(viewPresenter: self),
-        PhotoLibraryModule(viewPresenter: self),
-        GeolocationModule(scriptGateway: scriptDelegate, options: options),
-        IoxBleModule(scriptGateway: scriptDelegate),
-        SsoModule(viewPresenter: self),
-        AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),
-        SecureStorageModule(),
-        DutyStatusLogModule(scriptGateway: scriptDelegate),
-        AuthModule()
-    ]
     
+    #if DEBUG
+        private var _authModule: AuthModule?
+    #endif
+    
+    // Add internal Addons here
+    private lazy var modulesInternal: Set<Module> = {
+        var modules: Set<Module> = [
+            AppModule(scriptGateway: scriptDelegate, options: options),
+            ScreenModule(),
+            UserModule(scriptGateway: scriptDelegate),
+            DeviceModule(),
+            StateModule(scriptGateway: scriptDelegate),
+            LocalNotificationModule(options: options),
+            SpeechModule(),
+            BrowserModule(viewPresenter: self),
+            ConnectivityModule(scriptGateway: scriptDelegate),
+            BatteryModule(scriptGateway: scriptDelegate),
+            FileSystemModule(),
+            CameraModule(viewPresenter: self),
+            PhotoLibraryModule(viewPresenter: self),
+            GeolocationModule(scriptGateway: scriptDelegate, options: options),
+            IoxBleModule(scriptGateway: scriptDelegate),
+            SsoModule(viewPresenter: self),
+            AppearanceModule(scriptGateway: scriptDelegate, appearanceSource: self),
+            SecureStorageModule(),
+            DutyStatusLogModule(scriptGateway: scriptDelegate),
+        ]
+        #if DEBUG
+            modules.insert(_authModule ?? AuthModule())
+        #else
+            modules.insert(AuthModule())
+        #endif
+        return modules
+    }()
+
     /**
      Initializer
-     
+    
      - Parameters:
         - modules: User implemented third party modules
         - options: Optional behaviors for the view ocntrollerr
@@ -51,17 +62,28 @@ open class DriveViewController: SDKViewController {
         self.modules.formUnion(modulesInternal)
     }
     
+    #if DEBUG
+        /// Debug-only initializer for integration tests — substitutes a custom `AuthModule` in place
+        /// of the default, allowing headless auth flows without a browser. Not compiled in Release.
+        init(modules: Set<Module> = [], options: MobileSdkOptions = .default, authModule: AuthModule) {
+            _authModule = authModule
+            super.init(modules: modules, options: options)
+            self.modules.formUnion(modulesInternal)
+        }
+    #endif
+    
     /// :nodoc:
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-
+    
     /// :nodoc:
     override open func viewDidLoad() {
         super.viewDidLoad()
         
         if let credentialResult = loginCredentials {
-            let urlString = "https://\(DriveSdkConfig.serverAddress)/drive/default.html#ui/login,(server:'\(credentialResult.path)',credentials:(database:'\(credentialResult.credentials.database)',sessionId:'\(credentialResult.credentials.sessionId)',userName:'\(credentialResult.credentials.userName)'))"
+            let urlString =
+                "https://\(DriveSdkConfig.serverAddress)/drive/default.html#ui/login,(server:'\(credentialResult.path)',credentials:(database:'\(credentialResult.credentials.database)',sessionId:'\(credentialResult.credentials.sessionId)',userName:'\(credentialResult.credentials.userName)'))"
             let url = URL(string: urlString)!
             webViewNavigationFailedView.reloadURL = url
             webView.load(URLRequest(url: url))
