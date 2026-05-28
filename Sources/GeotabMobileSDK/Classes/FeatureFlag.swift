@@ -6,8 +6,6 @@ public enum FeatureFlag: String, CaseIterable {
     case ignoreRequestCancellationErrorsKillSwitch = "DRIVE.IOS_IGNORE_REQUEST_CANCELLATION_EXCEPTIONS_KILL_SWITCH"
     case samlLoginJsonEscapingKillSwitch = "DRIVE.IOS_SAML_LOGIN_JSON_ESCAPING.KILLSWITCH"
     
-    case sentryKillSwitch = "MOBILE.DISABLE_SENTRY.IOS.KILLSWITCH"
-    case fileProtectionKillSwitch = "MOBILE.DISABLE_FILE_PROTECTION.IOS.KILLSWITCH"
     case pushNativeVerboseLogging = "MYG.PUSH_NATIVE_VERBOSE_LOGGING"
 
     public var isEnabled: Bool {
