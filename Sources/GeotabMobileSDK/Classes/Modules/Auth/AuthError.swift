@@ -82,23 +82,23 @@ enum AuthError: LocalizedError, JsonSerializableError, Equatable {
             }
         case .noDataFoundError:
             return "No data returned from authorization flow."
-        case .failedToSaveAuthState(let username, let underlyingError, _):
-            return "Failed to save auth state for user \(username): \(underlyingError.localizedDescription)"
+        case .failedToSaveAuthState(_, let underlyingError, _):
+            return "Failed to save auth state: \(underlyingError.localizedDescription)"
         case .usernameMismatch(_, _, let ephemeralSession, _):
             if ephemeralSession {
                 return "Username mismatch in ephemeral session - potential security issue"
             } else {
                 return "Username mismatch in non-ephemeral session - Stale browser cookies from previous user"
             }
-        case .noAccessTokenFoundError(let user, _):
-            return "No auth token found for user \(user)"
+        case .noAccessTokenFoundError:
+            return "No auth token found"
         case .parseFailedForAuthState:
             return "Failed to unarchive auth state from Keychain data."
-        case .tokenRefreshFailed(let username, let underlyingError, let requiresReauth, _):
+        case .tokenRefreshFailed(_, let underlyingError, let requiresReauth, _):
             if requiresReauth {
-                return "Token refresh failed for user \(username). Re-authentication required: \(underlyingError.localizedDescription)"
+                return "Token refresh failed. Re-authentication required: \(underlyingError.localizedDescription)"
             } else {
-                return "Token refresh failed for user \(username). Please try again: \(underlyingError.localizedDescription)"
+                return "Token refresh failed. Please try again: \(underlyingError.localizedDescription)"
             }
         case .missingAuthData:
             return "Missing required authentication data"

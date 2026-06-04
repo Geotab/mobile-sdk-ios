@@ -572,7 +572,6 @@ declare namespace geotabModules {
             message: string;
             recoverable: boolean;
             requiresReauthentication?: boolean;
-            username?: string;
             underlyingError?: string;
             /** Whether the user should be redirected to the login screen. */
             shouldRedirectToLogin: boolean;
