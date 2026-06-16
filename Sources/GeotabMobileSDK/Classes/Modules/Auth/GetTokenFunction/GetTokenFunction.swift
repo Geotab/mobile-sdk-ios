@@ -42,7 +42,7 @@ class GetTokenFunction: ModuleFunction {
 
                 // Always log the error for debugging (unless it's noAccessTokenFoundError which is common)
                 if case AuthError.noAccessTokenFoundError = authError {
-                    self.$logger.warn("No access token found for user \(username)")
+                    self.$logger.info("No access token found for requested user")
                 } else {
                     self.$logger.error("Get token failed for user \(username): \(authError)")
                 }

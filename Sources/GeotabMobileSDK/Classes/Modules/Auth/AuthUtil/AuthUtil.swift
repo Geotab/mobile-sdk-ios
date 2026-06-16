@@ -613,16 +613,16 @@ extension DefaultAuthUtil {
 
                 if isRecoverable {
                     // Network error - keep auth state, user can retry
-                    self.$logger.warn("Token refresh failed (recoverable): \(error)")
+                    self.$logger.info("Token refresh failed (recoverable): \(error)")
                     throw AuthError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: false)
                 } else {
                     // Auth server rejected the refresh token
-                    self.$logger.warn("Token refresh failed (requires re-auth): \(error)")
+                    self.$logger.info("Token refresh failed (requires re-auth): \(error)")
 
                     // Check if app is in background - cannot show UI for reauth
                     let appState = await self.applicationStateProvider.applicationState
                     if appState == .background {
-                        self.$logger.warn("App is in background, deferring reauth until foreground")
+                        self.$logger.info("App is in background, deferring reauth until foreground")
                         throw AuthError.tokenRefreshFailed(username: username, underlyingError: error, requiresReauthentication: true)
                     }
 
