@@ -45,7 +45,7 @@ class LogoutFunction: ModuleFunction {
 
                 // Always log the error for debugging (unless it's noAccessTokenFoundError which is common)
                 if case AuthError.noAccessTokenFoundError = authError {
-                    self.$logger.info("No access token found during logout for requested user")
+                    self.$logger.warn("No access token found during logout for user \(username)")
                 } else {
                     self.$logger.error("Logout failed for user \(username): \(authError)")
                 }

@@ -1,6 +1,9 @@
 import Foundation
 
 private var fileProtectionAttributes: [FileAttributeKey: Any]? {
+    if FeatureFlag.fileProtectionKillSwitch.isEnabled {
+        return nil
+    }
     return [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
 }
 
