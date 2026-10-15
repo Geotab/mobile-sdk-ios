@@ -1,13 +1,13 @@
 {
-  "originHash" : "a4f2b5da907f6c1968f1e2960d0e01295754ca136c4907159a30191fd5cca4eb",
+  "originHash" : "73bce3eb21c8b96477cbac0447fc297422c367fa4cfd9384085f1d8193306a69",
   "pins" : [
     {
       "identity" : "appauth-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/openid/AppAuth-iOS.git",
       "state" : {
-        "revision" : "145104f5ea9d58ae21b60add007c33c1cc0c948e",
-        "version" : "2.0.0"
+        "revision" : "a7caeda164dc5108bf4649472b28a5af65dc6f33",
+        "version" : "2.1.0"
       }
     },
     {

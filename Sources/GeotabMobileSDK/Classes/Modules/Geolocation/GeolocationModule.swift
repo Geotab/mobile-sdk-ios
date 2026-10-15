@@ -21,8 +21,8 @@ protocol LocationManager: AnyObject {
 }
 
 enum GeolocationError: String {
-    case permissionDenied = "Permission denied."
-    case positionUnavailable = "Position unavailable."
+    case permissionDenied = "MODULE_GEOLOCATION_ERROR: PERMISSION_DENIED"
+    case positionUnavailable = "MODULE_GEOLOCATION_ERROR: POSITION_UNAVAILABLE"
 }
 
 /// :nodoc:

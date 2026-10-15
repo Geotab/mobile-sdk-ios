@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/groue/GRMustache.swift", from: "4.0.1"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.1.0"),
         .package(url: "https://github.com/Geotab/mobile-swift-rison", .upToNextMajor(from: "1.1.0")),
-        .package(url: "https://github.com/openid/AppAuth-iOS.git", from: "2.0.0"),
+        .package(url: "https://github.com/openid/AppAuth-iOS.git", from: "2.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
