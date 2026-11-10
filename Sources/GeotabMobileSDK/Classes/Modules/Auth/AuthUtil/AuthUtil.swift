@@ -96,7 +96,14 @@ actor AuthorizationCoordinator {
     // Unified map for login + reauth to prevent cross-operation race
     // (both produce AuthTokens for the same user — second call joins the first)
     private var inFlightAuth: [String: Task<AuthTokens, any Error>] = [:]
-    private var inFlightTokenRefresh: [String: Task<AuthTokens, any Error>] = [:]
+    private struct InFlightRefresh {
+        let id: UUID
+        let task: Task<AuthTokens, any Error>
+        let isForced: Bool
+    }
+
+    // One refresh per user: share forced work, or chain forced work after a non-forced refresh.
+    private var inFlightTokenRefresh: [String: InFlightRefresh] = [:]
     private var inFlightLogouts: [String: Task<Void, any Error>] = [:]
     
     // Track any UI-presenting operation (login, reauth, logout) to serialize them
@@ -161,23 +168,38 @@ actor AuthorizationCoordinator {
         forceRefresh: Bool,
         operation: @escaping () async throws -> AuthTokens
     ) async throws -> AuthTokens {
-        // Token refresh doesn't show UI, so no need to wait for UI operations
-        let key = "\(username)_\(forceRefresh)"
-        if let existingTask = inFlightTokenRefresh[key] {
+        // Refresh doesn't wait for UI operations, but foreground invalid_grant can trigger reauth.
+        // A chained forced refresh may therefore wait for that sign-in.
+        let existing = inFlightTokenRefresh[username]
+        if let existing, existing.isForced || !forceRefresh {
             $logger.debug("Token refresh already in progress, sharing result")
-            return try await existingTask.value
-        }
-        
-        $logger.debug("Starting new token refresh")
-        let task = Task<AuthTokens, any Error> {
-            try await operation()
+            return try await existing.task.value
         }
 
-        inFlightTokenRefresh[key] = task
-        defer { clearTokenRefresh(key: key) }
+        let myID = UUID()
+        let task: Task<AuthTokens, any Error>
+        if let existing {
+            $logger.debug("Chaining forced token refresh after non-forced refresh")
+            let previous = existing.task
+            task = Task {
+                _ = try await previous.value
+                return try await operation()
+            }
+        } else {
+            $logger.debug("Starting new token refresh")
+            task = Task { try await operation() }
+        }
+
+        inFlightTokenRefresh[username] = InFlightRefresh(id: myID, task: task, isForced: forceRefresh)
+        defer { clearTokenRefresh(username: username, id: myID) }
         return try await task.value
     }
     
+    // Exposes refresh registration state for tests.
+    func inFlightTokenRefreshIsForced(username: String) -> Bool? {
+        inFlightTokenRefresh[username]?.isForced
+    }
+
     func performLogout(
         username: String,
         operation: @escaping () async throws -> Void
@@ -221,8 +243,10 @@ actor AuthorizationCoordinator {
         inFlightAuth[username] = nil
     }
     
-    private func clearTokenRefresh(key: String) {
-        inFlightTokenRefresh[key] = nil
+    private func clearTokenRefresh(username: String, id: UUID) {
+        if inFlightTokenRefresh[username]?.id == id {
+            inFlightTokenRefresh[username] = nil
+        }
     }
     
     private func clearLogout(username: String) {

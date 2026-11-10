@@ -268,6 +268,24 @@ declare namespace geotabModules {
          *  result: undefined. Any other errors will be responded in the err argument of the callback.
          */
         function clearWebViewCache(argument: undefined, callback: (err?: Error, result?: undefined) => void);
+
+        /*******
+         * MyGeotab only. Set the color shown under the bottom safe area (the home indicator region), so it continues the
+         * web app's own bottom bar. Does not change the space reserved for it.
+         * Check that the function exists before calling it: it is missing from older versions of the app.
+         *
+         * The color stays until the web app replaces it or hands the area back with null. It is kept across page loads and
+         * navigations in the web view, so a page that must not inherit the previous page's color has to call this with null.
+         * The app hands the area back by itself when it shows its own error screen (navigation failed).
+         * @param color: string | null
+         *  `#RRGGBB`, the only accepted format. null returns the area to the app's own color. The bridge sends JSON, which cannot
+         *  represent every JavaScript value: `undefined`, a function or a symbol arrives as no argument, and `NaN` or `Infinity`
+         *  arrives as null, so all of them also return the area to the app's own color. A BigInt cannot be serialized: the call
+         *  throws in the page, nothing reaches the app and the callback is not called.
+         * @param callback
+         *  callback will be called with `err` if the color is not in the `#RRGGBB` format. Otherwise, err is null and result is undefined.
+         */
+        const setBottomSafeAreaColor: ((color: string | null, callback: (err?: Error, result?: undefined) => void) => void) | undefined;
     }
 
     namespace browser {

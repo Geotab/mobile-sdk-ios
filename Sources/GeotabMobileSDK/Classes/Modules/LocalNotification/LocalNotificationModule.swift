@@ -26,7 +26,9 @@ class LocalNotificationModule: Module {
     var actionIdentifiers: [String] = []
     var actionHandler: ((Result<String, any Error>) -> Void)?
     
-    init(options: MobileSdkOptions, adapter: any UserNotifcationAdapter = UNUserNotificationCenter.current()) {
+    /// - Parameter adapter: Nil uses the system's notification center.
+    init(options: MobileSdkOptions, adapter: (any UserNotifcationAdapter)? = nil) {
+        let adapter = adapter ?? UNUserNotificationCenter.current()
         self.notificationAdapter = adapter
         self.options = options
         super.init(name: LocalNotificationModule.moduleName)

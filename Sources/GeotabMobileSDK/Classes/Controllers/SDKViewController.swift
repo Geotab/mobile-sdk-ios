@@ -58,6 +58,10 @@ open class SDKViewController: UIViewController, ViewPresenter {
     */
     public var webAppLoadFailed: (() -> Void)?
     
+    /// Called right after the app shows its own navigation failed screen in place of the web page. A subclass takes back
+    /// here whatever the web app set on the app, because the web app does not own that screen. Does nothing by default.
+    func navigationFailedScreenDidShow() {}
+
     internal let options: MobileSdkOptions
 
     /**
@@ -156,6 +160,7 @@ extension SDKViewController: NavigationHost {
     private func showNavigationFailedScreen(for error: NSError) {
         webViewNavigationFailedView.isHidden = false
         webViewNavigationFailedView.errorInfoLabel.text = "\(error.domain) \(error.code) \(error.localizedDescription)"
+        navigationFailedScreenDidShow()
     }
     
     public func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {

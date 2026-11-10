@@ -11,12 +11,14 @@ public class MyGeotabViewController: SDKViewController {
     internal var logger
     
     private lazy var modulesInternal: Set<Module> = [
-        AppModule(scriptGateway: scriptDelegate, options: options),
+        AppModule(scriptGateway: scriptDelegate, options: options, bottomSafeAreaColorHandler: { [weak self] color in
+            self?.bottomSafeAreaView.setColor(color)
+        }),
         BrowserModule(viewPresenter: self),
         DeviceModule(),
         PrintModule(viewPresenter: self),
         SsoModule(viewPresenter: self),
-        LocalNotificationModule(options: options),
+        LocalNotificationModule(options: options, adapter: notificationAdapter),
         AuthModule()
     ]
     
@@ -28,7 +30,19 @@ public class MyGeotabViewController: SDKViewController {
      */
     var pendingCustomPath: String?
 
+    private let bottomSafeAreaView = BottomSafeAreaView()
+
+    /// Nil uses the system's notification center. Only the initializer below sets it.
+    private var notificationAdapter: (any UserNotifcationAdapter)?
+
     public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
+        super.init(modules: modules, options: options)
+        self.modules.formUnion(modulesInternal)
+    }
+
+    /// Lets tests build the controller around their own notification adapter, as they cannot reach the system's.
+    init(modules: Set<Module> = [], options: MobileSdkOptions = .default, notificationAdapter: any UserNotifcationAdapter) {
+        self.notificationAdapter = notificationAdapter
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
     }
@@ -42,6 +56,9 @@ public class MyGeotabViewController: SDKViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Below the navigation failed view, so a failure still covers the whole screen.
+        bottomSafeAreaView.install(in: view, above: webView)
+
         let path = pendingCustomPath.map { "#\($0)" } ?? ""
         pendingCustomPath = nil
         if let url = URL(string: "https://\(MyGeotabSdkConfig.serverAddress)/\(path)") {
@@ -49,6 +66,11 @@ public class MyGeotabViewController: SDKViewController {
             $logger.debug("Opening URL:\(url.absoluteString)")
             webView.load(URLRequest(url: url))
         }
+    }
+
+    override func navigationFailedScreenDidShow() {
+        // The web app does not own this screen and cannot hand the area back, so the app does.
+        bottomSafeAreaView.setColor(nil)
     }
 }
 

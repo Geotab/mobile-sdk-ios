@@ -19,6 +19,9 @@ open class DriveViewController: SDKViewController {
         private var _authModule: AuthModule?
     #endif
     
+    /// Nil uses the system's notification center. Only the initializer below sets it.
+    private var notificationAdapter: (any UserNotifcationAdapter)?
+
     // Add internal Addons here
     private lazy var modulesInternal: Set<Module> = {
         var modules: Set<Module> = [
@@ -27,7 +30,7 @@ open class DriveViewController: SDKViewController {
             UserModule(scriptGateway: scriptDelegate),
             DeviceModule(),
             StateModule(scriptGateway: scriptDelegate),
-            LocalNotificationModule(options: options),
+            LocalNotificationModule(options: options, adapter: notificationAdapter),
             SpeechModule(),
             BrowserModule(viewPresenter: self),
             ConnectivityModule(scriptGateway: scriptDelegate),
@@ -62,6 +65,13 @@ open class DriveViewController: SDKViewController {
         self.modules.formUnion(modulesInternal)
     }
     
+    /// Lets tests build the controller around their own notification adapter, as they cannot reach the system's.
+    init(modules: Set<Module> = [], options: MobileSdkOptions = .default, notificationAdapter: any UserNotifcationAdapter) {
+        self.notificationAdapter = notificationAdapter
+        super.init(modules: modules, options: options)
+        self.modules.formUnion(modulesInternal)
+    }
+
     #if DEBUG
         /// Debug-only initializer for integration tests — substitutes a custom `AuthModule` in place
         /// of the default, allowing headless auth flows without a browser. Not compiled in Release.
