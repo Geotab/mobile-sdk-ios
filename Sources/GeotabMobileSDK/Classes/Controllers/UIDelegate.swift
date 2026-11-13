@@ -7,6 +7,11 @@ protocol UIHostController: UIViewController {
 class UIDelegate: NSObject, WKUIDelegate {
     
     private weak var hostController: (any UIHostController)?
+    private let mediaPermissions: any MediaPermissionProviding
+    private let usageDescription: (String) -> String?
+    private let configuredServer: () -> String?
+    private let applicationState: () -> UIApplication.State
+    private var pendingMediaDecision: MediaDecisionOnce?
     
     private lazy var languageBundle: Bundle? = {
         GeotabMobileSDK.languageBundle()
@@ -15,8 +20,128 @@ class UIDelegate: NSObject, WKUIDelegate {
     var alertCompletionHandler: (() -> Void)?
     private static let log = OSLog(subsystem: "com.geotab.mobileSDK", category: "UIDelegate")
 
-    init(hostController: any UIHostController) {
+    init(hostController: any UIHostController,
+         mediaPermissions: any MediaPermissionProviding = SystemMediaPermissionProvider(),
+         usageDescription: @escaping (String) -> String? = { Bundle.main.object(forInfoDictionaryKey: $0) as? String },
+         configuredServer: (() -> String?)? = nil,
+         applicationState: @escaping () -> UIApplication.State = { UIApplication.shared.applicationState }) {
         self.hostController = hostController
+        self.mediaPermissions = mediaPermissions
+        self.usageDescription = usageDescription
+        self.configuredServer = configuredServer ?? { usageDescription("server-address") }
+        self.applicationState = applicationState
+    }
+
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decideMediaCapture(protocol: origin.protocol, host: origin.host, port: origin.port,
+                           isMainFrame: frame.isMainFrame, topLevelURL: webView.url,
+                           type: type, decisionHandler: decisionHandler)
+    }
+
+    func decideMediaCapture(protocol scheme: String, host: String, port: Int, isMainFrame: Bool,
+                            topLevelURL: URL?, type: WKMediaCaptureType,
+                            decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        let decision = MediaDecisionOnce(topLevelHost: type == .camera ? nil : (topLevelURL?.host ?? ""), decisionHandler)
+        MediaDecisionOnce.onMain { [weak self] in
+            guard let self else {
+                decision.resolve(.deny)
+                return
+            }
+            if type == .camera {
+                decision.resolve(.prompt)
+                return
+            }
+            guard self.hasUsageDescription("NSMicrophoneUsageDescription"),
+                  type != .cameraAndMicrophone || self.hasUsageDescription("NSCameraUsageDescription") else {
+                decision.resolve(.deny, reason: "no usage key")
+                return
+            }
+            guard type == .microphone || type == .cameraAndMicrophone, self.pendingMediaDecision == nil else {
+                decision.resolve(.deny, reason: "unsupported capture type or permission request pending")
+                return
+            }
+            switch WebViewAudioOriginPolicy.decision(protocol: scheme, host: host, port: port,
+                isMainFrame: isMainFrame, topLevelURL: topLevelURL, configuredServer: self.configuredServer()) {
+            case .allow: break
+            case .prompt:
+                decision.resolve(.prompt, reason: "Geotab domain is not a MyGeotab host")
+                return
+            case .deny(let reason):
+                decision.resolve(.deny, reason: reason)
+                return
+            }
+            guard self.applicationState() != .background, self.checkDeps() != nil else {
+                decision.resolve(.deny, reason: "app background or host not in window")
+                return
+            }
+            self.pendingMediaDecision = decision
+            self.authorizeRecord(type: type, decision: decision)
+        }
+    }
+
+    private func hasUsageDescription(_ key: String) -> Bool {
+        !(usageDescription(key)?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+    }
+
+    private func finishMedia(_ decision: MediaDecisionOnce, granted: Bool, reason: String = "OS permission denied") {
+        guard pendingMediaDecision === decision else { return }
+        pendingMediaDecision = nil
+        decision.resolve(granted ? .grant : .deny, reason: reason)
+    }
+
+    private func authorizeRecord(type: WKMediaCaptureType, decision: MediaDecisionOnce) {
+        // A known camera denial must not cause an unnecessary microphone prompt.
+        if type == .cameraAndMicrophone && mediaPermissions.cameraPermission == .denied {
+            finishMedia(decision, granted: false)
+            return
+        }
+        switch mediaPermissions.recordPermission {
+        case .denied: finishMedia(decision, granted: false)
+        case .granted: authorizeCamera(type: type, decision: decision)
+        case .undetermined:
+            guard applicationState() == .active, checkDeps() != nil else {
+                finishMedia(decision, granted: false, reason: "app not active or host not in window")
+                return
+            }
+            mediaPermissions.requestRecordPermission { [weak self] granted in
+                MediaDecisionOnce.onMain { [weak self] in
+                    guard let self else {
+                        decision.resolve(.deny)
+                        return
+                    }
+                    guard self.pendingMediaDecision === decision else { return }
+                    if granted { self.authorizeCamera(type: type, decision: decision) }
+                    else { self.finishMedia(decision, granted: false) }
+                }
+            }
+        }
+    }
+
+    private func authorizeCamera(type: WKMediaCaptureType, decision: MediaDecisionOnce) {
+        guard type == .cameraAndMicrophone else {
+            finishMedia(decision, granted: true)
+            return
+        }
+        switch mediaPermissions.cameraPermission {
+        case .denied: finishMedia(decision, granted: false)
+        case .granted: finishMedia(decision, granted: true)
+        case .undetermined:
+            guard applicationState() == .active, checkDeps() != nil else {
+                finishMedia(decision, granted: false, reason: "app not active or host not in window")
+                return
+            }
+            mediaPermissions.requestCameraPermission { [weak self] granted in
+                MediaDecisionOnce.onMain { [weak self] in
+                    guard let self else {
+                        decision.resolve(.deny)
+                        return
+                    }
+                    self.finishMedia(decision, granted: granted)
+                }
+            }
+        }
     }
     
     private func checkDeps() -> (Bundle, UIViewController)? {
@@ -140,6 +265,7 @@ class UIDelegate: NSObject, WKUIDelegate {
     }
     
     deinit {
+        pendingMediaDecision?.resolve(.deny)
         let handler = alertCompletionHandler
         alertCompletionHandler = nil
         // WebKit requires every JS dialog completion handler be called exactly once.
