@@ -286,6 +286,49 @@ declare namespace geotabModules {
          *  callback will be called with `err` if the color is not in the `#RRGGBB` format. Otherwise, err is null and result is undefined.
          */
         const setBottomSafeAreaColor: ((color: string | null, callback: (err?: Error, result?: undefined) => void) => void) | undefined;
+
+        /*******
+         * MyGeotab only. Set the color shown behind the status bar (the clock, signal and battery), so it continues the web
+         * app's own top bar. Does not change the space reserved for it. The app also asks for dark or light status bar
+         * content, whichever has the higher contrast (WCAG) with the color.
+         * Check that the function exists before calling it: it is missing from older versions of the app.
+         *
+         * The color stays until the web app replaces it or hands the area back with null, which also returns the status bar
+         * content to the app's own style. It is kept across page loads and navigations in the web view, so a page that must
+         * not inherit the previous page's color has to call this with null.
+         * The app hands the area back by itself when it shows its own error screen (navigation failed). When the user retries,
+         * the web app is loaded again and sends its color again.
+         * The iPhone hides the status bar in landscape, so nothing is painted there. The color is shown again in portrait.
+         * @param color: string | null
+         *  `#RRGGBB`, the only accepted format. null returns the area to the app's own color and style. The bridge sends JSON,
+         *  which cannot represent every JavaScript value: `undefined`, a function or a symbol arrives as no argument, and `NaN`
+         *  or `Infinity` arrives as null, so all of them also return the area to the app's own color. A BigInt cannot be
+         *  serialized: the call throws in the page, nothing reaches the app and the callback is not called.
+         * @param callback
+         *  callback will be called with `err` if the color is not in the `#RRGGBB` format. Otherwise, err is null and result is undefined.
+         */
+        const setTopSafeAreaColor: ((color: string | null, callback: (err?: Error, result?: undefined) => void) => void) | undefined;
+
+        /*******
+         * Open the system settings page of this app, where its permissions and notifications are managed: the app's page in
+         * Settings on iOS, the App info screen on Android. The web app cannot choose where to go: no URL, package name or
+         * other destination can be passed.
+         * Check that the function exists before calling it: it is missing from older versions of the app. It is declared
+         * as a constant that can be undefined, so that TypeScript makes callers check.
+         *
+         * Call it from a user action while the app is visible. From the background Settings may not appear: iOS reports an
+         * error, and Android may report success. The user leaves the app to look at the settings and nothing tells the web
+         * app what they changed, so read again whatever depends on them when the app returns (see the `app.background`
+         * event).
+         * @param argument: undefined
+         *  Ignored.
+         * @param callback
+         *  callback is called once, as long as the page is still loaded. It is called with `err` if the system did not accept
+         *  the request. Otherwise, err is null and result is undefined: the system accepted the request, which does not mean
+         *  that Settings was shown or that anything was changed. The text of `err` differs between iOS and Android and must
+         *  not be parsed.
+         */
+        const openSettings: ((argument: undefined, callback: (err?: Error, result?: undefined) => void) => void) | undefined;
     }
 
     namespace browser {

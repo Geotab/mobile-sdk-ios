@@ -16,6 +16,8 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
 
     private weak var navigationHost: (any NavigationHost)?
 
+    private let openURL: URLOpener
+
     /// Track the previous domain to detect changes
     private var previousDomainHost: String?
 
@@ -27,8 +29,9 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
         return ["geotab.com"]
     }()
     
-    init(navigationHost: any NavigationHost) {
+    init(navigationHost: any NavigationHost, openURL: @escaping URLOpener = AppSettings.openInSystem) {
         self.navigationHost = navigationHost
+        self.openURL = openURL
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -52,6 +55,15 @@ class NavigationDelegate: NSObject, WKNavigationDelegate {
         case "mailto", "tel", "sms":
             if UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+            decisionHandler(.cancel)
+            return
+        case "app-settings":
+            // Only the app's own link to its Settings page, as the system names it. A host, path or query is not it.
+            if AppSettings.isAppSettingsLink(url), let settingsURL = AppSettings.url {
+                openURL(settingsURL) { _ in }
+            } else {
+                $logger.info("Navigation cancelled for page with unexpected app-settings link")
             }
             decisionHandler(.cancel)
             return

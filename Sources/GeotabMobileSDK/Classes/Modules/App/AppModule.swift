@@ -23,13 +23,16 @@ class AppModule: Module {
     private let backgroundAudioFactory: BackgroundAudioFactory
     private let applicationState: ApplicationState
 
-    /// - Parameter bottomSafeAreaColorHandler: Receives the color the web app wants under the bottom safe area, or nil
-    ///   to return it to the app's own appearance. When nil the web app is not offered the function, as in Drive.
+    /// - Parameters:
+    ///   - bottomSafeAreaColorHandler: Receives the color the web app wants under the bottom safe area, or nil
+    ///     to return it to the app's own appearance. When nil the web app is not offered the function, as in Drive.
+    ///   - topSafeAreaColorHandler: The same for the top safe area, the status bar region.
     init(scriptGateway: any ScriptGateway,
          options: MobileSdkOptions,
          backgroundAudioFactory: @escaping BackgroundAudioFactory = defaultBackgroundAudioFactory,
          applicationState: @escaping ApplicationState = { UIApplication.shared.applicationState },
-         bottomSafeAreaColorHandler: ((UIColor?) -> Void)? = nil) {
+         bottomSafeAreaColorHandler: ((UIColor?) -> Void)? = nil,
+         topSafeAreaColorHandler: ((UIColor?) -> Void)? = nil) {
         self.scriptGateway = scriptGateway
         self.options = options
         self.backgroundAudioFactory = backgroundAudioFactory
@@ -42,8 +45,12 @@ class AppModule: Module {
                                                object: nil)
         functions.append(UpdateLastServerFunction(module: self))
         functions.append(ClearWebViewCacheFunction(module: self))
+        functions.append(OpenSettingsFunction(module: self))
         if let bottomSafeAreaColorHandler {
             functions.append(SetBottomSafeAreaColorFunction(module: self, onColorChange: bottomSafeAreaColorHandler))
+        }
+        if let topSafeAreaColorHandler {
+            functions.append(SetTopSafeAreaColorFunction(module: self, onColorChange: topSafeAreaColorHandler))
         }
     }
     

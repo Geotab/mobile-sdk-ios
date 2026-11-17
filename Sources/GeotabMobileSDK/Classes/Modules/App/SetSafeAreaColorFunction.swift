@@ -1,15 +1,14 @@
 import UIKit
 
-/// Lets the web app choose the color shown under the bottom safe area (the home indicator region), so it continues the
-/// web app's own bottom bar. `null` hands the area back to the app's own appearance.
-class SetBottomSafeAreaColorFunction: ModuleFunction {
-    static let functionName: String = "setBottomSafeAreaColor"
+/// Lets the web app choose the color shown in one safe area of the screen, so it continues the web app's own bar there.
+/// `null` hands the area back to the app's own appearance.
+class SetSafeAreaColorFunction: ModuleFunction {
 
     private let onColorChange: (UIColor?) -> Void
 
-    init(module: AppModule, onColorChange: @escaping (UIColor?) -> Void) {
+    init(module: AppModule, name: String, onColorChange: @escaping (UIColor?) -> Void) {
         self.onColorChange = onColorChange
-        super.init(module: module, name: Self.functionName)
+        super.init(module: module, name: name)
     }
 
     override func handleJavascriptCall(argument: Any?, jsCallback: @escaping (Result<String, any Error>) -> Void) {
@@ -29,6 +28,24 @@ class SetBottomSafeAreaColorFunction: ModuleFunction {
             return
         }
         jsCallback(Result.success("undefined"))
+    }
+}
+
+/// The bottom safe area, the home indicator region.
+class SetBottomSafeAreaColorFunction: SetSafeAreaColorFunction {
+    static let functionName: String = "setBottomSafeAreaColor"
+
+    init(module: AppModule, onColorChange: @escaping (UIColor?) -> Void) {
+        super.init(module: module, name: Self.functionName, onColorChange: onColorChange)
+    }
+}
+
+/// The top safe area, the status bar region.
+class SetTopSafeAreaColorFunction: SetSafeAreaColorFunction {
+    static let functionName: String = "setTopSafeAreaColor"
+
+    init(module: AppModule, onColorChange: @escaping (UIColor?) -> Void) {
+        super.init(module: module, name: Self.functionName, onColorChange: onColorChange)
     }
 }
 

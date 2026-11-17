@@ -11,9 +11,9 @@ public class MyGeotabViewController: SDKViewController {
     internal var logger
     
     private lazy var modulesInternal: Set<Module> = [
-        AppModule(scriptGateway: scriptDelegate, options: options, bottomSafeAreaColorHandler: { [weak self] color in
-            self?.bottomSafeAreaView.setColor(color)
-        }),
+        AppModule(scriptGateway: scriptDelegate, options: options,
+                  bottomSafeAreaColorHandler: { [weak self] color in self?.bottomSafeAreaView.setColor(color) },
+                  topSafeAreaColorHandler: topSafeAreaColorHandler),
         BrowserModule(viewPresenter: self),
         DeviceModule(),
         PrintModule(viewPresenter: self),
@@ -35,14 +35,23 @@ public class MyGeotabViewController: SDKViewController {
     /// Nil uses the system's notification center. Only the initializer below sets it.
     private var notificationAdapter: (any UserNotifcationAdapter)?
 
-    public override init(modules: Set<Module> = [], options: MobileSdkOptions = .default) {
+    private var topSafeAreaColorHandler: ((UIColor?) -> Void)?
+
+    /// - Parameter topSafeAreaColorHandler: Paints the top safe area, the status bar region, which the app owns. Receives the
+    ///   color the web app asks for, or nil when the area goes back to the app's own appearance: because the web app asked
+    ///   for that, or because the app shows its own navigation failed screen, which the web app cannot hand the area back for.
+    ///   Called on the main thread. Without it the web app is not offered `setTopSafeAreaColor`.
+    public init(modules: Set<Module> = [], options: MobileSdkOptions = .default, topSafeAreaColorHandler: ((UIColor?) -> Void)? = nil) {
+        self.topSafeAreaColorHandler = topSafeAreaColorHandler
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
     }
 
     /// Lets tests build the controller around their own notification adapter, as they cannot reach the system's.
-    init(modules: Set<Module> = [], options: MobileSdkOptions = .default, notificationAdapter: any UserNotifcationAdapter) {
+    init(modules: Set<Module> = [], options: MobileSdkOptions = .default, topSafeAreaColorHandler: ((UIColor?) -> Void)? = nil,
+         notificationAdapter: any UserNotifcationAdapter) {
         self.notificationAdapter = notificationAdapter
+        self.topSafeAreaColorHandler = topSafeAreaColorHandler
         super.init(modules: modules, options: options)
         self.modules.formUnion(modulesInternal)
     }
@@ -71,6 +80,7 @@ public class MyGeotabViewController: SDKViewController {
     override func navigationFailedScreenDidShow() {
         // The web app does not own this screen and cannot hand the area back, so the app does.
         bottomSafeAreaView.setColor(nil)
+        topSafeAreaColorHandler?(nil)
     }
 }
 
