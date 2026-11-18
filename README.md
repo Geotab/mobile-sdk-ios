@@ -166,6 +166,67 @@ let options = MobileSdkOptions(useAppBoundDomains: false)
 let driveViewController = DriveViewController(options: options)
 ```
 
+## Media capture access in the WebView
+
+Apps supporting microphone capture must declare `NSMicrophoneUsageDescription` in their
+Info.plist (and `NSCameraUsageDescription` for combined camera/microphone capture).
+Without a `MobileSdkOptions.mediaCaptureAccess` provider, HTTPS main-frame requests matching
+the top-level origin use WebKit's prompt on `geotab.com`, `geotab.ca`, `geotab.co.za`
+and their subdomains, or the configured `server-address` host and port. Microphone requests
+from other origins or without the required usage keys are denied. Camera-only requests
+continue to use WebKit's prompt.
+
+To let the SDK coordinate native microphone and combined camera consent for trusted hosts, implement the
+provider in your app, not in shared SDK code, and inject it:
+
+```swift
+import AVFoundation
+import GeotabMobileSDK
+
+struct AppMediaCaptureAccess: MediaCaptureAccessProviding {
+    var cameraAuthorization: MediaAuthorization {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized: return .granted
+        case .notDetermined: return .undetermined
+        default: return .denied
+        }
+    }
+
+    func requestCameraAccess(_ completion: @escaping @Sendable (Bool) -> Void) {
+        AVCaptureDevice.requestAccess(for: .video, completionHandler: completion)
+    }
+
+    var microphoneAuthorization: MediaAuthorization {
+        if #available(iOS 17.0, *) {
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted: return .granted
+            case .undetermined: return .undetermined
+            default: return .denied
+            }
+        }
+        switch AVAudioSession.sharedInstance().recordPermission {
+        case .granted: return .granted
+        case .undetermined: return .undetermined
+        default: return .denied
+        }
+    }
+
+    func requestMicrophoneAccess(_ completion: @escaping @Sendable (Bool) -> Void) {
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission(completionHandler: completion)
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission(completion)
+        }
+    }
+}
+
+let options = MobileSdkOptions(mediaCaptureAccess: AppMediaCaptureAccess())
+let controller = MyGeotabViewController(options: options)
+```
+
+Only inject a provider in apps declaring the required usage keys. Apps that do not
+support microphone capture should leave the option unset and omit that key.
+
 ## License
 
 GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.

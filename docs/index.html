@@ -64,6 +64,9 @@
               <li class="nav-group-task">
                 <a href="Enums/GeotabDriveErrors.html">GeotabDriveErrors</a>
               </li>
+              <li class="nav-group-task">
+                <a href="Enums/MediaAuthorization.html">MediaAuthorization</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -103,6 +106,9 @@
           <li class="nav-group-name">
             <a href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Protocols/MediaCaptureAccessProviding.html">MediaCaptureAccessProviding</a>
+              </li>
               <li class="nav-group-task">
                 <a href="Protocols/ViewPresenterProviding.html">ViewPresenterProviding</a>
               </li>
@@ -277,6 +283,64 @@ To override default icon in the network error page, create a property in <code>I
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MobileSdkOptions</span><span class="p">(</span><span class="nv">useAppBoundDomains</span><span class="p">:</span> <span class="kc">false</span><span class="p">)</span>
 <span class="k">let</span> <span class="nv">driveViewController</span> <span class="o">=</span> <span class="kt">DriveViewController</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span> <span class="n">options</span><span class="p">)</span>
 </code></pre>
+<h2 id='media-capture-access-in-the-webview' class='heading'>Media capture access in the WebView</h2>
+
+<p>Apps supporting microphone capture must declare <code>NSMicrophoneUsageDescription</code> in their
+Info.plist (and <code>NSCameraUsageDescription</code> for combined camera/microphone capture).
+Without a <code><a href="Structs/MobileSdkOptions.html#/s:15GeotabMobileSDK0B10SdkOptionsV18mediaCaptureAccessAA05MediagH9Providing_pSgvp">MobileSdkOptions.mediaCaptureAccess</a></code> provider, HTTPS main-frame requests matching
+the top-level origin use WebKit&rsquo;s prompt on <code>geotab.com</code>, <code>geotab.ca</code>, <code>geotab.co.za</code>
+and their subdomains, or the configured <code>server-address</code> host and port. Microphone requests
+from other origins or without the required usage keys are denied. Camera-only requests
+continue to use WebKit&rsquo;s prompt.</p>
+
+<p>To let the SDK coordinate native microphone and combined camera consent for trusted hosts, implement the
+provider in your app, not in shared SDK code, and inject it:</p>
+<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">AVFoundation</span>
+<span class="kd">import</span> <span class="kt">GeotabMobileSDK</span>
+
+<span class="kd">struct</span> <span class="kt">AppMediaCaptureAccess</span><span class="p">:</span> <span class="kt">MediaCaptureAccessProviding</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">cameraAuthorization</span><span class="p">:</span> <span class="kt">MediaAuthorization</span> <span class="p">{</span>
+        <span class="k">switch</span> <span class="kt">AVCaptureDevice</span><span class="o">.</span><span class="nf">authorizationStatus</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="o">.</span><span class="n">video</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nv">authorized</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">granted</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nv">notDetermined</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">undetermined</span>
+        <span class="k">default</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">denied</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">requestCameraAccess</span><span class="p">(</span><span class="n">_</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">AVCaptureDevice</span><span class="o">.</span><span class="nf">requestAccess</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="o">.</span><span class="n">video</span><span class="p">,</span> <span class="nv">completionHandler</span><span class="p">:</span> <span class="n">completion</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">var</span> <span class="nv">microphoneAuthorization</span><span class="p">:</span> <span class="kt">MediaAuthorization</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="kd">#available(iOS 17.0, *)</span> <span class="p">{</span>
+            <span class="k">switch</span> <span class="kt">AVAudioApplication</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">recordPermission</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="o">.</span><span class="nv">granted</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">granted</span>
+            <span class="k">case</span> <span class="o">.</span><span class="nv">undetermined</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">undetermined</span>
+            <span class="k">default</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">denied</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">switch</span> <span class="kt">AVAudioSession</span><span class="o">.</span><span class="nf">sharedInstance</span><span class="p">()</span><span class="o">.</span><span class="n">recordPermission</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nv">granted</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">granted</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nv">undetermined</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">undetermined</span>
+        <span class="k">default</span><span class="p">:</span> <span class="k">return</span> <span class="o">.</span><span class="n">denied</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">requestMicrophoneAccess</span><span class="p">(</span><span class="n">_</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="kd">#available(iOS 17.0, *)</span> <span class="p">{</span>
+            <span class="kt">AVAudioApplication</span><span class="o">.</span><span class="nf">requestRecordPermission</span><span class="p">(</span><span class="nv">completionHandler</span><span class="p">:</span> <span class="n">completion</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kt">AVAudioSession</span><span class="o">.</span><span class="nf">sharedInstance</span><span class="p">()</span><span class="o">.</span><span class="nf">requestRecordPermission</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MobileSdkOptions</span><span class="p">(</span><span class="nv">mediaCaptureAccess</span><span class="p">:</span> <span class="kt">AppMediaCaptureAccess</span><span class="p">())</span>
+<span class="k">let</span> <span class="nv">controller</span> <span class="o">=</span> <span class="kt">MyGeotabViewController</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span> <span class="n">options</span><span class="p">)</span>
+</code></pre>
+
+<p>Only inject a provider in apps declaring the required usage keys. Apps that do not
+support microphone capture should leave the option unset and omit that key.</p>
 <h2 id='license' class='heading'>License</h2>
 
 <p>GeotabDriveSDK is available under the MIT license. See the LICENSE file for more info.</p>
@@ -284,7 +348,7 @@ To override default icon in the network error page, create a property in <code>I
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2026-11-17)</p>
+          <p>&copy; 2026 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2026-11-18)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

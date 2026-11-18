@@ -7,7 +7,7 @@ protocol UIHostController: UIViewController {
 class UIDelegate: NSObject, WKUIDelegate {
     
     private weak var hostController: (any UIHostController)?
-    private let mediaPermissions: any MediaPermissionProviding
+    let mediaCaptureAccess: (any MediaCaptureAccessProviding)?
     private let usageDescription: (String) -> String?
     private let configuredServer: () -> String?
     private let applicationState: () -> UIApplication.State
@@ -21,12 +21,12 @@ class UIDelegate: NSObject, WKUIDelegate {
     private static let log = OSLog(subsystem: "com.geotab.mobileSDK", category: "UIDelegate")
 
     init(hostController: any UIHostController,
-         mediaPermissions: any MediaPermissionProviding = SystemMediaPermissionProvider(),
+         mediaCaptureAccess: (any MediaCaptureAccessProviding)? = nil,
          usageDescription: @escaping (String) -> String? = { Bundle.main.object(forInfoDictionaryKey: $0) as? String },
          configuredServer: (() -> String?)? = nil,
          applicationState: @escaping () -> UIApplication.State = { UIApplication.shared.applicationState }) {
         self.hostController = hostController
-        self.mediaPermissions = mediaPermissions
+        self.mediaCaptureAccess = mediaCaptureAccess
         self.usageDescription = usageDescription
         self.configuredServer = configuredServer ?? { usageDescription("server-address") }
         self.applicationState = applicationState
@@ -72,12 +72,17 @@ class UIDelegate: NSObject, WKUIDelegate {
                 decision.resolve(.deny, reason: reason)
                 return
             }
+            guard let mediaCaptureAccess = self.mediaCaptureAccess else {
+                // WebKit owns this prompt; the app-state guard only applies to native permission requests.
+                decision.resolve(.prompt, reason: "no media capture provider; WebKit prompt")
+                return
+            }
             guard self.applicationState() != .background, self.checkDeps() != nil else {
                 decision.resolve(.deny, reason: "app background or host not in window")
                 return
             }
             self.pendingMediaDecision = decision
-            self.authorizeRecord(type: type, decision: decision)
+            self.authorizeRecord(type: type, mediaCaptureAccess: mediaCaptureAccess, decision: decision)
         }
     }
 
@@ -91,40 +96,42 @@ class UIDelegate: NSObject, WKUIDelegate {
         decision.resolve(granted ? .grant : .deny, reason: reason)
     }
 
-    private func authorizeRecord(type: WKMediaCaptureType, decision: MediaDecisionOnce) {
+    private func authorizeRecord(type: WKMediaCaptureType, mediaCaptureAccess: any MediaCaptureAccessProviding,
+                                 decision: MediaDecisionOnce) {
         // A known camera denial must not cause an unnecessary microphone prompt.
-        if type == .cameraAndMicrophone && mediaPermissions.cameraPermission == .denied {
+        if type == .cameraAndMicrophone && mediaCaptureAccess.cameraAuthorization == .denied {
             finishMedia(decision, granted: false)
             return
         }
-        switch mediaPermissions.recordPermission {
+        switch mediaCaptureAccess.microphoneAuthorization {
         case .denied: finishMedia(decision, granted: false)
-        case .granted: authorizeCamera(type: type, decision: decision)
+        case .granted: authorizeCamera(type: type, mediaCaptureAccess: mediaCaptureAccess, decision: decision)
         case .undetermined:
             guard applicationState() == .active, checkDeps() != nil else {
                 finishMedia(decision, granted: false, reason: "app not active or host not in window")
                 return
             }
-            mediaPermissions.requestRecordPermission { [weak self] granted in
+            mediaCaptureAccess.requestMicrophoneAccess { [weak self] granted in
                 MediaDecisionOnce.onMain { [weak self] in
                     guard let self else {
                         decision.resolve(.deny)
                         return
                     }
                     guard self.pendingMediaDecision === decision else { return }
-                    if granted { self.authorizeCamera(type: type, decision: decision) }
+                    if granted { self.authorizeCamera(type: type, mediaCaptureAccess: mediaCaptureAccess, decision: decision) }
                     else { self.finishMedia(decision, granted: false) }
                 }
             }
         }
     }
 
-    private func authorizeCamera(type: WKMediaCaptureType, decision: MediaDecisionOnce) {
+    private func authorizeCamera(type: WKMediaCaptureType, mediaCaptureAccess: any MediaCaptureAccessProviding,
+                                 decision: MediaDecisionOnce) {
         guard type == .cameraAndMicrophone else {
             finishMedia(decision, granted: true)
             return
         }
-        switch mediaPermissions.cameraPermission {
+        switch mediaCaptureAccess.cameraAuthorization {
         case .denied: finishMedia(decision, granted: false)
         case .granted: finishMedia(decision, granted: true)
         case .undetermined:
@@ -132,7 +139,7 @@ class UIDelegate: NSObject, WKUIDelegate {
                 finishMedia(decision, granted: false, reason: "app not active or host not in window")
                 return
             }
-            mediaPermissions.requestCameraPermission { [weak self] granted in
+            mediaCaptureAccess.requestCameraAccess { [weak self] granted in
                 MediaDecisionOnce.onMain { [weak self] in
                     guard let self else {
                         decision.resolve(.deny)

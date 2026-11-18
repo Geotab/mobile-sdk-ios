@@ -21,7 +21,7 @@ open class SDKViewController: UIViewController, ViewPresenter {
     }()
 
     internal lazy var uiDelegate: UIDelegate = {
-        UIDelegate(hostController: self)
+        UIDelegate(hostController: self, mediaCaptureAccess: options.mediaCaptureAccess)
     }()
 
     internal lazy var webViewNavigationFailedView: WebViewNavigationFailedView = {
